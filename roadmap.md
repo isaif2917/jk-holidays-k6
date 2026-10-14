@@ -1,5 +1,9 @@
-# Admin CRM completion
+# JK Holidays — current round
 
-- [ ] Reference comparison: admin dashboard at jkholidays.org is login-gated; use only publicly visible information unless access is provided.
-- [ ] Replace mock-only admin lists and metrics with saved Cloud data and working actions, preserving the existing CRM navigation and access checks.
-- [ ] Verify the key admin flows and check current build/runtime diagnostics.
+- [ ] New address + email everywhere
+- [ ] Register / Login buttons under hero search; destination chips go to login
+- [ ] Premium, non-generic icons (Why JK Holidays + site-wide key sections)
+- [ ] Testimonials like reference (white cards, drop shadow) + "Add your review"
+- [ ] Sharper hero image, all photos converted to WebP
+- [ ] Membership plans: 3D overlapping swipeable pricing carousel (Framer Motion), smaller cards on mobile
+- [ ] Full mobile responsiveness pass
