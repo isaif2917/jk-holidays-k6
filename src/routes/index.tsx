@@ -82,7 +82,7 @@ function Home() {
       </section>
 
       {/* Plans */}
-      <section className="bg-muted/40 py-16">
+      <section className="bg-muted/40 py-10 md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="OUR MEMBERSHIP PLANS" />
           <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted-foreground">Swipe, drag or tap the arrows to compare plans.</p>
@@ -116,7 +116,7 @@ function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-muted/40 py-16">
+      <section className="bg-muted/40 py-10 md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="text-xs font-semibold tracking-widest text-gold">— JK Holidays —</div>
@@ -196,7 +196,7 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-muted/40 py-16">
+      <section className="bg-muted/40 py-10 md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" />
         </div>
