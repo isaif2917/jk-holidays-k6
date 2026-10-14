@@ -78,7 +78,7 @@ export function PricingCarousel() {
 
   return (
     <div
-      className="relative mx-auto max-w-5xl outline-none"
+      className="relative mx-auto max-w-7xl outline-none"
       tabIndex={0}
       role="region"
       aria-roledescription="carousel"
@@ -96,7 +96,7 @@ export function PricingCarousel() {
           return (
             <motion.div
               key={p.name}
-              className="absolute left-1/2 top-6 w-[76%] max-w-[300px] cursor-grab active:cursor-grabbing sm:max-w-[330px]"
+              className="absolute left-1/2 top-6 w-[80%] max-w-[340px] cursor-grab active:cursor-grabbing sm:max-w-[400px] lg:max-w-[440px]"
               style={{ zIndex: isActive ? 30 : 20 - Math.abs(rel) }}
               initial={false}
               animate={{
