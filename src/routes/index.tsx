@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { PricingCarousel } from "@/components/PricingCarousel";
-import { HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast, UsersThree, Buildings, Globe as PGlobe, Star as PStar, UserPlus as PUserPlus, CalendarCheck as PCalendarCheck, Medal, AirplaneTilt } from "@phosphor-icons/react";
+import { HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast, UserPlus as PUserPlus, CalendarCheck as PCalendarCheck, Medal, AirplaneTilt } from "@phosphor-icons/react";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { FeaturedPackages } from "@/components/FeaturedPackages";
 
