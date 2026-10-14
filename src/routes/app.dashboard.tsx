@@ -6,9 +6,9 @@ import { Calendar, Briefcase, Wallet, Crown, MapPin, Users, Gift, Tag, Headphone
 import { destinations } from "@/data/mock";
 import { db, fmtDate, inr, useMe, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
-import nextHoliday from "@/assets/next-holiday.jpg";
-import upgradeBanner from "@/assets/upgrade-banner.jpg";
-import heroImg from "@/assets/hero-resort.jpg";
+import nextHoliday from "@/assets/next-holiday.webp";
+import upgradeBanner from "@/assets/upgrade-banner.webp";
+import heroImg from "@/assets/hero-resort.webp";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
 

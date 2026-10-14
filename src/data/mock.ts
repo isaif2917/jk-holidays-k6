@@ -1,9 +1,9 @@
-import maldives from "@/assets/dest-maldives.jpg";
-import bali from "@/assets/dest-bali.jpg";
-import dubai from "@/assets/dest-dubai.jpg";
-import thailand from "@/assets/dest-thailand.jpg";
-import kashmir from "@/assets/dest-kashmir.jpg";
-import goa from "@/assets/dest-goa.jpg";
+import maldives from "@/assets/dest-maldives.webp";
+import bali from "@/assets/dest-bali.webp";
+import dubai from "@/assets/dest-dubai.webp";
+import thailand from "@/assets/dest-thailand.webp";
+import kashmir from "@/assets/dest-kashmir.webp";
+import goa from "@/assets/dest-goa.webp";
 
 export const destinations = [
   { name: "Maldives", country: "Overwater Villas", image: maldives },

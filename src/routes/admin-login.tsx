@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import heroImg from "@/assets/hero-resort.jpg";
+import heroImg from "@/assets/hero-resort.webp";
 import { ShieldCheck, Lock, Mail, Eye, EyeOff, ArrowRight, Users, CalendarCheck, Wallet, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/admin-login")({

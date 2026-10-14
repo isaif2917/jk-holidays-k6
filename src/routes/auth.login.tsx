@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import heroImg from "@/assets/hero-resort.jpg";
+import heroImg from "@/assets/hero-resort.webp";
 import { User, Lock, Eye, EyeOff, ArrowRight, Briefcase, Tag, Layout, Headphones, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/auth/login")({

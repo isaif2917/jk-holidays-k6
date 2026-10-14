@@ -8,12 +8,12 @@ import { FeaturedPackages } from "@/components/FeaturedPackages";
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
 import heroImg from "@/assets/hero-maldives.webp.asset.json";
-import upgradeBanner from "@/assets/upgrade-banner.jpg";
-import goaImg from "@/assets/dest-goa.jpg";
-import baliImg from "@/assets/dest-bali.jpg";
-import maldivesImg from "@/assets/dest-maldives.jpg";
-import thailandImg from "@/assets/dest-thailand.jpg";
-import dubaiImg from "@/assets/dest-dubai.jpg";
+import upgradeBanner from "@/assets/upgrade-banner.webp";
+import goaImg from "@/assets/dest-goa.webp";
+import baliImg from "@/assets/dest-bali.webp";
+import maldivesImg from "@/assets/dest-maldives.webp";
+import thailandImg from "@/assets/dest-thailand.webp";
+import dubaiImg from "@/assets/dest-dubai.webp";
 import { CountUp } from "@/components/CountUp";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
