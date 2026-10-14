@@ -1,19 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
-import { MembershipCarousel } from "@/components/MembershipCarousel";
+import { PricingCarousel } from "@/components/PricingCarousel";
+import { HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast, UsersThree, Buildings, Globe as PGlobe, Star as PStar, UserPlus as PUserPlus, CalendarCheck as PCalendarCheck, Medal, AirplaneTilt } from "@phosphor-icons/react";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
-import heroImg from "@/assets/hero-maldives.webp.asset.json";
-import upgradeBanner from "@/assets/upgrade-banner.jpg";
-import goaImg from "@/assets/dest-goa.jpg";
-import baliImg from "@/assets/dest-bali.jpg";
-import maldivesImg from "@/assets/dest-maldives.jpg";
-import thailandImg from "@/assets/dest-thailand.jpg";
-import dubaiImg from "@/assets/dest-dubai.jpg";
+import heroImg from "@/assets/hero-maldives-4k.webp.asset.json";
+import upgradeBanner from "@/assets/upgrade-banner.webp";
+import goaImg from "@/assets/dest-goa.webp";
+import baliImg from "@/assets/dest-bali.webp";
+import maldivesImg from "@/assets/dest-maldives.webp";
+import thailandImg from "@/assets/dest-thailand.webp";
+import dubaiImg from "@/assets/dest-dubai.webp";
 import { CountUp } from "@/components/CountUp";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const whyIcons = [Heart, Sparkles, Award, Wallet, Headphones, Globe];
+const whyIcons = [HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast];
 
 // Photo + tier-coloured gradient for each membership card (Silver, Gold, Platinum).
 const planArt = [
@@ -65,8 +66,8 @@ function Home() {
             const Icon = whyIcons[i];
             return (
               <div key={w.title} className="text-center">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border-2 border-gold bg-navy text-gold">
-                  <Icon className="h-6 w-6" />
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-gradient-to-br from-gold-soft to-card text-gold-dark shadow-[0_12px_24px_-12px_color-mix(in_oklab,var(--gold-dark)_60%,transparent)] ring-1 ring-gold/30 transition-transform duration-300 hover:-translate-y-1 hover:rotate-3">
+                  <Icon size={30} weight="duotone" />
                 </div>
                 <h3 className="mt-3 font-serif text-base font-bold text-navy">{w.title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{w.desc}</p>
@@ -77,52 +78,14 @@ function Home() {
       </section>
 
       {/* Plans */}
-      <section className="bg-navy-gradient py-16 text-white">
+      <section className="bg-muted/40 py-16">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="text-center">
-            <div className="text-xs font-bold tracking-[0.3em] text-gold">━━ OUR MEMBERSHIP PLANS ━━</div>
+          <SectionHeading eyebrow="OUR MEMBERSHIP PLANS" />
+          <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted-foreground">Swipe, drag or tap the arrows to compare plans.</p>
+          <div className="mt-6">
+            <PricingCarousel />
           </div>
-          {/* Mobile: interactive carousel */}
-          <div className="mt-8 md:hidden">
-            <MembershipCarousel />
-          </div>
-
-          {/* Desktop: grid */}
-          <div className="mt-10 hidden gap-6 md:grid md:grid-cols-3">
-            {plans.map((p, i) => {
-              const art = planArt[i % planArt.length]!;
-              return (
-              <div key={p.name} className="relative rounded-3xl border border-border bg-card p-7 text-card-foreground shadow-[0_20px_40px_-20px_hsl(0_0%_0%/0.35)]">
-                {p.badge && (
-                  <div className="absolute -right-3 -top-3 z-10 rotate-12 rounded-xl bg-gold px-4 py-1.5 text-sm font-semibold text-navy-deep shadow-lg">{p.highlight ? "Popular" : "Best Value"}</div>
-                )}
-                <div className="relative -mx-3 -mt-3 h-36 overflow-hidden rounded-2xl">
-                  <img src={art.img} alt={`${p.name} membership holiday`} loading="lazy" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0" style={{ background: art.gradient }} />
-                  <div className="absolute bottom-3 left-4 font-serif text-xl font-bold uppercase tracking-[0.2em] text-white drop-shadow">{p.name}</div>
-                </div>
-                <h3 className="mt-4 text-2xl font-semibold">{p.name}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{p.nights}</p>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-semibold">₹{p.price.toLocaleString()}</span>
-                  <span className="text-sm text-muted-foreground">/ {p.validity}</span>
-                </div>
-                <div className="text-xs text-muted-foreground line-through">₹{p.original.toLocaleString()}</div>
-                <Button asChild className="mt-5 h-12 w-full rounded-xl bg-navy-deep text-base text-white shadow-[0_12px_24px_-8px_hsl(0_0%_0%/0.5)] hover:opacity-90">
-                  <Link to="/auth/register">{p.highlight ? "Upgrade now" : "Join Now"}</Link>
-                </Button>
-                <ul className="mt-6 space-y-3 text-sm">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5">
-                      <BadgeCheck className={`h-5 w-5 shrink-0 ${p.highlight ? "fill-gold text-card" : "fill-navy-deep text-card"}`} />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );})}
-          </div>
-          <p className="mt-6 text-center text-xs text-white/70">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             <Sparkles className="mr-1 inline h-3 w-3 text-gold" /> All plans come with exciting referral benefits & reward points
           </p>
         </div>
@@ -161,7 +124,7 @@ function Home() {
               <path d="M0,230 C60,230 80,210 125,210 C220,210 280,90 375,90 C470,90 530,210 625,210 C720,210 780,90 875,90 C930,90 960,100 1000,110" fill="none" stroke="var(--gold)" strokeWidth="3" vectorEffect="non-scaling-stroke" />
             </svg>
             {howItWorks.map((s, i) => {
-              const Icon = [UserPlus, CalendarCheck, Award, MapPin][i % 4];
+              const Icon = [PUserPlus, PCalendarCheck, Medal, AirplaneTilt][i % 4]!;
               const low = i % 2 === 0;
               const left = 12.5 + i * 25;
               return (
@@ -169,7 +132,7 @@ function Home() {
                   <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${left}%`, top: low ? "70%" : "30%" }}>
                     <div className="absolute inset-0 -z-10 scale-150 rounded-full bg-gold/30 blur-xl" />
                     <div className="grid h-14 w-14 place-items-center bg-card text-navy shadow-lg" style={{ clipPath: "polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)" }}>
-                      <Icon className="h-6 w-6" />
+                      <Icon size={26} weight="duotone" />
                     </div>
                   </div>
                   <div className="absolute w-[22%] -translate-x-1/2" style={{ left: `${left}%`, ...(low ? { top: "0%" } : { top: "48%" }) }}>
@@ -186,11 +149,11 @@ function Home() {
           {/* Mobile vertical */}
           <div className="relative mt-8 space-y-8 border-l-2 border-gold pl-8 md:hidden">
             {howItWorks.map((s, i) => {
-              const Icon = [UserPlus, CalendarCheck, Award, MapPin][i % 4];
+              const Icon = [PUserPlus, PCalendarCheck, Medal, AirplaneTilt][i % 4]!;
               return (
                 <div key={s.step} className="relative">
                   <div className="absolute -left-[3.05rem] top-0 grid h-10 w-10 place-items-center bg-card text-navy shadow-md" style={{ clipPath: "polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)" }}>
-                    <Icon className="h-5 w-5" />
+                    <Icon size={20} weight="duotone" />
                   </div>
                   <span className="absolute right-0 -top-4 text-6xl font-bold text-foreground/5">{s.step}</span>
                   <h3 className="font-semibold text-navy">{s.title}</h3>
@@ -205,16 +168,16 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-card p-8 shadow-sm md:grid-cols-4">
             {[
-              { icon: Users, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
-              { icon: Building2, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
-              { icon: Globe, to: 25, suffix: "+", decimals: 0, label: "Countries" },
-              { icon: Star, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
+              { icon: UsersThree, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
+              { icon: Buildings, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
+              { icon: PGlobe, to: 25, suffix: "+", decimals: 0, label: "Countries" },
+              { icon: PStar, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
             ].map((s) => {
               const Icon = s.icon;
               return (
                 <div key={s.label} className="flex items-center gap-4">
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gold-soft text-gold-dark">
-                    <Icon className="h-7 w-7" />
+                    <Icon size={30} weight="duotone" />
                   </div>
                   <div>
                     <div className="font-display text-3xl font-bold tabular-nums text-navy md:text-4xl">
@@ -230,13 +193,11 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative overflow-hidden bg-navy-gradient py-16">
-        <div className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-gold/30 blur-3xl" />
-        <div className="pointer-events-none absolute -right-10 bottom-0 h-80 w-80 rounded-full bg-gold-dark/25 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4">
-          <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" light />
+      <section className="bg-muted/40 py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" />
         </div>
-        <div className="relative mt-8">
+        <div className="mt-4">
           <TestimonialsCarousel />
         </div>
       </section>
@@ -352,10 +313,18 @@ function HeroSearch() {
       </form>
       <div className="mt-5 flex flex-wrap justify-center gap-2">
         {cities.map((c) => (
-          <button key={c} type="button" onClick={() => setWhere(c)} className="rounded-full border border-border bg-card px-4 py-1.5 text-sm text-navy hover:border-gold">
+          <Link key={c} to="/auth/login" className="rounded-full border border-border bg-card px-4 py-1.5 text-sm text-navy transition hover:border-gold hover:text-gold-dark">
             {c}
-          </button>
+          </Link>
         ))}
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:mx-auto sm:flex sm:max-w-md sm:justify-center">
+        <Button asChild className="h-11 rounded-full bg-gold-gradient px-8 font-bold text-navy-deep shadow-lg hover:opacity-90">
+          <Link to="/auth/register">Register</Link>
+        </Button>
+        <Button asChild variant="outline" className="h-11 rounded-full border-navy px-8 font-bold text-navy hover:bg-navy hover:text-white">
+          <Link to="/auth/login">Login</Link>
+        </Button>
       </div>
     </div>
   );

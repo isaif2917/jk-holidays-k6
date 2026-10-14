@@ -1,9 +1,9 @@
-import maldives from "@/assets/dest-maldives.jpg";
-import bali from "@/assets/dest-bali.jpg";
-import dubai from "@/assets/dest-dubai.jpg";
-import thailand from "@/assets/dest-thailand.jpg";
-import kashmir from "@/assets/dest-kashmir.jpg";
-import goa from "@/assets/dest-goa.jpg";
+import maldives from "@/assets/dest-maldives.webp";
+import bali from "@/assets/dest-bali.webp";
+import dubai from "@/assets/dest-dubai.webp";
+import thailand from "@/assets/dest-thailand.webp";
+import kashmir from "@/assets/dest-kashmir.webp";
+import goa from "@/assets/dest-goa.webp";
 
 export const destinations = [
   { name: "Maldives", country: "Overwater Villas", image: maldives },
@@ -16,11 +16,11 @@ export const destinations = [
 
 export const CONTACT = {
   company: "JK Holidays Pvt. Ltd.",
-  address: "B-04, Sector 63, Noida,\nUttar Pradesh - 201301",
+  address: "#769, 1st Main, 1st Cross, Ring Road,\nKengeri Satellite Town, Bangalore – 560060",
   phone: "9019663540",
   phoneHref: "tel:9019663540",
   whatsapp: "https://wa.me/919019663540",
-  email: "info@jkholidays.com",
+  email: "jkholiday27@gmail.com",
 };
 
 /** Featured holiday packages — photos, ratings and enquiry options. */

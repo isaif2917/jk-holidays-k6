@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, ChevronLeft, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { plans } from "@/data/mock";
-import resortImg from "@/assets/hero-resort.jpg";
+import resortImg from "@/assets/hero-resort.webp";
 
 export function MembershipCarousel() {
   // Start at "Gold" (highlight) if present
