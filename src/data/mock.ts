@@ -154,7 +154,6 @@ export const whyUs = [
   { title: "Lifetime Memories", desc: "Create unforgettable memories with your loved ones." },
   { title: "Affordable Luxury", desc: "Enjoy 5-star stays at a fraction of the cost." },
   { title: "Exclusive Benefits", desc: "Special member discounts and insider privileges." },
-  { title: "EMI Options", desc: "Flexible payment options to suit your needs." },
   { title: "Travel Concierge", desc: "Dedicated support before, during & after your holiday." },
   { title: "Domestic & International", desc: "Explore 1000+ destinations across India & the world." },
 ];
