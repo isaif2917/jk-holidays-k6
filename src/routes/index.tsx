@@ -2,14 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { PricingCarousel } from "@/components/PricingCarousel";
-import { HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast, UsersThree, Buildings, Globe as PGlobe, Star as PStar, UserPlus as PUserPlus, CalendarCheck as PCalendarCheck, Medal, AirplaneTilt } from "@phosphor-icons/react";
+import { HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast, UserPlus as PUserPlus, CalendarCheck as PCalendarCheck, Medal, AirplaneTilt } from "@phosphor-icons/react";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
-import heroImgFile from "@/assets/hero-resort.webp";
-const heroImg = { url: heroImgFile };
+import heroImg from "@/assets/hero-explore-world.png.asset.json";
+import iconFamilies from "@/assets/icons/families.svg";
+import iconResorts from "@/assets/icons/resorts.svg";
+import iconCountries from "@/assets/icons/countries.svg";
+import iconRating from "@/assets/icons/rating.svg";
 import upgradeBanner from "@/assets/upgrade-banner.webp";
 import goaImg from "@/assets/dest-goa.webp";
 import baliImg from "@/assets/dest-bali.webp";
@@ -98,9 +101,9 @@ function Home() {
           <SectionHeading eyebrow="POPULAR DESTINATIONS" align="left" />
           <Link to="/destinations" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL DESTINATIONS →</Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6">
           {destinations.map((d) => (
-            <div key={d.name} className="group relative aspect-square overflow-hidden rounded-xl">
+            <div key={d.name} className="group relative aspect-square w-40 shrink-0 snap-start overflow-hidden rounded-xl sm:w-48 md:w-auto">
               <img src={d.image} alt={d.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 to-transparent" />
               <div className="absolute bottom-3 left-3 text-white">
@@ -169,16 +172,15 @@ function Home() {
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
           <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-card p-8 shadow-sm md:grid-cols-4">
             {[
-              { icon: UsersThree, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
-              { icon: Buildings, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
-              { icon: PGlobe, to: 25, suffix: "+", decimals: 0, label: "Countries" },
-              { icon: PStar, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
+              { icon: iconFamilies, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
+              { icon: iconResorts, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
+              { icon: iconCountries, to: 25, suffix: "+", decimals: 0, label: "Countries" },
+              { icon: iconRating, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
             ].map((s) => {
-              const Icon = s.icon;
               return (
                 <div key={s.label} className="flex items-center gap-4">
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gold-soft text-gold-dark">
-                    <Icon size={30} weight="duotone" />
+                    <img src={s.icon} alt="" className="h-8 w-8" />
                   </div>
                   <div>
                     <div className="font-display text-3xl font-bold tabular-nums text-navy md:text-4xl">
@@ -210,19 +212,23 @@ function Home() {
 
       {/* Refer & Earn */}
       <section className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pb-16">
-        <div className="flex flex-col items-center gap-6 rounded-2xl bg-navy-gradient p-8 text-white md:flex-row md:justify-between">
-          <div>
+        <div className="flex flex-col gap-8 rounded-2xl bg-navy-gradient p-6 text-center text-white sm:p-8 md:flex-row md:items-center md:justify-between md:text-left">
+          <div className="min-w-0">
             <div className="text-xs font-bold tracking-widest text-gold">REFER & EARN BIG</div>
-            <h3 className="mt-2 font-serif text-2xl font-bold">Invite your friends to join JK Holidays and earn exciting rewards.</h3>
+            <h3 className="mt-2 font-serif text-xl font-bold sm:text-2xl">Invite your friends to join JK Holidays and earn exciting rewards.</h3>
           </div>
-          <div className="flex items-center gap-4 text-center text-xs">
-            {[{i:UserPlus,l:"Invite Friends"},{i:Users,l:"They Join"},{i:Award,l:"Earn Rewards"}].map(({i:Icon,l},idx)=>(
-              <div key={l} className="flex items-center gap-2">
-                <div className="grid h-12 w-12 place-items-center rounded-full border border-gold/50 text-gold"><Icon className="h-5 w-5" /></div>
-                <div className="max-w-16">{l}</div>
-                {idx<2 && <ArrowRight className="h-4 w-4 text-gold" />}
-              </div>
-            ))}
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center justify-center gap-3 text-center text-xs sm:gap-4">
+              {[{i:UserPlus,l:"Invite Friends"},{i:Users,l:"They Join"},{i:Award,l:"Earn Rewards"}].map(({i:Icon,l},idx)=>(
+                <div key={l} className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/50 text-gold"><Icon className="h-5 w-5" /></div>
+                    <div className="max-w-20 leading-tight">{l}</div>
+                  </div>
+                  {idx<2 && <ArrowRight className="h-4 w-4 shrink-0 text-gold" />}
+                </div>
+              ))}
+            </div>
             <Button className="bg-gold-gradient font-bold text-navy-deep">KNOW MORE</Button>
           </div>
         </div>

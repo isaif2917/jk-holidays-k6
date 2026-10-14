@@ -32,9 +32,11 @@ function DestinationsPage() {
           Photos, ratings, and enquiry options — pricing shared after callback.
         </p>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible lg:grid-cols-3">
           {holidayPackages.map((p) => (
-            <HolidayPackageCard key={p.slug} pkg={p} />
+            <div key={p.slug} className="w-[85vw] max-w-xs shrink-0 snap-start sm:w-auto sm:max-w-none">
+              <HolidayPackageCard pkg={p} />
+            </div>
           ))}
         </div>
       </section>
@@ -45,9 +47,9 @@ function DestinationsPage() {
           <p className="mt-1 text-sm text-white/75">
             Over 500 partner resorts across India and 25+ countries.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6">
             {destinations.map((d) => (
-              <div key={d.name} className="group relative aspect-square overflow-hidden rounded-xl">
+              <div key={d.name} className="group relative aspect-square w-40 shrink-0 snap-start overflow-hidden rounded-xl sm:w-48 md:w-auto">
                 <img
                   src={d.image}
                   alt={d.name}

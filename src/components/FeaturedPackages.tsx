@@ -31,9 +31,11 @@ export function FeaturedPackages({
             </Link>
           )}
         </div>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible lg:grid-cols-3">
           {items.map((p) => (
-            <HolidayPackageCard key={p.slug} pkg={p} />
+            <div key={p.slug} className="w-[85vw] max-w-xs shrink-0 snap-start sm:w-auto sm:max-w-none">
+              <HolidayPackageCard pkg={p} />
+            </div>
           ))}
         </div>
       </div>
