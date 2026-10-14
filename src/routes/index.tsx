@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
 import heroImg from "@/assets/hero-maldives.webp.asset.json";
 import upgradeBanner from "@/assets/upgrade-banner.jpg";
+import goaImg from "@/assets/dest-goa.jpg";
+import baliImg from "@/assets/dest-bali.jpg";
+import maldivesImg from "@/assets/dest-maldives.jpg";
+import thailandImg from "@/assets/dest-thailand.jpg";
+import dubaiImg from "@/assets/dest-dubai.jpg";
+import { CountUp } from "@/components/CountUp";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
@@ -19,6 +25,14 @@ export const Route = createFileRoute("/")({
 });
 
 const whyIcons = [Heart, Sparkles, Award, Wallet, Headphones, Globe];
+
+// Photo + tier-coloured gradient for each membership card (Silver, Gold, Platinum).
+const planArt = [
+  { img: goaImg, gradient: "linear-gradient(135deg, color-mix(in oklab, var(--navy-soft) 70%, transparent), color-mix(in oklab, var(--muted) 30%, transparent))" },
+  { img: baliImg, gradient: "linear-gradient(135deg, color-mix(in oklab, var(--gold-dark) 75%, transparent), color-mix(in oklab, var(--gold) 25%, transparent))" },
+  { img: maldivesImg, gradient: "linear-gradient(135deg, color-mix(in oklab, var(--navy-deep) 80%, transparent), color-mix(in oklab, var(--gold) 30%, transparent))" },
+];
+const offerImages = [goaImg, thailandImg, baliImg, dubaiImg];
 
 function Home() {
   return (
@@ -76,14 +90,16 @@ function Home() {
           {/* Desktop: grid */}
           <div className="mt-10 hidden gap-6 md:grid md:grid-cols-3">
             {plans.map((p, i) => {
-              const PlanIcon = [Shield, Award, Sparkles][i % 3];
+              const art = planArt[i % planArt.length]!;
               return (
               <div key={p.name} className="relative rounded-3xl border border-border bg-card p-7 text-card-foreground shadow-[0_20px_40px_-20px_hsl(0_0%_0%/0.35)]">
                 {p.badge && (
-                  <div className="absolute -right-3 -top-3 rotate-12 rounded-xl bg-gold px-4 py-1.5 text-sm font-semibold text-navy-deep shadow-lg">{p.highlight ? "Popular" : "Best Value"}</div>
+                  <div className="absolute -right-3 -top-3 z-10 rotate-12 rounded-xl bg-gold px-4 py-1.5 text-sm font-semibold text-navy-deep shadow-lg">{p.highlight ? "Popular" : "Best Value"}</div>
                 )}
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-navy-deep text-gold shadow-md">
-                  <PlanIcon className="h-6 w-6" />
+                <div className="relative -mx-3 -mt-3 h-36 overflow-hidden rounded-2xl">
+                  <img src={art.img} alt={`${p.name} membership holiday`} loading="lazy" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: art.gradient }} />
+                  <div className="absolute bottom-3 left-4 font-serif text-xl font-bold uppercase tracking-[0.2em] text-white drop-shadow">{p.name}</div>
                 </div>
                 <h3 className="mt-4 text-2xl font-semibold">{p.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{p.nights}</p>
@@ -185,22 +201,26 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="bg-navy-gradient py-12 text-white">
+      <section className="py-12">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="mt-12 grid grid-cols-2 gap-4 rounded-xl bg-white/5 p-6 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-card p-8 shadow-sm md:grid-cols-4">
             {[
-              { icon: Users, ...stats[0] },
-              { icon: Building2, ...stats[1] },
-              { icon: Globe, ...stats[2] },
-              { icon: Star, value: "4.9 ★", label: "Customer Rating" },
+              { icon: Users, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
+              { icon: Building2, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
+              { icon: Globe, to: 25, suffix: "+", decimals: 0, label: "Countries" },
+              { icon: Star, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
             ].map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.label} className="flex items-center gap-3">
-                  <Icon className="h-8 w-8 text-gold" />
+                <div key={s.label} className="flex items-center gap-4">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gold-soft text-gold-dark">
+                    <Icon className="h-7 w-7" />
+                  </div>
                   <div>
-                    <div className="font-serif text-xl font-bold">{s.value}</div>
-                    <div className="text-xs text-white/70">{s.label}</div>
+                    <div className="font-display text-3xl font-bold tabular-nums text-navy md:text-4xl">
+                      <CountUp to={s.to} decimals={s.decimals} suffix={s.suffix} />
+                    </div>
+                    <div className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{s.label}</div>
                   </div>
                 </div>
               );
@@ -210,25 +230,14 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" align="left" />
-        <div className="mt-8 md:hidden">
-          <TestimonialsCarousel />
+      <section className="relative overflow-hidden bg-navy-gradient py-16">
+        <div className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-gold/30 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 bottom-0 h-80 w-80 rounded-full bg-gold-dark/25 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4">
+          <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" light />
         </div>
-        <div className="mt-8 hidden gap-6 md:grid md:grid-cols-3">
-          {testimonials.map((t) => (
-            <div key={t.name} className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="flex text-gold">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}</div>
-              <p className="mt-3 text-sm italic text-muted-foreground">"{t.quote}"</p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gold-gradient" />
-                <div>
-                  <div className="text-sm font-semibold text-navy">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.plan}</div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="relative mt-8">
+          <TestimonialsCarousel />
         </div>
       </section>
 
@@ -263,13 +272,26 @@ function Home() {
           <SectionHeading eyebrow="LATEST HOLIDAY OFFERS" align="left" />
           <Link to="/offers" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL OFFERS →</Link>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {offers.map((o) => (
-            <div key={o.title} className={`rounded-xl bg-gradient-to-br ${o.tone} p-5 text-white shadow-lg`}>
-              <div className="text-xs font-bold tracking-widest">{o.title.toUpperCase()}</div>
-              <div className="mt-2 font-serif text-3xl font-bold">Flat {o.pct}</div>
-              <div className="mt-1 text-sm text-white/90">{o.desc}</div>
-              <Button size="sm" className="mt-4 bg-gold-gradient font-bold text-navy-deep">BOOK NOW</Button>
+        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
+          {offers.map((o, i) => (
+            <div
+              key={o.title}
+              className={`flex flex-col items-center rounded-[999px] bg-card p-3 pb-8 text-center shadow-[0_25px_50px_-20px_color-mix(in_oklab,var(--navy-deep)_45%,transparent)] ring-1 ring-border transition-transform hover:-translate-y-2 ${i % 2 === 1 ? "lg:mt-16" : ""}`}
+            >
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[999px]">
+                <img src={offerImages[i % offerImages.length]} alt={o.title} loading="lazy" className="h-full w-full object-cover" />
+                <span className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-gold-gradient px-3 py-1 text-[10px] font-bold tracking-widest text-navy-deep shadow">{o.pct}</span>
+              </div>
+              <h3 className="mt-4 font-display text-lg font-bold text-navy sm:text-xl">{o.title}</h3>
+              <p className="mt-1 font-condensed text-sm text-muted-foreground">{o.desc}</p>
+              <div className="mt-2 font-condensed text-navy">
+                <span className="text-xs">Flat - </span>
+                <span className="text-2xl sm:text-3xl">{o.pct}</span>
+              </div>
+              <p className="font-condensed text-[11px] text-muted-foreground">*Conditions Apply</p>
+              <Button asChild size="sm" className="mt-3 rounded-full bg-gold-gradient px-5 font-bold text-navy-deep">
+                <Link to="/offers">BOOK NOW</Link>
+              </Button>
             </div>
           ))}
         </div>

@@ -148,3 +148,22 @@
 @utility bg-gold-gradient {
   background: linear-gradient(135deg, var(--gold), var(--gold-dark));
 }
+
+@theme inline {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-condensed: "Oswald", ui-sans-serif, sans-serif;
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+@utility animate-marquee-right {
+  animation: marquee-right 90s linear infinite;
+}
+@utility glass-card {
+  background: color-mix(in oklab, var(--card) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--card) 28%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 20px 40px -20px color-mix(in oklab, var(--navy-deep) 60%, transparent);
+}
