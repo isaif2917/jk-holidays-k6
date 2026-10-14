@@ -8,7 +8,7 @@ import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
-import heroImg from "@/assets/hero-explore-world.webp.asset.json";
+import heroImg from "@/assets/hero-explore-world.webp";
 import iconFamilies from "@/assets/icons/families.svg";
 import iconResorts from "@/assets/icons/resorts.svg";
 import iconCountries from "@/assets/icons/countries.svg";
@@ -44,13 +44,13 @@ function Home() {
     <PublicLayout>
       {/* Hero */}
       <section className="relative bg-background text-white">
-        <div className="relative h-[520px] overflow-hidden md:h-[560px]">
-          <img src={heroImg.url} alt="Infinity pool at a tropical beach resort at sunset" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1080} />
+        <div className="relative h-[440px] overflow-hidden md:h-[520px]">
+          <img src={heroImg} alt="Infinity pool at a tropical beach resort at sunset" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1080} />
           <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/90 via-navy-deep/50 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background" />
-          <div className="relative mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pt-16 md:pt-24">
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20">
             <div className="max-w-xl">
-              <h1 className="font-serif text-4xl font-bold leading-tight md:text-6xl">
+              <h1 className="font-serif text-4xl font-bold leading-tight md:text-5xl">
                 Travel More.<br />Spend Less.<br /><span className="text-gold">Live Better.</span>
               </h1>
               <p className="mt-4 text-base text-white/85 md:text-lg">
@@ -63,7 +63,7 @@ function Home() {
       </section>
 
       {/* Why Us */}
-      <section className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-16">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <SectionHeading eyebrow="WHY JK HOLIDAYS?" />
         <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
           {whyUs.map((w, i) => {
@@ -82,8 +82,8 @@ function Home() {
       </section>
 
       {/* Plans */}
-      <section className="bg-muted/40 py-16">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
+      <section className="bg-muted/40 py-10 md:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="OUR MEMBERSHIP PLANS" />
           <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted-foreground">Swipe, drag or tap the arrows to compare plans.</p>
           <div className="mt-6">
@@ -96,7 +96,7 @@ function Home() {
       </section>
 
       {/* Destinations */}
-      <section className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-16">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         <div className="flex items-center justify-between">
           <SectionHeading eyebrow="POPULAR DESTINATIONS" align="left" />
           <Link to="/destinations" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL DESTINATIONS →</Link>
@@ -116,8 +116,8 @@ function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-muted/40 py-16">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
+      <section className="bg-muted/40 py-10 md:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="text-xs font-semibold tracking-widest text-gold">— JK Holidays —</div>
             <h2 className="mt-2 font-serif text-4xl font-bold text-navy">How It Works<span className="text-gold">.</span></h2>
@@ -168,8 +168,8 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="py-12">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
+      <section className="py-10 md:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-card p-8 shadow-sm md:grid-cols-4">
             {[
               { icon: iconFamilies, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
@@ -196,8 +196,8 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-muted/40 py-16">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
+      <section className="bg-muted/40 py-10 md:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="WHY MEMBERS LOVE JK HOLIDAYS" />
         </div>
         <div className="mt-4">
@@ -211,7 +211,7 @@ function Home() {
 
 
       {/* Refer & Earn */}
-      <section className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pb-16">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10 md:pb-14">
         <div className="flex flex-col gap-8 rounded-2xl bg-navy-gradient p-6 text-center text-white sm:p-8 md:flex-row md:items-center md:justify-between md:text-left">
           <div className="min-w-0">
             <div className="text-xs font-bold tracking-widest text-gold">REFER & EARN BIG</div>
@@ -235,7 +235,7 @@ function Home() {
       </section>
 
       {/* Offers */}
-      <section className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pb-16">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10 md:pb-14">
         <div className="flex items-center justify-between">
           <SectionHeading eyebrow="LATEST HOLIDAY OFFERS" align="left" />
           <Link to="/offers" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL OFFERS →</Link>
