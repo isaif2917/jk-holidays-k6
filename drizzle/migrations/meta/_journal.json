@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791959097908,
+      "tag": "0000_jk_holidays_schema",
+      "breakpoints": true
+    }
+  ]
+}
