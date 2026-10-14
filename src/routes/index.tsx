@@ -7,7 +7,7 @@ import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
-import heroImg from "@/assets/hero-maldives.webp.asset.json";
+import heroImg from "@/assets/hero-maldives-4k.webp.asset.json";
 import upgradeBanner from "@/assets/upgrade-banner.webp";
 import goaImg from "@/assets/dest-goa.webp";
 import baliImg from "@/assets/dest-bali.webp";
