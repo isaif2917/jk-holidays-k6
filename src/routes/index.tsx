@@ -44,13 +44,13 @@ function Home() {
     <PublicLayout>
       {/* Hero */}
       <section className="relative bg-background text-white">
-        <div className="relative h-[520px] overflow-hidden md:h-[560px]">
-          <img src={heroImg.url} alt="Infinity pool at a tropical beach resort at sunset" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1080} />
+        <div className="relative h-[440px] overflow-hidden md:h-[520px]">
+          <img src={heroImg} alt="Infinity pool at a tropical beach resort at sunset" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1080} />
           <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/90 via-navy-deep/50 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background" />
-          <div className="relative mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pt-16 md:pt-24">
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20">
             <div className="max-w-xl">
-              <h1 className="font-serif text-4xl font-bold leading-tight md:text-6xl">
+              <h1 className="font-serif text-4xl font-bold leading-tight md:text-5xl">
                 Travel More.<br />Spend Less.<br /><span className="text-gold">Live Better.</span>
               </h1>
               <p className="mt-4 text-base text-white/85 md:text-lg">
