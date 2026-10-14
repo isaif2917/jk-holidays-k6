@@ -98,7 +98,7 @@ function Home() {
           <SectionHeading eyebrow="POPULAR DESTINATIONS" align="left" />
           <Link to="/destinations" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL DESTINATIONS →</Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {destinations.map((d) => (
             <div key={d.name} className="group relative aspect-square overflow-hidden rounded-xl">
               <img src={d.image} alt={d.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition group-hover:scale-110" />
