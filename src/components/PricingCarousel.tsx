@@ -128,7 +128,7 @@ export function PricingCarousel() {
         </button>
         <div className="flex gap-2">
           {plans.map((p, i) => (
-            <button key={p.name} type="button" aria-label={`Show ${p.name} plan`} aria-current={i === active} onClick={() => setActive(i)} className={`h-2 rounded-full transition-all ${i === active ? "w-7 bg-gold" : "w-2 bg-white/40"}`} />
+            <button key={p.name} type="button" aria-label={`Show ${p.name} plan`} aria-current={i === active} onClick={() => setActive(i)} className={`h-2 rounded-full transition-all ${i === active ? "w-7 bg-gold" : "w-2 bg-navy/20"}`} />
           ))}
         </div>
         <button type="button" onClick={() => go(1)} aria-label="Next plan" className="grid h-11 w-11 place-items-center rounded-full bg-card text-navy-deep shadow-md ring-1 ring-border transition hover:scale-105">
