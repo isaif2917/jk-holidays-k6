@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const whyIcons = [HeartStraight, Diamond, Crown, CreditCard, Headset, GlobeHemisphereEast];
+const whyIcons = [HeartStraight, Diamond, Crown, Headset, GlobeHemisphereEast];
 
 // Photo + tier-coloured gradient for each membership card (Silver, Gold, Platinum).
 const planArt = [
