@@ -16,11 +16,11 @@ export const destinations = [
 
 export const CONTACT = {
   company: "JK Holidays Pvt. Ltd.",
-  address: "B-04, Sector 63, Noida,\nUttar Pradesh - 201301",
+  address: "#769, 1st Main, 1st Cross, Ring Road,\nKengeri Satellite Town, Bangalore – 560060",
   phone: "9019663540",
   phoneHref: "tel:9019663540",
   whatsapp: "https://wa.me/919019663540",
-  email: "info@jkholidays.com",
+  email: "jkholiday27@gmail.com",
 };
 
 /** Featured holiday packages — photos, ratings and enquiry options. */

@@ -443,6 +443,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          approved: boolean
+          created_at: string
+          id: string
+          location: string | null
+          message: string
+          name: string
+          rating: number
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          location?: string | null
+          message: string
+          name: string
+          rating?: number
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          location?: string | null
+          message?: string
+          name?: string
+          rating?: number
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           admin_reply: string | null

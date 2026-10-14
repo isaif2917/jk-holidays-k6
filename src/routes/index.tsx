@@ -352,10 +352,18 @@ function HeroSearch() {
       </form>
       <div className="mt-5 flex flex-wrap justify-center gap-2">
         {cities.map((c) => (
-          <button key={c} type="button" onClick={() => setWhere(c)} className="rounded-full border border-border bg-card px-4 py-1.5 text-sm text-navy hover:border-gold">
+          <Link key={c} to="/auth/login" className="rounded-full border border-border bg-card px-4 py-1.5 text-sm text-navy transition hover:border-gold hover:text-gold-dark">
             {c}
-          </button>
+          </Link>
         ))}
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:mx-auto sm:flex sm:max-w-md sm:justify-center">
+        <Button asChild className="h-11 rounded-full bg-gold-gradient px-8 font-bold text-navy-deep shadow-lg hover:opacity-90">
+          <Link to="/auth/register">Register</Link>
+        </Button>
+        <Button asChild variant="outline" className="h-11 rounded-full border-navy px-8 font-bold text-navy hover:bg-navy hover:text-white">
+          <Link to="/auth/login">Login</Link>
+        </Button>
       </div>
     </div>
   );

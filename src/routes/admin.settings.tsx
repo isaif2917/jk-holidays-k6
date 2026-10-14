@@ -7,7 +7,7 @@ export const Route = createFileRoute("/admin/settings")({ component: () => (
     <h1 className="font-serif text-3xl font-bold text-navy">Settings</h1>
     <Card className="p-6 space-y-4">
       <div><label className="text-sm font-semibold">Site Name</label><Input defaultValue="JK Holidays" className="mt-1" /></div>
-      <div><label className="text-sm font-semibold">Support Email</label><Input defaultValue="support@jkholidays.com" className="mt-1" /></div>
+      <div><label className="text-sm font-semibold">Support Email</label><Input defaultValue="jkholiday27@gmail.com" className="mt-1" /></div>
       <div><label className="text-sm font-semibold">Support Phone</label><Input defaultValue="+91 90123 45678" className="mt-1" /></div>
       <Button className="bg-gold-gradient font-bold text-navy-deep">SAVE SETTINGS</Button>
     </Card>
