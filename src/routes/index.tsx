@@ -62,24 +62,8 @@ function Home() {
         <HeroSearch />
       </section>
 
-      {/* Why Us */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-        <SectionHeading eyebrow="WHY JK HOLIDAYS?" />
-        <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
-          {whyUs.map((w, i) => {
-            const Icon = whyIcons[i];
-            return (
-              <div key={w.title} className="text-center">
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-gradient-to-br from-gold-soft to-card text-gold-dark shadow-[0_12px_24px_-12px_color-mix(in_oklab,var(--gold-dark)_60%,transparent)] ring-1 ring-gold/30 transition-transform duration-300 hover:-translate-y-1 hover:rotate-3">
-                  <Icon size={30} weight="duotone" />
-                </div>
-                <h3 className="mt-3 font-serif text-base font-bold text-navy">{w.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{w.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* Featured Holiday Packages */}
+      <FeaturedPackages limit={3} />
 
       {/* Plans */}
       <section className="bg-muted/40 py-10 md:py-14">
@@ -205,8 +189,24 @@ function Home() {
         </div>
       </section>
 
-      {/* Featured Holiday Packages */}
-      <FeaturedPackages limit={3} />
+      {/* Why Us */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        <SectionHeading eyebrow="WHY JK HOLIDAYS?" />
+        <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+          {whyUs.map((w, i) => {
+            const Icon = whyIcons[i];
+            return (
+              <div key={w.title} className="text-center">
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-gradient-to-br from-gold-soft to-card text-gold-dark shadow-[0_12px_24px_-12px_color-mix(in_oklab,var(--gold-dark)_60%,transparent)] ring-1 ring-gold/30 transition-transform duration-300 hover:-translate-y-1 hover:rotate-3">
+                  <Icon size={30} weight="duotone" />
+                </div>
+                <h3 className="mt-3 font-serif text-base font-bold text-navy">{w.title}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{w.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
 
 
