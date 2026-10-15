@@ -15,6 +15,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTACT, membershipPackages } from "@/data/mock";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 const searchSchema = z.object({ request: z.coerce.number().optional() });
 
@@ -128,7 +130,7 @@ function PackageDetail() {
         </div>
       </section>
 
-      <PurchaseDialog open={open} setOpen={setOpen} title={pkg.title} amount={pkg.price} />
+      <PurchaseDialog open={open} setOpen={setOpen} title={pkg.title} amount={pkg.price} planSlug={pkg.slug.split("-")[0]} />
     </PublicLayout>
   );
 }
@@ -138,13 +140,38 @@ function PurchaseDialog({
   setOpen,
   title,
   amount,
+  planSlug,
 }: {
+  planSlug: string;
   open: boolean;
   setOpen: (v: boolean) => void;
   title: string;
   amount: number;
 }) {
   const [reference, setReference] = useState("");
+  const [method, setMethod] = useState("UPI");
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
+  const submit = async () => {
+    setBusy(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      setBusy(false);
+      toast.error("Please log in first", { description: "Sign in or create an account to send your membership request." });
+      navigate({ to: "/auth/login" });
+      return;
+    }
+    const { data: prof } = await (supabase as any).from("profiles").select("full_name,email,phone").eq("id", u.user.id).maybeSingle();
+    const { error } = await (supabase as any).from("payments").insert({
+      user_id: u.user.id, name: prof?.full_name ?? null, email: prof?.email ?? u.user.email, phone: prof?.phone ?? null,
+      plan_slug: planSlug, amount, method, reference: reference.trim(), status: "Pending",
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Request submitted", { description: `We'll verify your payment for ${title} and activate your membership shortly.` });
+    setReference("");
+    setOpen(false);
+  };
   const upiId = "jkholidays@ybl";
   const upiLink = `upi://pay?pa=${upiId}&pn=JK%20Holidays&am=${amount}&cu=INR`;
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiLink)}`;
@@ -165,7 +192,7 @@ function PurchaseDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="upi">
+        <Tabs defaultValue="upi" onValueChange={(v) => setMethod(v === "bank" ? "Bank Transfer" : "UPI")}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upi"><Smartphone className="mr-1 h-4 w-4" /> UPI QR</TabsTrigger>
             <TabsTrigger value="bank"><Building2 className="mr-1 h-4 w-4" /> Bank Transfer</TabsTrigger>
@@ -202,14 +229,8 @@ function PurchaseDialog({
 
         <Button
           className="w-full bg-gold-gradient font-bold text-navy-deep hover:opacity-90"
-          disabled={reference.trim().length < 4}
-          onClick={() => {
-            toast.success("Request submitted", {
-              description: `We'll verify your payment for ${title} and activate your membership shortly.`,
-            });
-            setReference("");
-            setOpen(false);
-          }}
+          disabled={busy || reference.trim().length < 4}
+          onClick={submit}
         >
           SUBMIT REQUEST
         </Button>
