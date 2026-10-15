@@ -41,6 +41,7 @@ const planArt = [
 const offerImages = [goaImg, thailandImg, baliImg, dubaiImg];
 
 function Home() {
+  const offers = useSiteOffers();
   return (
     <PublicLayout>
       {/* Hero */}
