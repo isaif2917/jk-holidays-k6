@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db, downloadCsv, fmtDate, useRefresh, useRows } from "@/lib/data";
-import { createMember } from "@/lib/admin.functions";
+import { createMember, setMemberPassword } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/members")({
   head: () => ({ meta: [{ title: "Members — JK Holidays Admin" }, { name: "description", content: "Manage JK Holidays members." }] }),
@@ -174,6 +174,7 @@ function Members() {
               ["Joined", fmtDate(view.created_at)], ["Membership", `${fmtDate(view.membership_start)} – ${fmtDate(view.membership_end)}`], ["Nights", `${view.nights_used} used / ${view.nights_total}`]]
               .map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium">{v || "—"}</dd></div>)}
           </dl>}
+          {view && <PasswordBox userId={view.id} />}
         </DialogContent>
       </Dialog>
 
@@ -227,5 +228,28 @@ function AddMember({ open, onClose, plans, onDone }: { open: boolean; onClose: (
         <DialogFooter><Button disabled={busy} className="bg-navy text-white" onClick={submit}>{busy ? "Adding…" : "Add member"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PasswordBox({ userId }: { userId: string }) {
+  const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    try { await setMemberPassword({ data: { userId, password: pw } }); toast.success("Password changed"); setPw(""); }
+    catch (e: any) { toast.error(e.message); }
+    setBusy(false);
+  };
+  return (
+    <div className="mt-2 rounded-lg border p-3">
+      <div className="text-xs font-semibold text-navy">Password</div>
+      <p className="text-[11px] text-muted-foreground">For security the current password is stored scrambled and can't be shown. Set a new one below and share it with the member.</p>
+      <div className="mt-2 flex gap-2">
+        <Input type={show ? "text" : "password"} placeholder="New password (min 6)" value={pw} onChange={(e) => setPw(e.target.value)} />
+        <Button type="button" variant="outline" size="sm" onClick={() => setShow(!show)}>{show ? "Hide" : "Show"}</Button>
+        <Button disabled={busy || pw.length < 6} size="sm" className="bg-navy text-white" onClick={save}>{busy ? "Saving…" : "Change"}</Button>
+      </div>
+    </div>
   );
 }
