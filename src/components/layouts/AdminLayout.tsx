@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutGrid, Users, Crown, Plane, CalendarCheck, Building2, Wallet, CreditCard,
-  ArrowDownToLine, BarChart3, Bell, ShieldCheck, LifeBuoy, Settings, LogOut, Menu, Home, Inbox,
+  ArrowDownToLine, BarChart3, Bell, ShieldCheck, LifeBuoy, Settings, LogOut, Menu, Home, Inbox, UserCheck, Tag,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,8 @@ const adminNav = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid },
   { to: "/admin/members", label: "Members", icon: Users },
   { to: "/admin/plans", label: "Membership Plans", icon: Crown },
+  { to: "/admin/membership-requests", label: "Membership Requests", icon: UserCheck, key: "payments" },
+  { to: "/admin/offers", label: "Offers", icon: Tag },
   { to: "/admin/requests", label: "Holiday Requests", icon: Plane, key: "requests" },
   { to: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { to: "/admin/resorts", label: "Destinations", icon: Building2 },

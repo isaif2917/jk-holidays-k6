@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, type PanInfo } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { CaretLeft, CaretRight, CheckCircle, Crown, Diamond, Medal } from "@phosphor-icons/react";
-import { plans } from "@/data/mock";
+import { useSitePlans, type SitePlan } from "@/lib/catalog";
 
-type Plan = (typeof plans)[number];
+type Plan = SitePlan;
 
 // Header colour per tier (Silver, Gold, Platinum) — built from theme tokens.
 const tierStyle = [
@@ -57,9 +57,11 @@ export function PricingCard({ plan, index, active }: { plan: Plan; index: number
 
 /** Layered 3D pricing carousel: centre card in front, neighbours tucked behind. Swipe, drag, arrows, dots or keyboard. */
 export function PricingCarousel() {
+  const plans = useSitePlans();
   const total = plans.length;
   const start = Math.max(0, plans.findIndex((p) => p.highlight));
   const [active, setActive] = useState(start);
+  useEffect(() => { setActive(start); }, [start]);
   const go = useCallback((d: number) => setActive((i) => (i + d + total) % total), [total]);
 
   const [wide, setWide] = useState(false);

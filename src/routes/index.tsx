@@ -7,7 +7,8 @@ import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
-import { plans, whyUs, destinations, howItWorks, stats, offers, testimonials } from "@/data/mock";
+import { plans, whyUs, destinations, howItWorks, stats, testimonials } from "@/data/mock";
+import { useSiteOffers } from "@/lib/catalog";
 import heroImg from "@/assets/hero-explore-world.webp";
 import iconFamilies from "@/assets/icons/families.svg";
 import iconResorts from "@/assets/icons/resorts.svg";
@@ -40,6 +41,7 @@ const planArt = [
 const offerImages = [goaImg, thailandImg, baliImg, dubaiImg];
 
 function Home() {
+  const offers = useSiteOffers();
   return (
     <PublicLayout>
       {/* Hero */}
