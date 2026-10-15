@@ -128,6 +128,9 @@
     overflow-x: hidden;
     max-width: 100%;
   }
+  /* Slightly smaller overall scale: everything sized in rem shrinks together. */
+  html { font-size: 15px; }
+  @media (min-width: 1024px) { html { font-size: 14px; } }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

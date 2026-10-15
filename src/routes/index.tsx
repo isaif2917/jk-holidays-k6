@@ -179,8 +179,8 @@ function Home() {
             ].map((s) => {
               return (
                 <div key={s.label} className="flex items-center gap-4">
-                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gold-soft text-gold-dark">
-                    <img src={s.icon} alt="" className="h-8 w-8" />
+                  <div className="grid h-12 w-12 shrink-0 place-items-center md:h-14 md:w-14">
+                    <img src={s.icon} alt="" className="h-11 w-11 md:h-14 md:w-14" />
                   </div>
                   <div>
                     <div className="font-display text-3xl font-bold tabular-nums text-navy md:text-4xl">
