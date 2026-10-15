@@ -42,10 +42,16 @@ function Login() {
       return;
     }
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+    if (roles?.some((r) => r.role === "admin") && !roles?.some((r) => r.role === "member")) {
+      await supabase.auth.signOut();
+      setBusy(false);
+      toast.error("Admin accounts must use the Admin Login page.");
+      navigate({ to: "/admin-login" });
+      return;
+    }
     await qc.invalidateQueries({ queryKey: ["me"] });
     setBusy(false);
-    const admin = roles?.some((r) => r.role === "admin");
-    navigate({ to: admin ? "/admin/dashboard" : "/app/dashboard" });
+    navigate({ to: "/app/dashboard" });
   };
 
   const forgot = async () => {
