@@ -154,7 +154,7 @@ function Home() {
       </section>
       <section className="py-10 md:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-card p-8 shadow-sm md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-6 rounded-3xl border border-border bg-card px-4 py-6 shadow-sm sm:p-8 md:grid-cols-4 md:gap-6">
             {[
               { icon: iconFamilies, to: 10000, suffix: "+", decimals: 0, label: "Happy Families" },
               { icon: iconResorts, to: 500, suffix: "+", decimals: 0, label: "Premium Resorts" },
@@ -162,15 +162,15 @@ function Home() {
               { icon: iconRating, to: 4.9, suffix: " ★", decimals: 1, label: "Customer Rating" },
             ].map((s) => {
               return (
-                <div key={s.label} className="flex items-center gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center md:h-14 md:w-14">
-                    <img src={s.icon} alt="" className="h-11 w-11 md:h-14 md:w-14" />
+                <div key={s.label} className="flex min-w-0 flex-col items-center gap-2 text-center lg:flex-row lg:items-center lg:gap-4 lg:text-left">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center md:h-14 md:w-14">
+                    <img src={s.icon} alt="" className="h-10 w-10 md:h-14 md:w-14" />
                   </div>
-                  <div>
-                    <div className="font-display text-3xl font-bold tabular-nums text-navy md:text-4xl">
+                  <div className="min-w-0">
+                    <div className="whitespace-nowrap font-display text-2xl font-bold tabular-nums text-navy sm:text-3xl md:text-4xl">
                       <CountUp to={s.to} decimals={s.decimals} suffix={s.suffix} />
                     </div>
-                    <div className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{s.label}</div>
+                    <div className="mt-0.5 text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground sm:text-xs sm:tracking-widest">{s.label}</div>
                   </div>
                 </div>
               );
