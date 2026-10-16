@@ -8,7 +8,6 @@ import { FeaturedPackages } from "@/components/FeaturedPackages";
 
 import { Button } from "@/components/ui/button";
 import { plans, whyUs, destinations, howItWorks, stats, testimonials } from "@/data/mock";
-import { useSiteOffers } from "@/lib/catalog";
 import heroImg from "@/assets/hero-explore-world.webp";
 import iconFamilies from "@/assets/icons/families.svg";
 import iconResorts from "@/assets/icons/resorts.svg";
@@ -21,6 +20,7 @@ import maldivesImg from "@/assets/dest-maldives.webp";
 import thailandImg from "@/assets/dest-thailand.webp";
 import dubaiImg from "@/assets/dest-dubai.webp";
 import { CountUp } from "@/components/CountUp";
+import { OfferCards } from "@/components/OfferCards";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
@@ -38,10 +38,8 @@ const planArt = [
   { img: baliImg, gradient: "linear-gradient(135deg, color-mix(in oklab, var(--gold-dark) 75%, transparent), color-mix(in oklab, var(--gold) 25%, transparent))" },
   { img: maldivesImg, gradient: "linear-gradient(135deg, color-mix(in oklab, var(--navy-deep) 80%, transparent), color-mix(in oklab, var(--gold) 30%, transparent))" },
 ];
-const offerImages = [goaImg, thailandImg, baliImg, dubaiImg];
 
 function Home() {
-  const offers = useSiteOffers();
   return (
     <PublicLayout>
       {/* Hero */}
@@ -242,29 +240,7 @@ function Home() {
           <SectionHeading eyebrow="LATEST HOLIDAY OFFERS" align="left" />
           <Link to="/offers" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL OFFERS →</Link>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
-          {offers.map((o, i) => (
-            <div
-              key={o.title}
-              className={`flex flex-col items-center rounded-[999px] bg-card p-3 pb-8 text-center shadow-[0_25px_50px_-20px_color-mix(in_oklab,var(--navy-deep)_45%,transparent)] ring-1 ring-border transition-transform hover:-translate-y-2 ${i % 2 === 1 ? "lg:mt-16" : ""}`}
-            >
-              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[999px]">
-                <img src={offerImages[i % offerImages.length]} alt={o.title} loading="lazy" className="h-full w-full object-cover" />
-                <span className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-gold-gradient px-3 py-1 text-[10px] font-bold tracking-widest text-navy-deep shadow">{o.pct}</span>
-              </div>
-              <h3 className="mt-4 font-display text-lg font-bold text-navy sm:text-xl">{o.title}</h3>
-              <p className="mt-1 font-condensed text-sm text-muted-foreground">{o.desc}</p>
-              <div className="mt-2 font-condensed text-navy">
-                <span className="text-xs">Flat - </span>
-                <span className="text-2xl sm:text-3xl">{o.pct}</span>
-              </div>
-              <p className="font-condensed text-[11px] text-muted-foreground">*Conditions Apply</p>
-              <Button asChild size="sm" className="mt-3 rounded-full bg-gold-gradient px-5 font-bold text-navy-deep">
-                <Link to="/offers">BOOK NOW</Link>
-              </Button>
-            </div>
-          ))}
-        </div>
+        <div className="mt-10"><OfferCards /></div>
       </section>
     </PublicLayout>
   );

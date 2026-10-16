@@ -23,9 +23,8 @@ const adminNav = [
   { to: "/admin/payments", label: "Payments", icon: CreditCard, key: "payments" },
   { to: "/admin/wallet", label: "Wallet & Transactions", icon: Wallet },
   { to: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownToLine, key: "withdrawals" },
-  { to: "/admin/leads", label: "Leads & Enquiries", icon: Inbox, key: "leads" },
   { to: "/admin/reports", label: "Reports", icon: BarChart3 },
-  { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/notifications", label: "Notifications", icon: Bell, key: "notifs" },
   { to: "/admin/roles", label: "Admins & Roles", icon: ShieldCheck },
   { to: "/admin/tickets", label: "Support Tickets", icon: LifeBuoy, key: "tickets" },
   { to: "/admin/settings", label: "Settings", icon: Settings },
@@ -40,7 +39,7 @@ export function AdminLayout() {
   const pay = useRows("payments", () => db.from("payments").select("*").order("created_at", { ascending: false }), ok);
   const wd = useRows("withdrawals", () => db.from("withdrawals").select("*").order("created_at", { ascending: false }), ok);
   const tk = useRows("support_tickets", () => db.from("support_tickets").select("*").order("created_at", { ascending: false }), ok);
-  const ld = useRows("leads", () => db.from("leads").select("*").order("created_at", { ascending: false }), ok);
+  const nt = useRows("admin_notifications", () => db.from("admin_notifications").select("id").eq("read", false), ok);
 
   useEffect(() => {
     if (isLoading) return;
@@ -55,7 +54,7 @@ export function AdminLayout() {
     payments: (pay.data ?? []).filter((r) => r.status === "Pending").length,
     withdrawals: (wd.data ?? []).filter((r) => r.status === "Pending").length,
     tickets: (tk.data ?? []).filter((r) => r.status === "Open").length,
-    leads: (ld.data ?? []).filter((r) => r.status === "New").length,
+    notifs: nt.data?.length ?? 0,
   };
   const logout = async () => {
     await qc.cancelQueries();

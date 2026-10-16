@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutGrid, User, Crown, CalendarCheck, Plane, Building2, Wallet,
+  LayoutGrid, User, Crown, CalendarCheck, Plane, Wallet,
   Users, Gift, Tag, Headphones, FileText, Bell, Settings, LogOut, Phone, Menu, Home,
 } from "lucide-react";
 import { useEffect } from "react";
@@ -18,7 +18,6 @@ const memberNav = [
   { to: "/app/bookings", label: "My Bookings", icon: CalendarCheck },
   { to: "/app/request", label: "Request Holiday", icon: Plane },
   { to: "/app/holidays", label: "Available Holidays", icon: Plane },
-  { to: "/app/resorts", label: "Resorts Directory", icon: Building2 },
   { to: "/app/wallet", label: "My Wallet", icon: Wallet },
   { to: "/app/refer", label: "Refer & Earn", icon: Users },
   { to: "/app/rewards", label: "My Rewards", icon: Gift },

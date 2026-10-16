@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { useMe } from "@/lib/data";
 import heroImg from "@/assets/hero-resort.webp";
 import { User, Lock, Eye, EyeOff, ArrowRight, Briefcase, Tag, Layout, Headphones, Gift } from "lucide-react";
 
@@ -31,6 +32,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const { data: me } = useMe();
+  useEffect(() => { if (me) navigate({ to: "/app/dashboard", replace: true }); }, [me, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
