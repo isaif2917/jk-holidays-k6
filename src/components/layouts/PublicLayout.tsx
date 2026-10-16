@@ -10,6 +10,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CONTACT, membershipPackages } from "@/data/mock";
 import type { ReactNode } from "react";
+import { useMe } from "@/lib/data";
 
 const links = [
   { to: "/", label: "Home" },
@@ -36,6 +37,26 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </a>
     </div>
   );
+}
+
+function AccountLink({ mobile }: { mobile?: boolean }) {
+  const { data: me } = useMe();
+  if (!me) return <Link to="/auth/login" className={mobile ? "hover:text-gold" : "text-sm font-semibold uppercase tracking-wide hover:text-gold"}>{mobile ? "Member Login" : "Login"}</Link>;
+  const name = me.profile?.full_name || me.user.email || "Me";
+  const to = me.isAdmin && !mobile ? "/admin/dashboard" : "/app/dashboard";
+  return (
+    <Link to={to} title="Go to my dashboard" className="flex items-center gap-2 hover:text-gold">
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-gold font-bold text-navy-deep ring-2 ring-white/30">{name[0]?.toUpperCase()}</span>
+      <span className={mobile ? "" : "hidden text-xs font-semibold xl:inline"}>{mobile ? "My Dashboard" : "My Account"}</span>
+    </Link>
+  );
+}
+
+function AccountIcon() {
+  const { data: me } = useMe();
+  if (!me) return null;
+  const name = me.profile?.full_name || me.user.email || "Me";
+  return <Link to="/app/dashboard" aria-label="My dashboard" className="grid h-9 w-9 place-items-center rounded-full bg-gold font-bold text-navy-deep">{name[0]?.toUpperCase()}</Link>;
 }
 
 function Navbar() {
@@ -74,10 +95,9 @@ function Navbar() {
             <span className="grid h-9 w-9 place-items-center rounded-full border border-gold text-gold"><Phone className="h-4 w-4" /></span>
             {CONTACT.phone}
           </a>
-          <Link to="/auth/login" className="text-sm font-semibold uppercase tracking-wide hover:text-gold">
-            Login
-          </Link>
+          <AccountLink />
         </div>
+        <div className="ml-auto md:hidden"><AccountIcon /></div>
         <Sheet>
           <SheetTrigger className="lg:hidden" aria-label="Toggle menu"><Menu className="h-6 w-6" /></SheetTrigger>
           <SheetContent side="right" className="bg-navy text-white">
@@ -86,7 +106,7 @@ function Navbar() {
                 <Link key={l.to} to={l.to} className="hover:text-gold">{l.label}</Link>
               ))}
               <Link to="/packages" search={{}} className="hover:text-gold">Membership Packages</Link>
-              <Link to="/auth/login" className="hover:text-gold">Member Login</Link>
+              <AccountLink mobile />
               <a href={CONTACT.phoneHref} className="text-gold">{CONTACT.phone}</a>
             </nav>
           </SheetContent>

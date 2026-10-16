@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { db, downloadCsv, fmtDate, useRefresh, useRows } from "@/lib/data";
+import { db, downloadCsv, fmtDate, inr, useRefresh, useRows } from "@/lib/data";
 import { createMember, setMemberPassword } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/members")({

@@ -31,6 +31,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const { data: me } = useMe();
+  useEffect(() => { if (me) navigate({ to: "/app/dashboard", replace: true }); }, [me, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
