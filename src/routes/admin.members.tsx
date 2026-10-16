@@ -168,12 +168,13 @@ function Members() {
       </Card>
 
       <Dialog open={!!view} onOpenChange={(o) => !o && setView(null)}>
-        <DialogContent><DialogHeader><DialogTitle>{view?.full_name}</DialogTitle></DialogHeader>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{view?.full_name}</DialogTitle></DialogHeader>
           {view && <dl className="grid grid-cols-2 gap-2 text-sm">
             {[["Member ID", view.member_code], ["Email", view.email], ["Mobile", view.phone], ["City", view.city], ["Plan", view.plan], ["Status", view.status],
               ["Joined", fmtDate(view.created_at)], ["Membership", `${fmtDate(view.membership_start)} – ${fmtDate(view.membership_end)}`], ["Nights", `${view.nights_used} used / ${view.nights_total}`]]
               .map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium">{v || "—"}</dd></div>)}
           </dl>}
+          {view && <MemberHistory userId={view.id} />}
           {view && <PasswordBox userId={view.id} />}
         </DialogContent>
       </Dialog>
@@ -250,6 +251,26 @@ function PasswordBox({ userId }: { userId: string }) {
         <Button type="button" variant="outline" size="sm" onClick={() => setShow(!show)}>{show ? "Hide" : "Show"}</Button>
         <Button disabled={busy || pw.length < 6} size="sm" className="bg-navy text-white" onClick={save}>{busy ? "Saving…" : "Change"}</Button>
       </div>
+    </div>
+  );
+}
+
+function MemberHistory({ userId }: { userId: string }) {
+  const pay = useRows(["payments", userId], () => db.from("payments").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
+  const tx = useRows(["wallet_transactions", userId], () => db.from("wallet_transactions").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
+  const bk = useRows(["bookings", userId], () => db.from("bookings").select("*").eq("user_id", userId).order("check_in", { ascending: false }));
+  const Section = ({ title, rows, render }: { title: string; rows: any[]; render: (r: any) => React.ReactNode }) => (
+    <div className="mt-4">
+      <div className="text-xs font-semibold text-navy">{title} ({rows.length})</div>
+      {rows.length === 0 ? <div className="mt-1 text-xs text-muted-foreground">None yet</div> :
+        <div className="mt-1 divide-y rounded-md border text-xs">{rows.map((r) => <div key={r.id} className="flex flex-wrap justify-between gap-2 p-2">{render(r)}</div>)}</div>}
+    </div>
+  );
+  return (
+    <div>
+      <Section title="Payments & membership requests" rows={pay.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.plan_slug} · {r.method}{r.reference ? ` · Ref ${r.reference}` : ""}</span><span className="font-semibold">{inr(r.amount)} · {r.status}</span></>} />
+      <Section title="Wallet transactions" rows={tx.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{r.type} {inr(r.amount)}</span></>} />
+      <Section title="Bookings" rows={bk.data ?? []} render={(r) => <><span>{r.destination} · {fmtDate(r.check_in)} – {fmtDate(r.check_out)}</span><span className="font-semibold">{r.nights} nights · {r.status}</span></>} />
     </div>
   );
 }
