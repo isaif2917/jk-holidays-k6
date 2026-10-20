@@ -22,6 +22,20 @@
       "when": 1792158705978,
       "tag": "0002_admin_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792483785237,
+      "tag": "0003_link_member_referrals",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792484603498,
+      "tag": "0004_validate_member_withdrawals",
+      "breakpoints": true
     }
   ]
 }

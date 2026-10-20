@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
+import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
 
-export const Route = createFileRoute("/admin/wallet")({ component: AdminWallet });
+export const Route = createFileRoute("/admin/wallet")({ head: () => createRouteHead("Wallet & Payments — JK Holidays Admin", "Review member wallet transactions and manage withdrawal payouts."), component: AdminWallet });
 
 const fmt = (d: string) => new Date(d);
 
@@ -25,11 +27,16 @@ function AdminWallet() {
   const t = tx.data ?? [];
   const w = wd.data ?? [];
   const bal: Record<string, number> = {};
-  t.forEach((x) => (bal[x.user_id] = (bal[x.user_id] ?? 0) + (x.type === "Credit" ? x.amount : -x.amount)));
+  members.forEach((member: any) => {
+    bal[member.id] = calculateAvailableWalletBalance(
+      t.filter((transaction) => transaction.user_id === member.id),
+      w.filter((withdrawal) => withdrawal.user_id === member.id),
+    );
+  });
   const liquidity = Object.values(bal).reduce((s, v) => s + v, 0);
-  const paidOut = w.filter((x) => x.status === "Approved" || x.status === "Paid").reduce((s, x) => s + x.amount, 0);
+  const paidOut = w.filter((x) => x.status === "Paid").reduce((s, x) => s + Number(x.amount ?? 0), 0);
   const pending = w.filter((x) => x.status === "Pending");
-  const pendingAmt = pending.reduce((s, x) => s + x.amount, 0);
+  const pendingAmt = w.filter((x) => x.status === "Pending" || x.status === "Approved").reduce((s, x) => s + Number(x.amount ?? 0), 0);
   const active = Object.values(bal).filter((v) => v > 0).length;
 
   const act = async (id: string, status: string) => {
@@ -57,7 +64,7 @@ function AdminWallet() {
           <div className="text-xs opacity-70">Points held across member wallets</div>
           <Button className="mt-4 w-full bg-gold-gradient font-bold text-navy-deep" onClick={() => setManage(true)}>MANAGE BALANCES</Button>
         </Card>
-        <Stat icon={TrendingUp} label="Total Paid Out" value={inr(paidOut)} sub="Approved + paid withdrawals" link="View History" onClick={() => setAll(true)} />
+        <Stat icon={TrendingUp} label="Total Paid Out" value={inr(paidOut)} sub="Paid requests" link="View History" onClick={() => setAll(true)} />
         <Stat icon={Clock} label="Payouts Pending" value={inr(pendingAmt)} sub={`${pending.length} under process`} link="Review Queue" to="/admin/withdrawals" />
         <Stat icon={Users} label="Active Wallets" value={String(active)} sub="Members with balance > 0" link="View Members" to="/admin/members" />
       </div>
@@ -86,7 +93,7 @@ function AdminWallet() {
 
         <Card className="p-5">
           <div className="flex items-center justify-between"><h3 className="font-serif text-lg font-bold text-navy">Payout Management</h3><Wallet className="h-5 w-5 text-gold" /></div>
-          <div className="mt-3 text-xs text-muted-foreground">Pending withdrawal amount</div>
+          <div className="mt-3 text-xs text-muted-foreground">Reserved withdrawal amount</div>
           <div className="font-serif text-2xl font-bold text-gold">{inr(pendingAmt)}</div>
           <div className="mt-4 space-y-3">
             {pending.map((x) => (

@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Gift } from "lucide-react";
-export const Route = createFileRoute("/app/rewards")({ component: () => (
+import { createRouteHead } from "@/lib/route-meta";
+export const Route = createFileRoute("/app/rewards")({ head: () => createRouteHead("My Rewards — JK Holidays", "Review the reward points available through your JK Holidays membership."), component: () => (
   <div className="space-y-6">
     <h1 className="font-serif text-3xl font-bold text-navy">My Rewards</h1>
     <Card className="p-8 text-center">

@@ -3,9 +3,10 @@ import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { plans, planSlug } from "@/data/mock";
 import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/membership")({
-  head: () => ({ meta: [{ title: "Membership Plans — JK Holidays" }, { name: "description", content: "Choose from Silver, Gold, or Platinum holiday membership plans." }] }),
+  head: () => createRouteHead("Holiday Membership Plans — JK Holidays", "Compare Silver, Gold and Platinum JK Holidays memberships and choose the travel benefits that suit you."),
   component: () => (
     <PublicLayout>
       <section className="bg-navy-gradient py-16 text-white">

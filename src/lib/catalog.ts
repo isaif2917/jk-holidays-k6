@@ -3,6 +3,7 @@ import { plans as mockPlans, offers as mockOffers } from "@/data/mock";
 
 export type SitePlan = (typeof mockPlans)[number] & { slug: string };
 export type SiteOffer = { title: string; pct: string; desc: string; tone: string };
+export type SiteDestination = { name: string; country: string; image: string };
 
 const tones = ["from-rose-500 to-rose-700", "from-indigo-600 to-purple-700", "from-teal-500 to-cyan-700", "from-amber-500 to-orange-700"];
 
@@ -32,4 +33,12 @@ export function useSiteOffers(): SiteOffer[] {
   return q.data
     .filter((o: any) => !o.valid_till || o.valid_till >= today)
     .map((o: any, i: number) => ({ title: o.title, pct: o.discount ?? "", desc: o.description ?? "", tone: tones[i % tones.length]! }));
+}
+
+/** Destinations published from Admin → Destinations, with bundled defaults until properties are added. */
+export function useSiteDestinations(): SiteDestination[] {
+  const q = useRows("published-destinations", () => db.from("resorts").select("id,name,location,image_url,status,created_at")
+    .in("status", ["Published", "Active"]).order("created_at", { ascending: false }));
+  if (!q.data?.length) return [];
+  return q.data.map((r: any) => ({ name: r.name, country: r.location, image: r.image_url ?? "" }));
 }

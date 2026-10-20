@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, useRefresh, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/resorts")({ component: AdminResorts });
+export const Route = createFileRoute("/admin/resorts")({ head: () => createRouteHead("Destinations — JK Holidays Admin", "Add, edit and publish the destinations displayed on JK Holidays."), component: AdminResorts });
 
 type Resort = { id?: string; name: string; location: string; image_url: string; rating: number; description: string; status: string };
 const empty: Resort = { name: "", location: "", image_url: "", rating: 4.5, description: "", status: "Published" };

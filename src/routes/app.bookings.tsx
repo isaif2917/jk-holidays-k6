@@ -2,8 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { db, fmtDate, useMe, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/bookings")({ component: Bookings });
+export const Route = createFileRoute("/app/bookings")({ head: () => createRouteHead("My Bookings — JK Holidays", "Review your confirmed bookings and holiday requests."), component: Bookings });
 
 function Bookings() {
   const { data: me } = useMe();

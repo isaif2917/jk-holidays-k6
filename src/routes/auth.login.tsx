@@ -10,18 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/data";
 import heroImg from "@/assets/hero-resort.webp";
 import { User, Lock, Eye, EyeOff, ArrowRight, Briefcase, Tag, Layout, Headphones, Gift } from "lucide-react";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/auth/login")({
-  head: () => ({
-    meta: [
-      { title: "Member Login — JK Holidays" },
-      { name: "description", content: "Log in to your JK Holidays membership account." },
-      { property: "og:title", content: "Member Login — JK Holidays" },
-      { property: "og:description", content: "Manage bookings, wallet and holiday requests." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => createRouteHead("Member Login — JK Holidays", "Sign in to manage your JK Holidays bookings, membership, wallet and holiday requests."),
   component: Login,
 });
 

@@ -9,8 +9,9 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/membership")({ component: Membership });
+export const Route = createFileRoute("/app/membership")({ head: () => createRouteHead("My Membership — JK Holidays", "Review your current holiday membership and membership requests."), component: Membership });
 
 function Membership() {
   const { data: me } = useMe();

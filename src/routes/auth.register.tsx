@@ -5,18 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/auth/register")({
-  head: () => ({
-    meta: [
-      { title: "Create Account — JK Holidays" },
-      { name: "description", content: "Register for a JK Holidays member account." },
-      { property: "og:title", content: "Create Account — JK Holidays" },
-      { property: "og:description", content: "Join JK Holidays and start travelling more for less." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => createRouteHead("Create a Member Account — JK Holidays", "Join JK Holidays to access premium resort stays, member offers and holiday benefits."),
   component: Register,
 });
 
@@ -33,7 +25,15 @@ function Register() {
     const { error } = await supabase.auth.signUp({
       email: f.email.trim(),
       password: f.password,
-      options: { emailRedirectTo: `${window.location.origin}/app/dashboard`, data: { full_name: f.name, phone: f.phone, city: f.city } },
+      options: {
+        emailRedirectTo: `${window.location.origin}/app/dashboard`,
+        data: {
+          full_name: f.name,
+          phone: f.phone,
+          city: f.city,
+          referral_code: new URLSearchParams(window.location.search).get("ref")?.trim().slice(0, 64) || null,
+        },
+      },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -46,9 +46,9 @@ function Register() {
       <div className="mx-auto grid max-w-md gap-4 px-4 py-12">
         {sent ? (
           <div className="rounded-2xl bg-white p-8 text-center text-navy shadow-2xl">
-            <h2 className="font-serif text-2xl font-bold">Check your email</h2>
-            <p className="mt-2 text-sm text-muted-foreground">We sent a confirmation link to {f.email}. Click it to activate your account, then log in.</p>
-            <Button asChild className="mt-6 bg-gold-gradient font-bold text-navy-deep"><Link to="/auth/login">GO TO LOGIN</Link></Button>
+            <h2 className="font-serif text-2xl font-bold">Your account is ready</h2>
+            <p className="mt-2 text-sm text-muted-foreground">You can now sign in with {f.email} and the password you created.</p>
+            <Button asChild className="mt-6 bg-gold-gradient font-bold text-navy-deep"><Link to="/auth/login">SIGN IN</Link></Button>
           </div>
         ) : (
           <form onSubmit={submit} className="rounded-2xl bg-white p-6 text-navy shadow-2xl sm:p-8">

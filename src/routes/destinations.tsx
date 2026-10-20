@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { HolidayPackageCard } from "@/components/HolidayPackageCard";
 import { destinations, holidayPackages } from "@/data/mock";
+import { useSiteDestinations } from "@/lib/catalog";
 
 export const Route = createFileRoute("/destinations")({
   head: () => ({
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/destinations")({
 });
 
 function DestinationsPage() {
+  const liveDestinations = useSiteDestinations();
+  const popularDestinations = liveDestinations.length ? liveDestinations : destinations;
   return (
     <PublicLayout>
       <section className="mx-auto max-w-7xl px-4 py-16">
@@ -48,7 +51,7 @@ function DestinationsPage() {
             Over 500 partner resorts across India and 25+ countries.
           </p>
           <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6">
-            {destinations.map((d) => (
+            {popularDestinations.map((d) => (
               <div key={d.name} className="group relative aspect-square w-40 shrink-0 snap-start overflow-hidden rounded-xl sm:w-48 md:w-auto">
                 <img
                   src={d.image}

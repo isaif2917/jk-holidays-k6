@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { destinations } from "@/data/mock";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/holidays")({ component: Holidays });
+export const Route = createFileRoute("/app/holidays")({ head: () => createRouteHead("Available Holidays — JK Holidays", "Explore holiday destinations available to JK Holidays members."), component: Holidays });
 
 function Holidays() {
   return (

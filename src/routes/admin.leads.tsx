@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { db, fmtDate, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/leads")({ component: Leads });
+export const Route = createFileRoute("/admin/leads")({ head: () => createRouteHead("Enquiries — JK Holidays Admin", "Review holiday enquiries submitted to JK Holidays."), component: Leads });
 
 function Leads() {
   const q = useRows("leads", () => db.from("leads").select("*").order("created_at", { ascending: false }));

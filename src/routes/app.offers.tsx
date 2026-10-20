@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { OfferCards } from "@/components/OfferCards";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/offers")({ component: MemberOffers });
+export const Route = createFileRoute("/app/offers")({ head: () => createRouteHead("Member Offers — JK Holidays", "Browse current holiday offers and discounts for members."), component: MemberOffers });
 
 function MemberOffers() {
   return (

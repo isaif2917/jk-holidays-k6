@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { db, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/resorts")({ component: Resorts });
+export const Route = createFileRoute("/app/resorts")({ head: () => createRouteHead("Resorts Directory — JK Holidays", "Browse resort destinations available to JK Holidays members."), component: Resorts });
 
 function Resorts() {
   const q = useRows<any>("resorts", () => db.from("resorts").select("*").neq("status", "Draft").order("created_at", { ascending: false }));

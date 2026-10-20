@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
@@ -13,10 +14,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db, downloadCsv, fmtDate, inr, useRefresh, useRows } from "@/lib/data";
-import { createMember, setMemberPassword } from "@/lib/admin.functions";
+import { createMember, deleteMember, saveMemberDetails, setMemberPassword } from "@/lib/admin.functions";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/members")({
-  head: () => ({ meta: [{ title: "Members — JK Holidays Admin" }, { name: "description", content: "Manage JK Holidays members." }] }),
+  head: () => createRouteHead("Members — JK Holidays Admin", "Manage member profiles, account access, plans, referrals and wallet history."),
   component: Members,
 });
 
@@ -28,12 +30,18 @@ const PAGE = 10;
 
 function Members() {
   const refresh = useRefresh();
+  const saveMember = useServerFn(saveMemberDetails);
+  const deleteMemberAccount = useServerFn(deleteMember);
   const profiles = useRows("profiles", () => db.from("profiles").select("*").order("created_at", { ascending: false }));
   const plans = useRows("membership_plans", () => db.from("membership_plans").select("name").order("sort"));
+  const referralRows = useRows("member-referral-summary", () => db.from("referrals").select("user_id"));
+  const walletRows = useRows("member-wallet-summary", () => db.from("wallet_transactions").select("user_id,type,amount"));
+  const withdrawalRows = useRows("member-withdrawal-summary", () => db.from("withdrawals").select("user_id,amount,status"));
   const [q, setQ] = useState(""); const [plan, setPlan] = useState("all"); const [status, setStatus] = useState("all");
   const [range, setRange] = useState<DateRange | undefined>(); const [page, setPage] = useState(1);
   const [sel, setSel] = useState<string[]>([]);
   const [view, setView] = useState<any>(null); const [edit, setEdit] = useState<any>(null); const [adding, setAdding] = useState(false);
+  const [editBusy, setEditBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const rows = useMemo(() => (profiles.data ?? []).filter((m: any) => {
@@ -48,6 +56,18 @@ function Members() {
   }), [profiles.data, q, plan, status, range]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
+  const summaries = useMemo(() => {
+    const result: Record<string, { referrals: number; earned: number; withdrawn: number; pending: number }> = {};
+    const ensure = (id: string) => result[id] ??= { referrals: 0, earned: 0, withdrawn: 0, pending: 0 };
+    (referralRows.data ?? []).forEach((r: any) => { ensure(r.user_id).referrals += 1; });
+    (walletRows.data ?? []).forEach((r: any) => { if (String(r.type).toLowerCase() === "credit") ensure(r.user_id).earned += Number(r.amount ?? 0); });
+    (withdrawalRows.data ?? []).forEach((r: any) => {
+      if (r.status === "Paid" || r.status === "Approved") ensure(r.user_id).withdrawn += Number(r.amount ?? 0);
+      if (r.status === "Pending") ensure(r.user_id).pending += Number(r.amount ?? 0);
+    });
+    return result;
+  }, [referralRows.data, walletRows.data, withdrawalRows.data]);
+  const profilesById = useMemo(() => Object.fromEntries((profiles.data ?? []).map((p: any) => [p.id, p])), [profiles.data]);
 
   const update = async (ids: string[], patch: any, msg = "Updated") => {
     const { error } = await db.from("profiles").update(patch).in("id", ids);
@@ -118,10 +138,10 @@ function Members() {
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr className="border-b">
               <th className="py-2"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
-              <th>Member ID</th><th>Member Name</th><th>Mobile Number</th><th>Email</th><th>Membership Plan</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead>
+              <th>Member ID</th><th>Member Name</th><th>Mobile Number</th><th>Email</th><th>City</th><th>Plan</th><th>Referrals</th><th>Earned</th><th>Withdrawals</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead>
             <tbody>
-              {profiles.isLoading && <tr><td colSpan={9} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
-              {!profiles.isLoading && !shown.length && <tr><td colSpan={9} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
+              {profiles.isLoading && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
+              {!profiles.isLoading && !shown.length && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
               {shown.map((m: any) => {
                 const active = m.status === "Active";
                 return (
@@ -129,8 +149,10 @@ function Members() {
                   <td className="py-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
-                  <td>{m.phone || "—"}</td><td>{m.email}</td>
+                  <td>{m.phone || "—"}</td><td>{m.email}</td><td>{m.city || "—"}</td>
                   <td>{m.plan ? <Badge className={planColor[m.plan] ?? "bg-muted text-foreground"}>{m.plan}</Badge> : <span className="text-muted-foreground">—</span>}</td>
+                  <td>{summaries[m.id]?.referrals ?? 0}</td><td>{inr(summaries[m.id]?.earned ?? 0)}</td>
+                  <td><div>{inr(summaries[m.id]?.withdrawn ?? 0)}</div>{(summaries[m.id]?.pending ?? 0) > 0 && <div className="text-xs text-muted-foreground">{inr(summaries[m.id]?.pending)} pending</div>}</td>
                   <td>{fmtDate(m.created_at)}</td>
                   <td><button onClick={() => update([m.id], { status: active ? "Inactive" : "Active" }, active ? "Deactivated" : "Activated")} title="Click to toggle"
                     className={active ? "text-emerald-600" : "text-rose-600"}>● {m.status}</button></td>
@@ -141,6 +163,15 @@ function Members() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setView(m)}>View details</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setEdit({ ...m })}>Edit member</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={async () => {
+                          if (!confirm(`Delete ${m.full_name || m.email}? This permanently removes the account and its saved records.`)) return;
+                          try {
+                            await deleteMemberAccount({ data: { userId: m.id } });
+                            toast.success("Member and associated records deleted");
+                            refresh("profiles", "user_roles", "payments", "wallet_transactions", "withdrawals", "referrals", "bookings", "documents", "holiday_requests", "notifications", "support_tickets");
+                          } catch (e: any) { toast.error(e?.message ?? "Could not delete member"); }
+                        }}>Delete member</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {STATUSES.filter((s) => s !== m.status).map((s) => <DropdownMenuItem key={s} onClick={() => update([m.id], { status: s }, `Marked ${s}`)}>Mark {s}</DropdownMenuItem>)}
                         <DropdownMenuSeparator />
@@ -174,7 +205,7 @@ function Members() {
               ["Joined", fmtDate(view.created_at)], ["Membership", `${fmtDate(view.membership_start)} – ${fmtDate(view.membership_end)}`], ["Nights", `${view.nights_used} used / ${view.nights_total}`]]
               .map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium">{v || "—"}</dd></div>)}
           </dl>}
-          {view && <MemberHistory userId={view.id} />}
+          {view && <MemberHistory userId={view.id} profilesById={profilesById} />}
           {view && <PasswordBox userId={view.id} />}
         </DialogContent>
       </Dialog>
@@ -182,7 +213,10 @@ function Members() {
       <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
         <DialogContent><DialogHeader><DialogTitle>Edit member</DialogTitle></DialogHeader>
           {edit && <div className="grid gap-3">
-            {(["full_name", "phone", "city"] as const).map((k) => <Input key={k} placeholder={k.replace("_", " ")} value={edit[k] ?? ""} onChange={(e) => setEdit({ ...edit, [k]: e.target.value })} />)}
+            <Input placeholder="Full name" value={edit.full_name ?? ""} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} />
+            <Input type="email" placeholder="Email address" value={edit.email ?? ""} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+            <Input placeholder="Mobile" value={edit.phone ?? ""} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} />
+            <Input placeholder="City" value={edit.city ?? ""} onChange={(e) => setEdit({ ...edit, city: e.target.value })} />
             <Select value={edit.plan ?? "none"} onValueChange={(v) => setEdit({ ...edit, plan: v === "none" ? null : v })}><SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="none">No plan</SelectItem>{(plans.data ?? []).map((p: any) => <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>)}</SelectContent></Select>
             <Select value={edit.status} onValueChange={(v) => setEdit({ ...edit, status: v })}><SelectTrigger><SelectValue /></SelectTrigger>
@@ -194,10 +228,19 @@ function Members() {
               <label className="text-xs">Nights used<Input type="number" value={edit.nights_used} onChange={(e) => setEdit({ ...edit, nights_used: +e.target.value })} /></label>
             </div>
           </div>}
-          <DialogFooter><Button className="bg-navy text-white" onClick={async () => {
-            const { id, full_name, phone, city, plan, status, membership_start, membership_end, nights_total, nights_used } = edit;
-            await update([id], { full_name, phone, city, plan, status, membership_start, membership_end, nights_total, nights_used }, "Member saved"); setEdit(null);
-          }}>Save</Button></DialogFooter>
+          <DialogFooter><Button className="bg-navy text-white" disabled={editBusy} onClick={async () => {
+            if (!edit) return;
+            setEditBusy(true);
+            try {
+              await saveMember({ data: {
+                userId: edit.id, full_name: edit.full_name, email: edit.email, phone: edit.phone || null, city: edit.city || null,
+                plan: edit.plan || null, status: edit.status, membership_start: edit.membership_start || null,
+                membership_end: edit.membership_end || null, nights_total: Number(edit.nights_total), nights_used: Number(edit.nights_used),
+              } });
+              toast.success("Member saved"); setEdit(null); refresh("profiles");
+            } catch (e: any) { toast.error(e?.message ?? "Could not save member"); }
+            finally { setEditBusy(false); }
+          }}>{editBusy ? "Saving…" : "Save"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -233,12 +276,13 @@ function AddMember({ open, onClose, plans, onDone }: { open: boolean; onClose: (
 }
 
 function PasswordBox({ userId }: { userId: string }) {
+  const changePassword = useServerFn(setMemberPassword);
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
-    try { await setMemberPassword({ data: { userId, password: pw } }); toast.success("Password changed"); setPw(""); }
+    try { await changePassword({ data: { userId, password: pw } }); toast.success("Password changed"); setPw(""); }
     catch (e: any) { toast.error(e.message); }
     setBusy(false);
   };
@@ -255,10 +299,12 @@ function PasswordBox({ userId }: { userId: string }) {
   );
 }
 
-function MemberHistory({ userId }: { userId: string }) {
+function MemberHistory({ userId, profilesById }: { userId: string; profilesById: Record<string, any> }) {
   const pay = useRows(["payments", userId], () => db.from("payments").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const tx = useRows(["wallet_transactions", userId], () => db.from("wallet_transactions").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const bk = useRows(["bookings", userId], () => db.from("bookings").select("*").eq("user_id", userId).order("check_in", { ascending: false }));
+  const refs = useRows(["member-referrals", userId], () => db.from("referrals").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
+  const withdrawals = useRows(["member-withdrawals", userId], () => db.from("withdrawals").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const Section = ({ title, rows, render }: { title: string; rows: any[]; render: (r: any) => React.ReactNode }) => (
     <div className="mt-4">
       <div className="text-xs font-semibold text-navy">{title} ({rows.length})</div>
@@ -268,6 +314,9 @@ function MemberHistory({ userId }: { userId: string }) {
   );
   return (
     <div>
+      <Section title="Referrals and member IDs" rows={refs.data ?? []} render={(r) => <><span>{r.friend_name} · {r.referred_user_id ? `Member ${profilesById[r.referred_user_id]?.member_code ?? r.referred_user_id.slice(0, 8)}` : r.friend_phone}</span><span className="font-semibold">{r.status}</span></>} />
+      <Section title="Wallet earned" rows={(tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() === "credit")} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{inr(r.amount)}</span></>} />
+      <Section title="Withdrawals" rows={withdrawals.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.method} · {inr(r.amount)}</span><span className="font-semibold">{r.status}{r.remarks ? ` · ${r.remarks}` : ""}</span></>} />
       <Section title="Payments & membership requests" rows={pay.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.plan_slug} · {r.method}{r.reference ? ` · Ref ${r.reference}` : ""}</span><span className="font-semibold">{inr(r.amount)} · {r.status}</span></>} />
       <Section title="Wallet transactions" rows={tx.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{r.type} {inr(r.amount)}</span></>} />
       <Section title="Bookings" rows={bk.data ?? []} render={(r) => <><span>{r.destination} · {fmtDate(r.check_in)} – {fmtDate(r.check_out)}</span><span className="font-semibold">{r.nights} nights · {r.status}</span></>} />

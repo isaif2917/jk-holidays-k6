@@ -416,6 +416,7 @@ export type Database = {
           friend_name: string
           friend_phone: string
           id: string
+          referred_user_id: string | null
           status: string
           user_id: string
         }
@@ -424,6 +425,7 @@ export type Database = {
           friend_name: string
           friend_phone: string
           id?: string
+          referred_user_id?: string | null
           status?: string
           user_id?: string
         }
@@ -432,6 +434,7 @@ export type Database = {
           friend_name?: string
           friend_phone?: string
           id?: string
+          referred_user_id?: string | null
           status?: string
           user_id?: string
         }

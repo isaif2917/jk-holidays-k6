@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { db, fmtDate, inr, useRefresh, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/payments")({ component: Payments });
+export const Route = createFileRoute("/admin/payments")({ head: () => createRouteHead("Payments — JK Holidays Admin", "Review membership payments and update their verification status."), component: Payments });
 
 function Payments() {
   const refresh = useRefresh();

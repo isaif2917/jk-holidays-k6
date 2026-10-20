@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, Trash2, Eye } from "lucide-react";
 import { requests } from "@/data/mock";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/request")({ component: RequestFlow });
+export const Route = createFileRoute("/app/request")({ head: () => createRouteHead("Request a Holiday — JK Holidays", "Submit and track a holiday request with JK Holidays."), component: RequestFlow });
 
 const steps = ["Travel Details", "Traveller Details", "Additional Info", "Review & Submit", "Request Status"];
 

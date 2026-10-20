@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
-export const Route = createFileRoute("/admin/reports")({ component: () => (
+import { createRouteHead } from "@/lib/route-meta";
+export const Route = createFileRoute("/admin/reports")({ head: () => createRouteHead("Reports — JK Holidays Admin", "Access membership, bookings, financial, referral and support reports."), component: () => (
   <div className="space-y-6">
     <h1 className="font-serif text-3xl font-bold text-navy">Reports</h1>
     <div className="grid gap-4 md:grid-cols-3">

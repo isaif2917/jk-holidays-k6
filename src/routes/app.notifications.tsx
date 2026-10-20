@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Bell } from "lucide-react";
-export const Route = createFileRoute("/app/notifications")({ component: () => (
+import { createRouteHead } from "@/lib/route-meta";
+export const Route = createFileRoute("/app/notifications")({ head: () => createRouteHead("My Notifications — JK Holidays", "View updates about your JK Holidays account and travel requests."), component: () => (
   <div className="space-y-6">
     <h1 className="font-serif text-3xl font-bold text-navy">Notifications</h1>
     <Card className="p-5">

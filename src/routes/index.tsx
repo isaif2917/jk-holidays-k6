@@ -21,12 +21,21 @@ import thailandImg from "@/assets/dest-thailand.webp";
 import dubaiImg from "@/assets/dest-dubai.webp";
 import { CountUp } from "@/components/CountUp";
 import { OfferCards } from "@/components/OfferCards";
+import { useSiteDestinations } from "@/lib/catalog";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "JK Holidays — Premium Holiday Memberships" },
+    { name: "description", content: "Explore premium resort stays, member-only holiday offers and flexible holiday memberships with JK Holidays." },
+    { property: "og:title", content: "JK Holidays — Premium Holiday Memberships" },
+    { property: "og:description", content: "Discover premium resort stays and member-only holiday benefits across India and beyond." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Home,
 });
 
@@ -40,6 +49,8 @@ const planArt = [
 ];
 
 function Home() {
+  const liveDestinations = useSiteDestinations();
+  const popularDestinations = liveDestinations.length ? liveDestinations : destinations;
   return (
     <PublicLayout>
       {/* Hero */}
@@ -86,7 +97,7 @@ function Home() {
           <Link to="/destinations" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL DESTINATIONS →</Link>
         </div>
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6">
-          {destinations.map((d) => (
+          {popularDestinations.map((d) => (
             <div key={d.name} className="group relative aspect-square w-40 shrink-0 snap-start overflow-hidden rounded-xl sm:w-48 md:w-auto">
               <img src={d.image} alt={d.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 to-transparent" />

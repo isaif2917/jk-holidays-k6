@@ -3,8 +3,9 @@ import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { UserPlus, Crown, LifeBuoy, Bell } from "lucide-react";
 import { db, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/notifications")({ component: AdminNotifications });
+export const Route = createFileRoute("/admin/notifications")({ head: () => createRouteHead("Admin Notifications — JK Holidays", "Review recent member sign-ups, requests and support updates."), component: AdminNotifications });
 
 const icons: Record<string, typeof Bell> = { member: UserPlus, membership: Crown, ticket: LifeBuoy };
 

@@ -5,8 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { db, useMe, useRefresh } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/profile")({ component: Profile });
+export const Route = createFileRoute("/app/profile")({ head: () => createRouteHead("My Profile — JK Holidays", "Review and update your JK Holidays contact details."), component: Profile });
 
 function Profile() {
   const { data: me } = useMe();
