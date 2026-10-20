@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/bookings")({ component: Bookings });
+export const Route = createFileRoute("/admin/bookings")({ head: () => createRouteHead("Bookings Calendar — JK Holidays Admin", "Review, schedule and manage member holiday bookings."), component: Bookings });
 
 const tones: Record<string, string> = { Confirmed: "bg-emerald-500", Pending: "bg-amber-500", "Check-out": "bg-blue-500", Blocked: "bg-rose-500" };
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

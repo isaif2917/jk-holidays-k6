@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, downloadCsv, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/withdrawals")({ component: Withdrawals });
+export const Route = createFileRoute("/admin/withdrawals")({ head: () => createRouteHead("Withdrawals — JK Holidays Admin", "Review member withdrawal requests and update payout status."), component: Withdrawals });
 
 const tabs = ["All", "Pending", "Approved", "Rejected", "Paid"];
 const fmtDT = (d: string) => new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });

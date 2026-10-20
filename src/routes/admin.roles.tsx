@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { db, useMe, useProfilesMap, useRefresh, useRows } from "@/lib/data";
 import { createAdmin, removeAdmin } from "@/lib/admin.functions";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/roles")({ component: Roles });
+export const Route = createFileRoute("/admin/roles")({ head: () => createRouteHead("Admins & Roles — JK Holidays", "Manage administrator accounts and access for JK Holidays."), component: Roles });
 
 function Roles() {
   const refresh = useRefresh();

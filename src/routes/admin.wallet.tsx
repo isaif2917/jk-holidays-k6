@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/wallet")({ component: AdminWallet });
+export const Route = createFileRoute("/admin/wallet")({ head: () => createRouteHead("Wallet & Payments — JK Holidays Admin", "Review member wallet transactions and manage withdrawal payouts."), component: AdminWallet });
 
 const fmt = (d: string) => new Date(d);
 

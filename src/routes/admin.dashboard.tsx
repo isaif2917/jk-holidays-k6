@@ -4,8 +4,9 @@ import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis
 import { Card } from "@/components/ui/card";
 import { Users, Crown, Plane, Wallet, ArrowUpRight, LifeBuoy, CreditCard } from "lucide-react";
 import { db, inr, useMe, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/dashboard")({ component: AdminDash });
+export const Route = createFileRoute("/admin/dashboard")({ head: () => createRouteHead("Admin Dashboard — JK Holidays", "View JK Holidays membership, booking, payment and support activity."), component: AdminDash });
 
 const COLORS = ["var(--navy)", "var(--gold)", "oklch(0.65 0.15 160)", "oklch(0.65 0.18 25)", "oklch(0.6 0.15 280)"];
 

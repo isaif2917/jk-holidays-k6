@@ -13,3 +13,4 @@
 - tsconfig matches the source project's (non-strict optional/index checks) so imported code compiles unchanged.
 - Keep referral attribution as a member-code link recorded from signup metadata; admin-only account changes must remain in authenticated server functions.
 - Member wallet reads stay scoped through the browser client and row policies; withdrawal ownership, initial status, amount rules, and available-balance checks are enforced again by a database trigger because browser checks alone are bypassable.
+- Content pages define page-specific sharing metadata through the shared `src/lib/route-meta.ts` helper, while the home page keeps its own title and description.

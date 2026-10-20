@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Eye, MessageSquare, Check, X, CalendarClock } from "lucide-react";
 import { db, fmtDate, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/requests")({ component: AdminRequests });
+export const Route = createFileRoute("/admin/requests")({ head: () => createRouteHead("Holiday Requests — JK Holidays Admin", "Review member holiday requests, travel details and status."), component: AdminRequests });
 
 function AdminRequests() {
   const q = useRows<any>("holiday_requests", () => db.from("holiday_requests").select("*").order("created_at", { ascending: false }));

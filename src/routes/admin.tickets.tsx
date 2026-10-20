@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { db, fmtDate, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/tickets")({ component: Tickets });
+export const Route = createFileRoute("/admin/tickets")({ head: () => createRouteHead("Support Tickets — JK Holidays Admin", "Review support tickets and respond to member requests."), component: Tickets });
 
 function Tickets() {
   const refresh = useRefresh();
