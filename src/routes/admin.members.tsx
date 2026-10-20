@@ -15,9 +15,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db, downloadCsv, fmtDate, inr, useRefresh, useRows } from "@/lib/data";
 import { createMember, deleteMember, saveMemberDetails, setMemberPassword } from "@/lib/admin.functions";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/members")({
-  head: () => ({ meta: [{ title: "Members — JK Holidays Admin" }, { name: "description", content: "Manage JK Holidays members." }] }),
+  head: () => createRouteHead("Members — JK Holidays Admin", "Manage member profiles, account access, plans, referrals and wallet history."),
   component: Members,
 });
 

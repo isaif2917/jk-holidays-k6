@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, inr, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/plans")({
-  head: () => ({ meta: [{ title: "Membership Plans — JK Holidays Admin" }, { name: "description", content: "Create and edit membership plans." }] }),
+  head: () => createRouteHead("Membership Plans — JK Holidays Admin", "Create and update holiday membership pricing, inclusions and availability."),
   component: Plans,
 });
 

@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { useSiteOffers } from "@/lib/catalog";
 import { Button } from "@/components/ui/button";
+import { createRouteHead } from "@/lib/route-meta";
 export const Route = createFileRoute("/offers")({
-  head: () => ({ meta: [{ title: "Offers — JK Holidays" }, { name: "description", content: "Latest holiday offers and discounts for members." }] }),
+  head: () => createRouteHead("Holiday Offers — JK Holidays", "Explore the latest JK Holidays seasonal travel offers and member discounts."),
   component: () => (
     <PublicLayout>
       <section className="mx-auto max-w-7xl px-4 py-16">

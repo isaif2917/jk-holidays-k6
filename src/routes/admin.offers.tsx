@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, fmtDate, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/offers")({
-  head: () => ({ meta: [{ title: "Offers — JK Holidays Admin" }, { name: "description", content: "Manage the holiday offers shown on the website." }] }),
+  head: () => createRouteHead("Offers — JK Holidays Admin", "Manage the active holiday offers displayed on the public JK Holidays site."),
   component: Offers,
 });
 

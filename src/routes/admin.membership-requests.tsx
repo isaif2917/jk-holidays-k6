@@ -5,9 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { db, fmtDate, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/membership-requests")({
-  head: () => ({ meta: [{ title: "Membership Requests — JK Holidays Admin" }, { name: "description", content: "Approve or reject member plan requests." }] }),
+  head: () => createRouteHead("Membership Requests — JK Holidays Admin", "Review member payment details and approve or reject holiday membership requests."),
   component: Requests,
 });
 

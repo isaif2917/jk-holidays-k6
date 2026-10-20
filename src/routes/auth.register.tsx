@@ -5,18 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/auth/register")({
-  head: () => ({
-    meta: [
-      { title: "Create Account — JK Holidays" },
-      { name: "description", content: "Register for a JK Holidays member account." },
-      { property: "og:title", content: "Create Account — JK Holidays" },
-      { property: "og:description", content: "Join JK Holidays and start travelling more for less." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => createRouteHead("Create a Member Account — JK Holidays", "Join JK Holidays to access premium resort stays, member offers and holiday benefits."),
   component: Register,
 });
 

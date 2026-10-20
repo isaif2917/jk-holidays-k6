@@ -8,18 +8,10 @@ import { Logo } from "@/components/brand/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero-resort.webp";
 import { ShieldCheck, Lock, Mail, Eye, EyeOff, ArrowRight, Users, CalendarCheck, Wallet, BarChart3 } from "lucide-react";
+import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin-login")({
-  head: () => ({
-    meta: [
-      { title: "Admin Login — JK Holidays CRM" },
-      { name: "description", content: "Staff sign-in for the JK Holidays admin CRM." },
-      { property: "og:title", content: "Admin Login — JK Holidays CRM" },
-      { property: "og:description", content: "Manage members, requests, bookings and payments." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => createRouteHead("Admin Login — JK Holidays", "Secure staff sign-in for managing JK Holidays members, bookings and payments."),
   component: AdminLogin,
 });
 
