@@ -120,10 +120,10 @@ function WalletPage() {
               <Input className="mt-1" maxLength={200} value={account} onChange={(e) => setAccount(e.target.value)} placeholder={method === "bank" ? "Enter account number" : "yourid@upi"} />
             </div>
             {method === "bank" && <>
-              <Input placeholder="Account holder name" maxLength={200} value={holderName} onChange={(e) => setHolderName(e.target.value)} />
-              <Input placeholder="Bank name" maxLength={200} value={bank} onChange={(e) => setBank(e.target.value)} />
-              <Input placeholder="Branch (optional)" maxLength={200} value={branch} onChange={(e) => setBranch(e.target.value)} />
-              <Input placeholder="IFSC" maxLength={200} value={ifsc} onChange={(e) => setIfsc(e.target.value.toUpperCase())} />
+              <label className="block text-xs font-semibold">Account holder name<Input className="mt-1" placeholder="Name as on account" maxLength={200} value={holderName} onChange={(e) => setHolderName(e.target.value)} /></label>
+              <label className="block text-xs font-semibold">Bank name<Input className="mt-1" placeholder="Bank name" maxLength={200} value={bank} onChange={(e) => setBank(e.target.value)} /></label>
+              <label className="block text-xs font-semibold">Branch (optional)<Input className="mt-1" placeholder="Branch" maxLength={200} value={branch} onChange={(e) => setBranch(e.target.value)} /></label>
+              <label className="block text-xs font-semibold">IFSC<Input className="mt-1" placeholder="IFSC" maxLength={11} value={ifsc} onChange={(e) => setIfsc(e.target.value.toUpperCase())} /></label>
             </>}
             <div>
               <div className="flex items-center justify-between text-xs font-semibold">
