@@ -1,18 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, TrendingUp, Building2, Clock, ArrowRight, Shield, Zap, IndianRupee, Headphones } from "lucide-react";
-import { transactions } from "@/data/mock";
-import { useState } from "react";
+import { Wallet, TrendingUp, Building2, Clock, Shield, Zap, IndianRupee, Headphones } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { db, fmtDate, inr, useMe, useRefresh, useRows } from "@/lib/data";
 
-export const Route = createFileRoute("/app/wallet")({ component: WalletPage });
+export const Route = createFileRoute("/app/wallet")({
+  head: () => ({ meta: [{ title: "My Wallet — JK Holidays" }, { name: "description", content: "Review your wallet activity and request a withdrawal." }, { property: "og:title", content: "My Wallet — JK Holidays" }, { property: "og:description", content: "Review your JK Holidays wallet activity and withdrawal requests." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  component: WalletPage,
+});
 
 function WalletPage() {
+  const { data: me } = useMe();
+  const refresh = useRefresh();
   const [method, setMethod] = useState<"bank" | "upi">("bank");
   const [amount, setAmount] = useState("");
+  const [account, setAccount] = useState("");
+  const [holderName, setHolderName] = useState("");
+  const [bank, setBank] = useState("");
+  const [branch, setBranch] = useState("");
+  const [ifsc, setIfsc] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [busy, setBusy] = useState(false);
+  const tx = useRows("my-wallet-transactions", () => db.from("wallet_transactions").select("*").eq("user_id", me?.user.id).order("created_at", { ascending: false }), !!me?.user.id);
+  const withdrawals = useRows("my-withdrawals", () => db.from("withdrawals").select("*").eq("user_id", me?.user.id).order("created_at", { ascending: false }), !!me?.user.id);
+  const earned = (tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() === "credit").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+  const ledgerDebits = (tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() !== "credit").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+  const paidOut = (withdrawals.data ?? []).filter((r: any) => r.status === "Paid").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+  const pending = (withdrawals.data ?? []).filter((r: any) => r.status === "Pending" || r.status === "Approved").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+  const balance = Math.max(0, earned - ledgerDebits - paidOut - pending);
+  const submitWithdrawal = async () => {
+    const parsedAmount = Math.floor(Number(amount));
+    if (!me?.user.id) return toast.error("Sign in to request a withdrawal.");
+    if (!Number.isSafeInteger(parsedAmount) || parsedAmount < 500) return toast.error("Enter a whole amount of at least ₹500.");
+    if (parsedAmount > balance) return toast.error("The requested amount is higher than your available balance.");
+    if (method === "upi" && !/^\S+@\S+$/.test(account.trim())) return toast.error("Enter a valid UPI ID.");
+    if (method === "bank" && (!account.trim() || !holderName.trim() || !bank.trim() || !ifsc.trim())) return toast.error("Enter your account number, account holder, bank and IFSC.");
+    if ([account, holderName, bank, branch, ifsc, remarks].some((value) => value.length > 200)) return toast.error("Please shorten the payment details and try again.");
+    setBusy(true);
+    const details = method === "upi"
+      ? { upi_id: account.trim() }
+      : { account_number: account.trim(), holder_name: holderName.trim(), bank: bank.trim(), branch: branch.trim(), ifsc: ifsc.trim() };
+    const { error } = await db.from("withdrawals").insert({ amount: parsedAmount, method: method === "upi" ? "UPI" : "Bank", details, remarks: remarks.trim() || null });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Withdrawal request submitted");
+    setAmount(""); setAccount(""); setHolderName(""); setBank(""); setBranch(""); setIfsc(""); setRemarks("");
+    refresh("my-withdrawals");
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -23,21 +62,19 @@ function WalletPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-navy-gradient p-5 text-white">
           <div className="text-sm text-white/80">Total Wallet Balance</div>
-          <div className="mt-2 font-serif text-3xl font-bold text-gold">₹ 25,630.00</div>
-          <div className="mt-1 text-xs text-white/70">Total Available Balance</div>
-          <div className="mt-1 text-sm text-emerald-300">₹ 25,630.00</div>
-          <Button className="mt-4 w-full bg-gold-gradient font-bold text-navy-deep">WITHDRAW NOW</Button>
+          <div className="mt-2 font-serif text-3xl font-bold text-gold">{inr(balance)}</div>
+          <div className="mt-1 text-xs text-white/70">Available after pending requests</div>
+          <Button onClick={() => document.getElementById("withdrawal-form")?.scrollIntoView({ behavior: "smooth" })} className="mt-4 w-full bg-gold-gradient font-bold text-navy-deep">WITHDRAW NOW</Button>
         </Card>
-        <WalletStat icon={TrendingUp} tone="emerald" label="Total Earnings" value="₹ 1,25,630.00" sub="All Time" link />
-        <WalletStat icon={Building2} tone="blue" label="Total Withdrawn" value="₹ 1,00,000.00" sub="All Time" link linkText="View History" />
-        <WalletStat icon={Clock} tone="amber" label="Pending Amount" value="₹ 5,000.00" sub="Under Process" link />
+        <WalletStat icon={TrendingUp} tone="emerald" label="Total Earnings" value={inr(earned)} sub="Wallet credits" />
+        <WalletStat icon={Building2} tone="blue" label="Total Withdrawn" value={inr(paidOut)} sub="Paid requests" />
+        <WalletStat icon={Clock} tone="amber" label="Pending Amount" value={inr(pending)} sub="Under process" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2 p-5">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-lg font-bold text-navy">Recent Transactions</h3>
-            <a className="text-xs font-semibold text-blue-600">View All</a>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-sm">
@@ -45,47 +82,54 @@ function WalletPage() {
                 <tr className="border-b"><th className="py-2">Date</th><th>Description</th><th>Type</th><th className="text-right">Amount</th><th className="text-right">Balance</th></tr>
               </thead>
               <tbody>
-                {transactions.map((t, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-3"><div>{t.date}</div><div className="text-xs text-muted-foreground">{t.time}</div></td>
-                    <td><div className="font-medium text-navy">{t.desc}</div><div className="text-xs text-muted-foreground">{t.sub}</div></td>
-                    <td><Badge variant="outline" className={t.type === "Credit" ? "border-emerald-500 text-emerald-600" : "border-rose-500 text-rose-600"}>{t.type}</Badge></td>
-                    <td className={`text-right font-semibold ${t.type === "Credit" ? "text-emerald-600" : "text-rose-600"}`}>{t.type === "Credit" ? "+" : "-"} ₹ {t.amount.toLocaleString()}</td>
-                    <td className="text-right text-navy">₹ {t.balance.toLocaleString()}</td>
+                {(tx.data ?? []).map((t: any) => (
+                  <tr key={t.id} className="border-b last:border-0">
+                    <td className="py-3">{fmtDate(t.created_at)}</td>
+                    <td><div className="font-medium text-navy">{t.description}</div></td>
+                    <td><Badge variant="outline" className={String(t.type).toLowerCase() === "credit" ? "border-emerald-500 text-emerald-600" : "border-rose-500 text-rose-600"}>{t.type}</Badge></td>
+                    <td className={`text-right font-semibold ${String(t.type).toLowerCase() === "credit" ? "text-emerald-600" : "text-rose-600"}`}>{String(t.type).toLowerCase() === "credit" ? "+" : "-"} {inr(t.amount)}</td>
+                    <td className="text-right text-navy">—</td>
                   </tr>
                 ))}
+                {!tx.data?.length && <tr><td colSpan={5} className="py-8 text-center text-muted-foreground">{tx.isLoading ? "Loading wallet activity…" : "No wallet transactions yet."}</td></tr>}
               </tbody>
             </table>
           </div>
-          <Button variant="outline" className="mt-4 w-full">VIEW ALL TRANSACTIONS</Button>
+          <div className="mt-4 text-xs text-muted-foreground">Your wallet activity is shown from your saved account records.</div>
         </Card>
 
-        <Card className="p-5">
+        <Card id="withdrawal-form" className="p-5">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-lg font-bold text-navy">Withdraw Money</h3>
             <Wallet className="h-6 w-6 text-gold" />
           </div>
           <div className="mt-4 text-xs text-muted-foreground">Available Balance</div>
-          <div className="font-serif text-2xl font-bold text-emerald-600">₹ 25,630.00</div>
+          <div className="font-serif text-2xl font-bold text-emerald-600">{inr(balance)}</div>
           <div className="mt-4 text-sm font-semibold text-navy">Select Withdrawal Method</div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(["bank", "upi"] as const).map((m) => (
               <button key={m} onClick={() => setMethod(m)}
                 className={`rounded-md border p-2.5 text-sm ${method === m ? "border-gold bg-gold-soft/30 font-semibold" : ""}`}>
-                {m === "bank" ? "🏦 Bank Transfer" : "📱 UPI Transfer"}
+                {m === "bank" ? "Bank Transfer" : "UPI Transfer"}
               </button>
             ))}
           </div>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs font-semibold">{method === "bank" ? "Bank Details" : "UPI ID"}</label>
-              <Input className="mt-1" placeholder={method === "bank" ? "Select Bank Account" : "yourid@upi"} />
+              <label className="text-xs font-semibold">{method === "bank" ? "Account number" : "UPI ID"}</label>
+              <Input className="mt-1" maxLength={200} value={account} onChange={(e) => setAccount(e.target.value)} placeholder={method === "bank" ? "Enter account number" : "yourid@upi"} />
             </div>
+            {method === "bank" && <>
+              <Input placeholder="Account holder name" maxLength={200} value={holderName} onChange={(e) => setHolderName(e.target.value)} />
+              <Input placeholder="Bank name" maxLength={200} value={bank} onChange={(e) => setBank(e.target.value)} />
+              <Input placeholder="Branch (optional)" maxLength={200} value={branch} onChange={(e) => setBranch(e.target.value)} />
+              <Input placeholder="IFSC" maxLength={200} value={ifsc} onChange={(e) => setIfsc(e.target.value.toUpperCase())} />
+            </>}
             <div>
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span>Withdrawal Amount</span><span className="text-muted-foreground">Min. ₹500</span>
               </div>
-              <Input className="mt-1" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <Input className="mt-1" type="number" min="500" max={balance} step="1" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
               <div className="mt-2 flex gap-2">
                 {[1000, 2000, 5000, 10000].map((a) => (
                   <button key={a} onClick={() => setAmount(String(a))} className="flex-1 rounded-md border px-2 py-1 text-xs hover:border-gold">₹{a.toLocaleString()}</button>
@@ -94,13 +138,21 @@ function WalletPage() {
             </div>
             <div>
               <label className="text-xs font-semibold">Remarks (Optional)</label>
-              <Textarea className="mt-1" placeholder="Enter remarks" rows={2} />
+              <Textarea className="mt-1" placeholder="Enter remarks" rows={2} maxLength={200} value={remarks} onChange={(e) => setRemarks(e.target.value)} />
             </div>
-            <Button className="w-full bg-gold-gradient font-bold text-navy-deep">SUBMIT WITHDRAWAL REQUEST</Button>
+            <Button disabled={busy || balance < 500} onClick={submitWithdrawal} className="w-full bg-gold-gradient font-bold text-navy-deep">{busy ? "SUBMITTING…" : "SUBMIT WITHDRAWAL REQUEST"}</Button>
             <p className="text-center text-[10px] text-muted-foreground">✓ Withdrawals are processed within 24–48 working hours.</p>
           </div>
         </Card>
       </div>
+
+      <Card className="p-5">
+        <h3 className="font-serif text-lg font-bold text-navy">Withdrawal requests</h3>
+        <div className="mt-3 divide-y">
+          {(withdrawals.data ?? []).map((r: any) => <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><span>{fmtDate(r.created_at)} · {r.method}</span><span className="font-semibold">{inr(r.amount)} · {r.status}</span></div>)}
+          {!withdrawals.data?.length && <p className="py-4 text-sm text-muted-foreground">{withdrawals.isLoading ? "Loading requests…" : "No withdrawal requests yet."}</p>}
+        </div>
+      </Card>
 
       <div className="grid gap-4 rounded-2xl bg-navy-gradient p-6 text-white md:grid-cols-4">
         {[
@@ -119,7 +171,7 @@ function WalletPage() {
   );
 }
 
-function WalletStat({ icon: Icon, tone, label, value, sub, link, linkText }: any) {
+function WalletStat({ icon: Icon, tone, label, value, sub }: any) {
   const tones: Record<string, string> = {
     emerald: "bg-emerald-100 text-emerald-600",
     blue: "bg-blue-100 text-blue-600",
@@ -135,7 +187,6 @@ function WalletStat({ icon: Icon, tone, label, value, sub, link, linkText }: any
         </div>
         <div className={`grid h-12 w-12 place-items-center rounded-full ${tones[tone]}`}><Icon className="h-6 w-6" /></div>
       </div>
-      {link && <a className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-600">{linkText || "View Details"} <ArrowRight className="h-3 w-3" /></a>}
     </Card>
   );
 }
