@@ -51,7 +51,12 @@ export const saveMemberDetails = createServerFn({ method: "POST" })
       plan: data.plan, status: data.status, membership_start: data.membership_start,
       membership_end: data.membership_end, nights_total: data.nights_total, nights_used: data.nights_used,
     }).eq("id", data.userId);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (current.user.email && current.user.email.toLowerCase() !== email) {
+        await supabaseAdmin.auth.admin.updateUserById(data.userId, { email: current.user.email, email_confirm: true });
+      }
+      throw new Error(error.message);
+    }
     return { ok: true };
   });
 
