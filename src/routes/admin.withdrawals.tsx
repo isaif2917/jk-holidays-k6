@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, downloadCsv, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
+import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
 
 export const Route = createFileRoute("/admin/withdrawals")({ head: () => createRouteHead("Withdrawals — JK Holidays Admin", "Review member withdrawal requests and update payout status."), component: Withdrawals });
 
@@ -28,7 +29,10 @@ function Withdrawals() {
   const [remarks, setRemarks] = useState("");
 
   const rows = q.data ?? [];
-  const balance = (uid: string) => (tx.data ?? []).filter((t) => t.user_id === uid).reduce((s, t) => s + (t.type === "Credit" ? t.amount : -t.amount), 0);
+  const balance = (uid: string) => calculateAvailableWalletBalance(
+    (tx.data ?? []).filter((transaction) => transaction.user_id === uid),
+    rows.filter((withdrawal) => withdrawal.user_id === uid),
+  );
   const list = useMemo(() => rows.filter((w) => (tab === "All" || w.status === tab) && (!search || [w.id, map[w.user_id]?.full_name, map[w.user_id]?.member_code, w.details?.account_number, w.details?.upi_id].some((v) => String(v ?? "").toLowerCase().includes(search.toLowerCase())))), [rows, tab, search, map]);
   const shortId = (id: string) => "WD" + id.slice(0, 5).toUpperCase();
 

@@ -10,6 +10,7 @@ import nextHoliday from "@/assets/next-holiday.webp";
 import upgradeBanner from "@/assets/upgrade-banner.webp";
 import heroImg from "@/assets/hero-resort.webp";
 import { createRouteHead } from "@/lib/route-meta";
+import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
 
 export const Route = createFileRoute("/app/dashboard")({ head: () => createRouteHead("Member Dashboard — JK Holidays", "View your holiday membership, wallet, bookings and travel requests."), component: Dashboard });
 
@@ -20,7 +21,8 @@ function Dashboard() {
   const bookings = useRows(["bookings", uid], () => db.from("bookings").select("*").eq("user_id", uid).order("check_in", { ascending: false }).limit(4), !!uid);
   const requests = useRows(["holiday_requests", uid], () => db.from("holiday_requests").select("*").eq("user_id", uid).order("created_at", { ascending: false }), !!uid);
   const tx = useRows(["wallet_transactions", uid], () => db.from("wallet_transactions").select("*").eq("user_id", uid), !!uid);
-  const balance = (tx.data ?? []).reduce((s, t) => s + (String(t.type).toLowerCase() === "credit" ? t.amount : -t.amount), 0);
+  const withdrawals = useRows(["wallet-withdrawals", uid], () => db.from("withdrawals").select("status,amount").eq("user_id", uid), !!uid);
+  const balance = calculateAvailableWalletBalance(tx.data ?? [], withdrawals.data ?? []);
   const daysLeft = p.membership_end ? Math.max(0, Math.ceil((new Date(p.membership_end).getTime() - Date.now()) / 86400000)) : 0;
   const nightsLeft = (p.nights_total ?? 0) - (p.nights_used ?? 0);
   const recent = [

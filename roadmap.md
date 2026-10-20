@@ -3,7 +3,7 @@
 - [x] Finish admin member management: editable account email/profile, referral and wallet/withdrawal summaries, safe password reset, and protected account deletion.
 - [x] Record validated referral codes at signup and show admin-managed destinations on the homepage.
 - [x] Remove email confirmation from registration and verify sign-in behavior.
-- [ ] Replace member wallet demo values with account data and make withdrawal requests persist with server-side validation.
+- [x] Replace member wallet demo values with account data and make withdrawal requests persist with server-side validation.
 - [ ] Explain the separate Vercel environment warning and note the pasted utils.ts error does not match the current source.
 - [x] New address + email everywhere
 - [x] Register / Login buttons under hero search; destination chips go to login

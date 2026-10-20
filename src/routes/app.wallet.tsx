@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { db, fmtDate, inr, useMe, useRefresh, useRows } from "@/lib/data";
 import { validateWithdrawalAmount } from "@/lib/wallet-validation";
+import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
 
 export const Route = createFileRoute("/app/wallet")({
   head: () => ({ meta: [{ title: "My Wallet — JK Holidays" }, { name: "description", content: "Review your wallet activity and request a withdrawal." }, { property: "og:title", content: "My Wallet — JK Holidays" }, { property: "og:description", content: "Review your JK Holidays wallet activity and withdrawal requests." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -30,10 +31,9 @@ function WalletPage() {
   const tx = useRows("my-wallet-transactions", () => db.from("wallet_transactions").select("*").eq("user_id", me?.user.id).order("created_at", { ascending: false }), !!me?.user.id);
   const withdrawals = useRows("my-withdrawals", () => db.from("withdrawals").select("*").eq("user_id", me?.user.id).order("created_at", { ascending: false }), !!me?.user.id);
   const earned = (tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() === "credit").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
-  const ledgerDebits = (tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() !== "credit").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
   const paidOut = (withdrawals.data ?? []).filter((r: any) => r.status === "Paid").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
   const pending = (withdrawals.data ?? []).filter((r: any) => r.status === "Pending" || r.status === "Approved").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
-  const balance = Math.max(0, earned - ledgerDebits - paidOut - pending);
+  const balance = calculateAvailableWalletBalance(tx.data ?? [], withdrawals.data ?? []);
   const submitWithdrawal = async () => {
     if (!me?.user.id) return toast.error("Sign in to request a withdrawal.");
     const amountResult = validateWithdrawalAmount(amount, balance);
