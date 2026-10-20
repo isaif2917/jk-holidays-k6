@@ -20,7 +20,7 @@ function Dashboard() {
   const bookings = useRows(["bookings", uid], () => db.from("bookings").select("*").eq("user_id", uid).order("check_in", { ascending: false }).limit(4), !!uid);
   const requests = useRows(["holiday_requests", uid], () => db.from("holiday_requests").select("*").eq("user_id", uid).order("created_at", { ascending: false }), !!uid);
   const tx = useRows(["wallet_transactions", uid], () => db.from("wallet_transactions").select("*").eq("user_id", uid), !!uid);
-  const balance = (tx.data ?? []).reduce((s, t) => s + (t.type === "Credit" ? t.amount : -t.amount), 0);
+  const balance = (tx.data ?? []).reduce((s, t) => s + (String(t.type).toLowerCase() === "credit" ? t.amount : -t.amount), 0);
   const daysLeft = p.membership_end ? Math.max(0, Math.ceil((new Date(p.membership_end).getTime() - Date.now()) / 86400000)) : 0;
   const nightsLeft = (p.nights_total ?? 0) - (p.nights_used ?? 0);
   const recent = [

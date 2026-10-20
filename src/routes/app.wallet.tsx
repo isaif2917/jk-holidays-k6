@@ -80,7 +80,7 @@ function WalletPage() {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs text-muted-foreground">
-                <tr className="border-b"><th className="py-2">Date</th><th>Description</th><th>Type</th><th className="text-right">Amount</th><th className="text-right">Balance</th></tr>
+                <tr className="border-b"><th className="py-2">Date</th><th>Description</th><th>Type</th><th className="text-right">Amount</th></tr>
               </thead>
               <tbody>
                 {(tx.data ?? []).map((t: any) => (
@@ -89,10 +89,9 @@ function WalletPage() {
                     <td><div className="font-medium text-navy">{t.description}</div></td>
                     <td><Badge variant="outline" className={String(t.type).toLowerCase() === "credit" ? "border-emerald-500 text-emerald-600" : "border-rose-500 text-rose-600"}>{t.type}</Badge></td>
                     <td className={`text-right font-semibold ${String(t.type).toLowerCase() === "credit" ? "text-emerald-600" : "text-rose-600"}`}>{String(t.type).toLowerCase() === "credit" ? "+" : "-"} {inr(t.amount)}</td>
-                    <td className="text-right text-navy">—</td>
                   </tr>
                 ))}
-                {!tx.data?.length && <tr><td colSpan={5} className="py-8 text-center text-muted-foreground">{tx.isLoading ? "Loading wallet activity…" : "No wallet transactions yet."}</td></tr>}
+                {!tx.data?.length && <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">{tx.isLoading ? "Loading wallet activity…" : "No wallet transactions yet."}</td></tr>}
               </tbody>
             </table>
           </div>
@@ -109,10 +108,10 @@ function WalletPage() {
           <div className="mt-4 text-sm font-semibold text-navy">Select Withdrawal Method</div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(["bank", "upi"] as const).map((m) => (
-              <button key={m} onClick={() => setMethod(m)}
-                className={`rounded-md border p-2.5 text-sm ${method === m ? "border-gold bg-gold-soft/30 font-semibold" : ""}`}>
+              <Button key={m} type="button" variant={method === m ? "default" : "outline"} onClick={() => setMethod(m)}
+                className={`h-auto p-2.5 text-sm ${method === m ? "bg-navy text-white" : ""}`}>
                 {m === "bank" ? "Bank Transfer" : "UPI Transfer"}
-              </button>
+              </Button>
             ))}
           </div>
           <div className="mt-4 space-y-3">
@@ -133,7 +132,7 @@ function WalletPage() {
               <Input className="mt-1" type="number" min="500" max={balance} step="1" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
               <div className="mt-2 flex gap-2">
                 {[1000, 2000, 5000, 10000].map((a) => (
-                  <button key={a} onClick={() => setAmount(String(a))} className="flex-1 rounded-md border px-2 py-1 text-xs hover:border-gold">₹{a.toLocaleString()}</button>
+                  <Button key={a} type="button" size="sm" variant="outline" onClick={() => setAmount(String(a))} className="h-auto flex-1 px-2 py-1 text-xs">₹{a.toLocaleString()}</Button>
                 ))}
               </div>
             </div>
