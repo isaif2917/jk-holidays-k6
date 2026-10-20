@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Gift, Copy } from "lucide-react";
 import { toast } from "sonner";
-import { useMe } from "@/lib/data";
+import { db, useMe } from "@/lib/data";
 import { useRows } from "@/lib/data";
 
 export const Route = createFileRoute("/app/refer")({ component: Refer });

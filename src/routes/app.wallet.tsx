@@ -8,6 +8,7 @@ import { Wallet, TrendingUp, Building2, Clock, Shield, Zap, IndianRupee, Headpho
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { db, fmtDate, inr, useMe, useRefresh, useRows } from "@/lib/data";
+import { validateWithdrawalAmount } from "@/lib/wallet-validation";
 
 export const Route = createFileRoute("/app/wallet")({
   head: () => ({ meta: [{ title: "My Wallet — JK Holidays" }, { name: "description", content: "Review your wallet activity and request a withdrawal." }, { property: "og:title", content: "My Wallet — JK Holidays" }, { property: "og:description", content: "Review your JK Holidays wallet activity and withdrawal requests." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -34,10 +35,10 @@ function WalletPage() {
   const pending = (withdrawals.data ?? []).filter((r: any) => r.status === "Pending" || r.status === "Approved").reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
   const balance = Math.max(0, earned - ledgerDebits - paidOut - pending);
   const submitWithdrawal = async () => {
-    const parsedAmount = Math.floor(Number(amount));
     if (!me?.user.id) return toast.error("Sign in to request a withdrawal.");
-    if (!Number.isSafeInteger(parsedAmount) || parsedAmount < 500) return toast.error("Enter a whole amount of at least ₹500.");
-    if (parsedAmount > balance) return toast.error("The requested amount is higher than your available balance.");
+    const amountResult = validateWithdrawalAmount(amount, balance);
+    if (!amountResult.valid) return toast.error(amountResult.message);
+    const parsedAmount = amountResult.amount;
     if (method === "upi" && !/^\S+@\S+$/.test(account.trim())) return toast.error("Enter a valid UPI ID.");
     if (method === "bank" && (!account.trim() || !holderName.trim() || !bank.trim() || !ifsc.trim())) return toast.error("Enter your account number, account holder, bank and IFSC.");
     if ([account, holderName, bank, branch, ifsc, remarks].some((value) => value.length > 200)) return toast.error("Please shorten the payment details and try again.");

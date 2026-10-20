@@ -28,6 +28,14 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "JK Holidays — Premium Holiday Memberships" },
+    { name: "description", content: "Explore premium resort stays, member-only holiday offers and flexible holiday memberships with JK Holidays." },
+    { property: "og:title", content: "JK Holidays — Premium Holiday Memberships" },
+    { property: "og:description", content: "Discover premium resort stays and member-only holiday benefits across India and beyond." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Home,
 });
 
