@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { FileText, Download } from "lucide-react";
-export const Route = createFileRoute("/app/documents")({ component: () => (
+import { createRouteHead } from "@/lib/route-meta";
+export const Route = createFileRoute("/app/documents")({ head: () => createRouteHead("My Documents — JK Holidays", "Access your JK Holidays membership documents and receipts."), component: () => (
   <div className="space-y-6">
     <h1 className="font-serif text-3xl font-bold text-navy">Documents</h1>
     <Card className="p-5">

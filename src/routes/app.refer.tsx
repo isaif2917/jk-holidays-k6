@@ -5,8 +5,9 @@ import { Gift, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { db, useMe } from "@/lib/data";
 import { useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/refer")({ component: Refer });
+export const Route = createFileRoute("/app/refer")({ head: () => createRouteHead("Refer & Earn — JK Holidays", "Share your member referral link and track successful sign-ups and rewards."), component: Refer });
 
 function Refer() {
   const { data: me } = useMe();

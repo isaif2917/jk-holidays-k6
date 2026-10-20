@@ -9,8 +9,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Headphones } from "lucide-react";
 import { CONTACT } from "@/data/mock";
 import { db, fmtDate, useMe, useRefresh, useRows } from "@/lib/data";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/support")({ component: Support });
+export const Route = createFileRoute("/app/support")({ head: () => createRouteHead("Member Support — JK Holidays", "Contact JK Holidays support and review your existing support requests."), component: Support });
 
 function Support() {
   const { data: me } = useMe();

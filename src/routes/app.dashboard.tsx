@@ -9,8 +9,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import nextHoliday from "@/assets/next-holiday.webp";
 import upgradeBanner from "@/assets/upgrade-banner.webp";
 import heroImg from "@/assets/hero-resort.webp";
+import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
+export const Route = createFileRoute("/app/dashboard")({ head: () => createRouteHead("Member Dashboard — JK Holidays", "View your holiday membership, wallet, bookings and travel requests."), component: Dashboard });
 
 function Dashboard() {
   const { data: me } = useMe();

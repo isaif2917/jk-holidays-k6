@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-export const Route = createFileRoute("/app/settings")({ component: () => (
+import { createRouteHead } from "@/lib/route-meta";
+export const Route = createFileRoute("/app/settings")({ head: () => createRouteHead("Account Settings — JK Holidays", "Manage your JK Holidays account settings."), component: () => (
   <div className="space-y-6">
     <h1 className="font-serif text-3xl font-bold text-navy">Settings</h1>
     <Card className="p-6 space-y-4">
