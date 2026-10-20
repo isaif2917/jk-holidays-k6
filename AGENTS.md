@@ -11,3 +11,4 @@
 
 - Code imported from the JK Holidays source ZIP; roles live in public.user_roles checked via has_role() so admin access cannot be self-granted.
 - tsconfig matches the source project's (non-strict optional/index checks) so imported code compiles unchanged.
+- Keep referral attribution as a member-code link recorded from signup metadata; admin-only account changes must remain in authenticated server functions.
