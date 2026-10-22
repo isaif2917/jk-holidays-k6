@@ -12,7 +12,7 @@ import { db, downloadCsv, inr, useProfilesMap, useRefresh, useRows } from "@/lib
 import { createRouteHead } from "@/lib/route-meta";
 import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
 
-export const Route = createFileRoute("/admin/withdrawals")({ head: () => createRouteHead("Withdrawals — JK Holidays Admin", "Review member withdrawal requests and update payout status."), component: Withdrawals });
+export const Route = createFileRoute("/admin/withdrawals")({ head: () => createRouteHead("Withdrawal Requests — JK Holidays Admin", "Review member withdrawal requests and update payout status."), component: Withdrawals });
 
 const tabs = ["All", "Pending", "Approved", "Rejected", "Paid"];
 const fmtDT = (d: string) => new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
