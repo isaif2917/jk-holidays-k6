@@ -7,7 +7,8 @@ import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { CONTACT, holidayPackages } from "@/data/mock";
+import { holidayPackages } from "@/data/mock";
+import { useSiteContact } from "@/lib/catalog";
 
 const searchSchema = z.object({ interest: z.string().optional() });
 
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const { interest } = Route.useSearch();
+  const c = useSiteContact();
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -68,21 +70,21 @@ function ContactPage() {
               <div className="flex gap-3">
                 <MapPin className="mt-1 h-5 w-5 shrink-0 text-gold" />
                 <div className="whitespace-pre-line">
-                  {CONTACT.company}
+                  {c.company}
                   {"\n"}
-                  {CONTACT.address}
+                  {c.address}
                 </div>
               </div>
-              <a href={CONTACT.phoneHref} className="flex gap-3 hover:text-gold">
+              <a href={c.phoneHref} className="flex gap-3 hover:text-gold">
                 <Phone className="mt-1 h-5 w-5 shrink-0 text-gold" />
-                {CONTACT.phone}
+                {c.phone}
               </a>
-              <a href={`mailto:${CONTACT.email}`} className="flex gap-3 hover:text-gold">
+              <a href={`mailto:${c.email}`} className="flex gap-3 hover:text-gold">
                 <Mail className="mt-1 h-5 w-5 shrink-0 text-gold" />
-                {CONTACT.email}
+                {c.email}
               </a>
               <a
-                href={CONTACT.whatsapp}
+                href={c.whatsapp}
                 target="_blank"
                 rel="noreferrer"
                 className="flex gap-3 hover:text-green-600"
