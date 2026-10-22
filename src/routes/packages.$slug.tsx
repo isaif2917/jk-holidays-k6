@@ -13,7 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CONTACT, membershipPackages } from "@/data/mock";
+import { membershipPackages } from "@/data/mock";
+import { useSiteContact } from "@/lib/catalog";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,6 +137,7 @@ function PackageDetail() {
 }
 
 function PurchaseDialog({
+  const c = useSiteContact();
   open,
   setOpen,
   title,
@@ -235,7 +237,7 @@ function PurchaseDialog({
           SUBMIT REQUEST
         </Button>
         <p className="text-center text-xs text-muted-foreground">
-          Need help? Call {CONTACT.phone}
+          Need help? Call {c.phone}
         </p>
       </DialogContent>
     </Dialog>
