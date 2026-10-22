@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Check, Plus, Trash2, Eye, Crown, CalendarCheck, CreditCard } from "lucide-react";
-import { destinations } from "@/data/mock";
 import { useSiteDestinations } from "@/lib/catalog";
 import { db, fmtDate, inr, useMe, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
@@ -149,9 +148,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function TravelDetails({ travel, setTravel, nights, onNext }: { travel: any; setTravel: (t: any) => void; nights: number; onNext: () => void }) {
-  const nightsLeft = Math.max(0, (travel.nights_total ?? 0) - (travel.nights_used ?? 0));
-  void nightsLeft;
   return (
+
     <div>
       <div className="flex items-center justify-between">
         <h2 className="font-serif text-xl font-bold text-navy">Travel Details</h2>
@@ -308,5 +306,3 @@ export function HolidayHeaderCards() {
   );
 }
 
-// Keep the bundled destination list referenced so the fallback grid stays in sync with the public site.
-void destinations;
