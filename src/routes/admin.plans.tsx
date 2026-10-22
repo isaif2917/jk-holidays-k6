@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/plans")({
 });
 
 const IMG = (slug: string) => `plan_image:${slug}`;
-const empty = { slug: "", name: "", price: 0, original_price: 0, nights: 0, validity_years: 1, features: [] as string[], sort: 0, active: true, image: "" };
+const empty = { slug: "", name: "", price: 0, original_price: 0, nights: 0, validity_years: 1, features: [] as string[], sort: 0, active: true, referral_amount: 0, image: "" };
 
 function Plans() {
   const refresh = useRefresh();
@@ -75,7 +75,7 @@ function Plans() {
             <div className="p-5">
               <div className="flex items-center justify-between"><div className="font-serif text-xl font-bold text-navy">{p.name}</div>{!p.active && <span className="text-xs text-rose-600">Disabled</span>}</div>
               <div className="mt-2 font-serif text-2xl font-bold text-gold">{inr(p.price)} <span className="text-sm text-muted-foreground line-through">{inr(p.original_price)}</span></div>
-              <div className="text-xs text-muted-foreground">{p.nights} nights · {p.validity_years} years</div>
+              <div className="text-xs text-muted-foreground">{p.nights} nights · {p.validity_years} years · Referral reward {inr(p.referral_amount ?? 0)}</div>
               <ul className="mt-2 list-disc pl-4 text-xs">{(p.features ?? []).slice(0, 4).map((f: string) => <li key={f}>{f}</li>)}</ul>
               <div className="mt-3 flex gap-2">
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => setEdit({ ...p, image: s[IMG(p.slug)] ?? "" })}>Edit</Button>
@@ -91,8 +91,9 @@ function Plans() {
           {edit && <div className="grid gap-3">
             <label className="text-xs">Name<Input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></label>
             <div className="grid grid-cols-2 gap-2">
-              {([["price", "Price (₹)"], ["original_price", "Original price (₹)"], ["nights", "Nights"], ["validity_years", "Validity (years)"], ["sort", "Display order"]] as const).map(([k, l]) => (
-                <label key={k} className="text-xs">{l}<Input type="number" value={edit[k]} onChange={(e) => setEdit({ ...edit, [k]: +e.target.value })} /></label>))}
+              {([["price", "Price (₹)"], ["original_price", "Original price (₹)"], ["referral_amount", "Referral reward (₹)"], ["nights", "Nights"], ["validity_years", "Validity (years)"], ["sort", "Display order"]] as const).map(([k, l]) => (
+                <label key={k} className="text-xs">{l}<Input type="number" value={edit[k] ?? 0} onChange={(e) => setEdit({ ...edit, [k]: +e.target.value })} /></label>))}
+
             </div>
             <label className="text-xs">Features (one per line)<Textarea rows={5} value={(edit.features ?? []).join("\n")} onChange={(e) => setEdit({ ...edit, features: e.target.value.split("\n").filter(Boolean) })} /></label>
             <div className="text-xs">Photo
