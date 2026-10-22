@@ -137,8 +137,8 @@ function PackageDetail() {
 }
 
 function PurchaseDialog({
-  const c = useSiteContact();
   open,
+
   setOpen,
   title,
   amount,
@@ -150,7 +150,9 @@ function PurchaseDialog({
   title: string;
   amount: number;
 }) {
+  const c = useSiteContact();
   const [reference, setReference] = useState("");
+
   const [method, setMethod] = useState("UPI");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
