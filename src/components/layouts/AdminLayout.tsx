@@ -22,7 +22,7 @@ const adminNav = [
   { to: "/admin/resorts", label: "Destinations", icon: Building2 },
   { to: "/admin/payments", label: "Payments", icon: CreditCard, key: "payments" },
   { to: "/admin/wallet", label: "Wallet & Transactions", icon: Wallet },
-  { to: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownToLine, key: "withdrawals" },
+  { to: "/admin/withdrawals", label: "Withdrawal Requests", icon: ArrowDownToLine, key: "withdrawals" },
   { to: "/admin/reports", label: "Reports", icon: BarChart3 },
   { to: "/admin/notifications", label: "Notifications", icon: Bell, key: "notifs" },
   { to: "/admin/roles", label: "Admins & Roles", icon: ShieldCheck },

@@ -8,7 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { CONTACT, membershipPackages } from "@/data/mock";
+import { membershipPackages } from "@/data/mock";
+import { useSiteContact } from "@/lib/catalog";
+
 import type { ReactNode } from "react";
 import { useMe } from "@/lib/data";
 
@@ -21,13 +23,14 @@ const links = [
 ] as const;
 
 export function PublicLayout({ children }: { children: ReactNode }) {
+  const c = useSiteContact();
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
       <a
-        href={CONTACT.whatsapp}
+        href={c.whatsapp}
         target="_blank"
         rel="noreferrer"
         className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-green-500 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-green-600"
@@ -60,6 +63,7 @@ function AccountIcon() {
 }
 
 function Navbar() {
+  const c = useSiteContact();
   return (
     <header className="sticky top-0 z-40 bg-navy-gradient text-white shadow-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4">
@@ -91,9 +95,9 @@ function Navbar() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <a href={CONTACT.phoneHref} className="hidden items-center gap-2 text-sm xl:flex">
+          <a href={c.phoneHref} className="hidden items-center gap-2 text-sm xl:flex">
             <span className="grid h-9 w-9 place-items-center rounded-full border border-gold text-gold"><Phone className="h-4 w-4" /></span>
-            {CONTACT.phone}
+            {c.phone}
           </a>
           <AccountLink />
         </div>
@@ -107,7 +111,7 @@ function Navbar() {
               ))}
               <Link to="/packages" search={{}} className="hover:text-gold">Membership Packages</Link>
               <AccountLink mobile />
-              <a href={CONTACT.phoneHref} className="text-gold">{CONTACT.phone}</a>
+              <a href={c.phoneHref} className="text-gold">{c.phone}</a>
             </nav>
           </SheetContent>
         </Sheet>
@@ -117,6 +121,7 @@ function Navbar() {
 }
 
 function Footer() {
+  const c = useSiteContact();
   return (
     <footer className="bg-navy-gradient text-white/80">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 md:grid-cols-2 lg:grid-cols-5">
@@ -172,21 +177,21 @@ function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/contact" search={{}} className="hover:text-gold">Book Presentation</Link></li>
             <li><Link to="/app/support" className="hover:text-gold">Help & Support</Link></li>
-            <li><a href={CONTACT.whatsapp} target="_blank" rel="noreferrer" className="hover:text-gold">WhatsApp Us</a></li>
+            <li><a href={c.whatsapp} target="_blank" rel="noreferrer" className="hover:text-gold">WhatsApp Us</a></li>
           </ul>
         </div>
 
         <div>
           <h4 className="mb-4 font-serif text-lg text-white">Contact Us</h4>
           <p className="whitespace-pre-line text-sm">
-            {CONTACT.company}
+            {c.company}
             {"\n"}
-            {CONTACT.address}
+            {c.address}
           </p>
           <p className="mt-3 text-sm">
-            <a href={CONTACT.phoneHref} className="hover:text-gold">{CONTACT.phone}</a>
+            <a href={c.phoneHref} className="hover:text-gold">{c.phone}</a>
             <br />
-            <a href={`mailto:${CONTACT.email}`} className="hover:text-gold">{CONTACT.email}</a>
+            <a href={`mailto:${c.email}`} className="hover:text-gold">{c.email}</a>
           </p>
         </div>
       </div>

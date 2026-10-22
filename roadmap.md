@@ -13,3 +13,14 @@
 - [x] Sharper hero image, all photos converted to WebP
 - [x] Membership plans: 3D overlapping swipeable pricing carousel (Framer Motion), smaller cards on mobile
 - [x] Full mobile responsiveness pass
+
+# Round: member + admin upgrades (Oct 22)
+
+- [x] Profile: password change for the member (passwords stay scrambled, never displayed) + self-service account deletion
+- [x] Holiday request flow saves real submissions; they appear in Admin → Holiday Requests with the member's details (admin notification too)
+- [x] Available Holidays: live destinations, membership/nights-available card and payment summary
+- [x] Wallet withdrawals already flow to Admin → Withdrawal Requests (nav renamed for clarity)
+- [x] Referral rewards per plan: admin sets reward on each plan; crediting happens automatically when the referred member's payment is approved; shown in Refer & Earn, My Rewards, admin member details
+- [x] Admin reports: animated line/area charts for all six report topics + CSV export
+- [x] Admin settings: editable website email, phone, address and site name, live on footer/contact pages
+- [x] Admin dashboard: animated new-members growth chart directly below Total Members

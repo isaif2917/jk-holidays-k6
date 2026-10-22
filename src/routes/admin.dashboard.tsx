@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Users, Crown, Plane, Wallet, ArrowUpRight, LifeBuoy, CreditCard } from "lucide-react";
 import { db, inr, useMe, useRows } from "@/lib/data";
@@ -82,7 +82,32 @@ function AdminDash() {
         ))}
       </div>
 
+      <Card className="p-5">
+        <div className="flex items-center justify-between">
+          <h3 className="font-serif text-lg font-bold text-navy">New members — last 6 months</h3>
+          <span className="rounded-full bg-gold-soft/60 px-3 py-1 text-xs font-semibold text-navy">{P.length} total members</span>
+        </div>
+        <div className="mt-4 h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={months} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="memberGrowthFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--navy)" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="var(--navy)" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="4 4" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="m" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis tickLine={false} axisLine={false} fontSize={12} width={40} allowDecimals={false} />
+              <Tooltip />
+              <Area type="monotone" dataKey="members" name="New members" stroke="var(--navy)" strokeWidth={2.5} fill="url(#memberGrowthFill)" dot={{ r: 3 }} activeDot={{ r: 5 }} animationDuration={1400} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-3">
+
         <Card className="p-5 lg:col-span-2">
           <h3 className="font-serif text-lg font-bold text-navy">Revenue — last 6 months</h3>
           <div className="mt-4 h-64">
@@ -124,16 +149,8 @@ function AdminDash() {
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-5">
-          <h3 className="font-serif text-lg font-bold text-navy">New members — last 6 months</h3>
-          <div className="mt-4 h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={months}><XAxis dataKey="m" tickLine={false} axisLine={false} fontSize={12} /><Tooltip /><Bar dataKey="members" fill="var(--gold)" radius={[8, 8, 0, 0]} animationDuration={1200} /></BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-        <Card className="p-5">
+      <Card className="p-5">
+
           <div className="flex items-center justify-between"><h3 className="font-serif text-lg font-bold text-navy">Recent Activity</h3><Link to="/admin/notifications" className="text-xs font-semibold text-blue-600">View all</Link></div>
           <div className="mt-4 space-y-3 text-sm">
             {(notes.data ?? []).slice(0, 6).map((n: any) => {
@@ -143,7 +160,7 @@ function AdminDash() {
             {(notes.data ?? []).length === 0 && <div className="py-6 text-center text-muted-foreground">No activity yet.</div>}
           </div>
         </Card>
-      </div>
     </div>
   );
+
 }

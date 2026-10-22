@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Share2, Star, Clock, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CONTACT, holidayPackages } from "@/data/mock";
+import { holidayPackages } from "@/data/mock";
+import { useSiteContact } from "@/lib/catalog";
 
 type Pkg = (typeof holidayPackages)[number];
 
 export function HolidayPackageCard({ pkg }: { pkg: Pkg }) {
+  const c = useSiteContact();
   const [photo, setPhoto] = useState(0);
   const total = pkg.photos.length;
 
@@ -102,7 +104,7 @@ export function HolidayPackageCard({ pkg }: { pkg: Pkg }) {
             </Link>
           </Button>
           <a
-            href={`${CONTACT.whatsapp}?text=${encodeURIComponent(`Hi JK Holidays, I'm interested in the ${pkg.name}.`)}`}
+            href={`${c.whatsapp}?text=${encodeURIComponent(`Hi JK Holidays, I'm interested in the ${pkg.name}.`)}`}
             target="_blank"
             rel="noreferrer"
             aria-label={`WhatsApp about ${pkg.name}`}

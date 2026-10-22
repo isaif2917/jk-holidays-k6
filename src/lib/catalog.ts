@@ -1,5 +1,6 @@
 import { db, useRows } from "@/lib/data";
-import { plans as mockPlans, offers as mockOffers } from "@/data/mock";
+import { plans as mockPlans, offers as mockOffers, CONTACT } from "@/data/mock";
+
 
 export type SitePlan = (typeof mockPlans)[number] & { slug: string };
 export type SiteOffer = { title: string; pct: string; desc: string; tone: string };
@@ -42,3 +43,21 @@ export function useSiteDestinations(): SiteDestination[] {
   if (!q.data?.length) return [];
   return q.data.map((r: any) => ({ name: r.name, country: r.location, image: r.image_url ?? "" }));
 }
+
+/** Site contact details managed in Admin → Settings, falling back to bundled defaults. */
+export function useSiteContact() {
+  const q = useRows("site-settings", () => db.from("admin_settings").select("key,value").in("key", ["site_name", "site_email", "site_phone", "site_address"]));
+  const map: Record<string, string> = {};
+  (q.data ?? []).forEach((r: any) => { if (r.value) map[r.key] = r.value; });
+  const phone = map.site_phone || CONTACT.phone;
+  const digits = phone.replace(/\D/g, "");
+  return {
+    company: map.site_name || CONTACT.company,
+    email: map.site_email || CONTACT.email,
+    phone,
+    phoneHref: `tel:${digits}`,
+    whatsapp: `https://wa.me/${digits.length >= 10 ? "91" + digits.slice(-10) : CONTACT.whatsapp.split("/").pop()}`,
+    address: map.site_address || CONTACT.address,
+  };
+}
+

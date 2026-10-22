@@ -233,6 +233,7 @@ export type Database = {
           nights: number
           original_price: number
           price: number
+          referral_amount: number
           slug: string
           sort: number
           validity_years: number
@@ -245,6 +246,7 @@ export type Database = {
           nights?: number
           original_price?: number
           price?: number
+          referral_amount?: number
           slug: string
           sort?: number
           validity_years?: number
@@ -257,6 +259,7 @@ export type Database = {
           nights?: number
           original_price?: number
           price?: number
+          referral_amount?: number
           slug?: string
           sort?: number
           validity_years?: number
@@ -417,6 +420,7 @@ export type Database = {
           friend_phone: string
           id: string
           referred_user_id: string | null
+          reward_amount: number | null
           status: string
           user_id: string
         }
@@ -426,6 +430,7 @@ export type Database = {
           friend_phone: string
           id?: string
           referred_user_id?: string | null
+          reward_amount?: number | null
           status?: string
           user_id?: string
         }
@@ -435,6 +440,7 @@ export type Database = {
           friend_phone?: string
           id?: string
           referred_user_id?: string | null
+          reward_amount?: number | null
           status?: string
           user_id?: string
         }
