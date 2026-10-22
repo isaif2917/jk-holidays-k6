@@ -175,3 +175,37 @@ export const removeAdmin = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const deleteOwnAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { userId: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Valid account required");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    if (data.userId !== context.userId) throw new Error("You can only delete your own account");
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", { _user_id: data.userId, _role: "admin" });
+    if (roleError) throw new Error("Could not verify the account role");
+    if (isAdmin) throw new Error("Admin accounts can't be deleted here — ask another admin to remove your admin access first");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: referralError } = await supabaseAdmin.from("referrals").update({ referred_user_id: null }).eq("referred_user_id", data.userId);
+    if (referralError) throw new Error(referralError.message);
+    const deletions = await Promise.all([
+      supabaseAdmin.from("bookings").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("documents").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("holiday_requests").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("notifications").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("payments").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("referrals").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("support_tickets").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("wallet_transactions").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("withdrawals").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId),
+    ]);
+    const failed = deletions.find((result) => result.error);
+    if (failed?.error) throw new Error(failed.error.message);
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
