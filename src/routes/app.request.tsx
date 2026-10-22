@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Check, Plus, Trash2, Eye, Crown, CalendarCheck, CreditCard } from "lucide-react";
+import { Check, Plus, Trash2, Eye } from "lucide-react";
 import { useSiteDestinations } from "@/lib/catalog";
-import { db, fmtDate, inr, useMe, useRefresh, useRows } from "@/lib/data";
+import { db, fmtDate, useMe, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/app/request")({ head: () => createRouteHead("Request a Holiday — JK Holidays", "Submit and track a holiday request with JK Holidays."), component: RequestFlow });
@@ -281,28 +281,3 @@ function ReviewBlock({ title, rows }: { title: string; rows: [string, string][] 
     </div>
   );
 }
-
-export function HolidayHeaderCards() {
-  const { data: me } = useMe();
-  const p = me?.profile ?? {};
-  const pays = useRows(["payments", me?.user.id], () => db.from("payments").select("*").eq("user_id", me!.user.id).order("created_at", { ascending: false }), !!me?.user.id);
-  const nightsLeft = Math.max(0, (p.nights_total ?? 0) - (p.nights_used ?? 0));
-  return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <Card className="bg-navy-gradient p-5 text-white">
-        <div className="flex items-center gap-3"><Crown className="h-8 w-8 text-gold" /><div><div className="text-xs text-white/80">Membership</div><div className="font-serif text-xl font-bold text-gold">{p.plan ? `${p.plan} · ${p.status}` : "No active plan"}</div></div></div>
-        <div className="mt-3 text-sm text-white/80">Valid till {fmtDate(p.membership_end)}</div>
-      </Card>
-      <Card className="p-5">
-        <div className="flex items-center gap-3"><CalendarCheck className="h-8 w-8 text-gold" /><div><div className="text-xs text-muted-foreground">Holiday Nights Available</div><div className="font-serif text-2xl font-bold text-navy">{nightsLeft} nights left</div><div className="text-xs text-muted-foreground">{p.nights_used ?? 0} of {p.nights_total ?? 0} used</div></div></div>
-      </Card>
-      <Card className="p-5">
-        <div className="flex items-center gap-3"><CreditCard className="h-8 w-8 text-gold" /><div className="min-w-0 flex-1"><div className="text-xs text-muted-foreground">Latest Payment</div>
-          {(pays.data ?? [])[0] ? <div className="font-serif text-xl font-bold text-navy">{inr((pays.data as any[])[0].amount)} · <StatusBadge s={(pays.data as any[])[0].status} /></div> : <div className="font-serif text-xl font-bold text-navy">No payments yet</div>}
-          <Link to="/app/membership" className="text-xs font-semibold text-blue-600">View payments & plan →</Link>
-        </div></div>
-      </Card>
-    </div>
-  );
-}
-
