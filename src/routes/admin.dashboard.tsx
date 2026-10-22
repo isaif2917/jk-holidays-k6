@@ -160,7 +160,7 @@ function AdminDash() {
             {(notes.data ?? []).length === 0 && <div className="py-6 text-center text-muted-foreground">No activity yet.</div>}
           </div>
         </Card>
-      </div>
     </div>
   );
+
 }

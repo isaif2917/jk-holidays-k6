@@ -8,7 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { CONTACT, membershipPackages } from "@/data/mock";
+import { membershipPackages } from "@/data/mock";
+import { useSiteContact } from "@/lib/catalog";
+
 import type { ReactNode } from "react";
 import { useMe } from "@/lib/data";
 
