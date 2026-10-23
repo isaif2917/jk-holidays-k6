@@ -218,3 +218,20 @@ export const createStaff = createServerFn({ method: "POST" })
     return { id };
   });
 
+export const removeRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { userId: string; role: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Valid account required");
+    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.role)) throw new Error("Invalid role");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+    if (data.userId === context.userId && data.role === "admin") throw new Error("You can't remove your own admin access");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
