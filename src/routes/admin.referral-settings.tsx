@@ -149,6 +149,111 @@ function ReferralSettings() {
           </div>
         </Card>
       </div>
+
+      <ReferralSettlements />
     </div>
+  );
+}
+
+function ReferralSettlements() {
+  const settle = useServerFn(settleReferral);
+  const reject = useServerFn(rejectReferral);
+  const refresh = useRefresh();
+  const { map: profilesById } = useProfilesMap();
+  const settings = useRows("admin_settings", () => db.from("admin_settings").select("*"));
+  const rows = useRows("referrals-all", () => db.from("referrals").select("*").order("created_at", { ascending: false }));
+  const [amounts, setAmounts] = useState<Record<string, string>>({});
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const defaultValue = String((settings.data ?? []).find((r: any) => r.key === "referral_value")?.value ?? "0");
+
+  useEffect(() => {
+    const next: Record<string, string> = {};
+    (rows.data ?? []).forEach((r: any) => {
+      if (r.status === "Pending" || r.status === "Approved") next[r.id] = r.reward_amount != null ? String(r.reward_amount) : defaultValue;
+    });
+    setAmounts(next);
+  }, [rows.data, defaultValue]);
+
+  const doSettle = async (r: any) => {
+    const amount = Number(amounts[r.id]);
+    if (!Number.isFinite(amount) || amount <= 0) return toast.error("Enter the reward amount to settle");
+    setBusyId(r.id);
+    try {
+      await settle({ data: { referralId: r.id, amount } });
+      toast.success(`Settled — ₹${amount} credited to ${profilesById[r.user_id]?.full_name || "the referrer"}'s wallet`);
+      refresh("referrals", "referrals-all", "member-referrals", "member-referral-summary", "wallet_transactions", "member-wallet-summary", "profiles");
+    } catch (e: any) { toast.error(e.message); }
+    setBusyId(null);
+  };
+
+  const doReject = async (r: any) => {
+    setBusyId(r.id);
+    try {
+      await reject({ data: { referralId: r.id } });
+      toast.success("Referral rejected — no reward will be credited");
+      refresh("referrals", "referrals-all", "member-referrals", "member-referral-summary", "profiles");
+    } catch (e: any) { toast.error(e.message); }
+    setBusyId(null);
+  };
+
+  const label = (id: string) => {
+    const p = profilesById[id];
+    return p ? `${p.full_name || p.email || "Member"} (${p.member_code ?? ""})` : id.slice(0, 8);
+  };
+
+  const pending = (rows.data ?? []).filter((r: any) => r.status === "Pending" || r.status === "Approved");
+  const settled = (rows.data ?? []).filter((r: any) => r.status === "Rewarded" || r.status === "Rejected");
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-2">
+        <Users className="h-5 w-5 text-gold" />
+        <h2 className="font-serif text-xl font-bold text-navy">Referral settlements</h2>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Decide each referral reward: settle to credit the referrer's wallet, or reject it. Rewards from approved membership payments are credited automatically.</p>
+
+      <div className="mt-4 space-y-2">
+        {rows.isLoading && <div className="py-4 text-center text-sm text-muted-foreground">Loading referrals…</div>}
+        {!rows.isLoading && !pending.length && <div className="py-4 text-center text-sm text-muted-foreground">No referrals waiting for settlement.</div>}
+        {pending.map((r: any) => (
+          <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+            <div>
+              <div className="text-sm font-bold text-navy">{r.friend_name} <span className="font-normal text-muted-foreground">· {r.friend_phone}</span></div>
+              <div className="text-xs text-muted-foreground">Referred by {label(r.user_id)} · {fmtDate(r.created_at)}</div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={r.status} />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+                <Input className="w-28 pl-7" type="number" min="0" value={amounts[r.id] ?? ""} onChange={(e) => setAmounts({ ...amounts, [r.id]: e.target.value })} />
+              </div>
+              <Button size="sm" disabled={busyId === r.id} className="bg-navy text-white" onClick={() => doSettle(r)}>{busyId === r.id ? "Settling…" : "Settle"}</Button>
+              <Button size="sm" variant="outline" disabled={busyId === r.id} className="text-destructive" onClick={() => doReject(r)}>Reject</Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {settled.length > 0 && (
+        <div className="mt-5">
+          <div className="text-xs font-semibold text-muted-foreground">HISTORY</div>
+          <div className="mt-2 space-y-2">
+            {settled.map((r: any) => (
+              <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3">
+                <div>
+                  <div className="text-sm text-navy">{r.friend_name}</div>
+                  <div className="text-xs text-muted-foreground">Referred by {label(r.user_id)} · {fmtDate(r.created_at)}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={r.status} />
+                  <span className="text-sm font-semibold text-navy">{r.reward_amount != null ? inr(r.reward_amount) : ""}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
