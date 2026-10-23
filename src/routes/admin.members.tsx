@@ -277,22 +277,33 @@ function AddMember({ open, onClose, plans, onDone }: { open: boolean; onClose: (
 
 function PasswordBox({ userId }: { userId: string }) {
   const changePassword = useServerFn(setMemberPassword);
+  const known = useRows(["admin-known-password", userId], () => db.from("admin_known_passwords").select("password, updated_at").eq("user_id", userId).maybeSingle());
+  const current = (known.data as any)?.password as string | null | undefined;
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
-    try { await changePassword({ data: { userId, password: pw } }); toast.success("Password changed"); setPw(""); }
+    try { await changePassword({ data: { userId, password: pw } }); toast.success("Password changed"); setPw(""); refresh("admin-known-password"); }
     catch (e: any) { toast.error(e.message); }
     setBusy(false);
   };
   return (
     <div className="mt-2 rounded-lg border p-3">
       <div className="text-xs font-semibold text-navy">Password</div>
-      <p className="text-[11px] text-muted-foreground">For security the current password is stored scrambled and can't be shown. Set a new one below and share it with the member.</p>
+      {known.isLoading ? (
+        <p className="text-[11px] text-muted-foreground">Checking saved password…</p>
+      ) : current ? (
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <code className="rounded bg-muted px-2 py-1 text-xs font-semibold">{show ? current : "•".repeat(Math.max(current.length, 8))}</code>
+          <Button type="button" variant="outline" size="sm" onClick={() => setShow(!show)}>{show ? "Hide" : "Show password"}</Button>
+          <span className="text-[11px] text-muted-foreground">Last password set from the admin panel{known.data?.updated_at ? ` on ${fmtDate(known.data.updated_at)}` : ""}.</span>
+        </div>
+      ) : (
+        <p className="text-[11px] text-muted-foreground">No recorded password yet — passwords members choose themselves stay private. Set one below and it will show here.</p>
+      )}
       <div className="mt-2 flex gap-2">
         <Input type={show ? "text" : "password"} placeholder="New password (min 6)" value={pw} onChange={(e) => setPw(e.target.value)} />
-        <Button type="button" variant="outline" size="sm" onClick={() => setShow(!show)}>{show ? "Hide" : "Show"}</Button>
         <Button disabled={busy || pw.length < 6} size="sm" className="bg-navy text-white" onClick={save}>{busy ? "Saving…" : "Change"}</Button>
       </div>
     </div>
