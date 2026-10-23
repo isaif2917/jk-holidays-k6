@@ -86,6 +86,7 @@ export const deleteMember = createServerFn({ method: "POST" })
     const deletions = await Promise.all([
       supabaseAdmin.from("bookings").delete().eq("user_id", data.userId),
       supabaseAdmin.from("documents").delete().eq("user_id", data.userId),
+      supabaseAdmin.from("admin_known_passwords").delete().eq("user_id", data.userId),
       supabaseAdmin.from("holiday_requests").delete().eq("user_id", data.userId),
       supabaseAdmin.from("notifications").delete().eq("user_id", data.userId),
       supabaseAdmin.from("payments").delete().eq("user_id", data.userId),
