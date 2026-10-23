@@ -12,7 +12,7 @@ const map: Record<string, string> = {
   Resolved: "bg-emerald-100 text-emerald-700",
   Joined: "bg-emerald-100 text-emerald-700",
   Rejected: "bg-rose-100 text-rose-700",
-  In Progress: "bg-blue-100 text-blue-700",
+  "In Progress": "bg-blue-100 text-blue-700",
   Replied: "bg-blue-100 text-blue-700",
   Rewarded: "bg-emerald-100 text-emerald-700",
   Cancelled: "bg-rose-100 text-rose-700",
