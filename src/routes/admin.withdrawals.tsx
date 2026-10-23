@@ -68,6 +68,7 @@ function Withdrawals() {
   ];
   const colsOn = COLS.every((c) => cols[c.key] !== false) ? {} : cols;
   const exportExcel = () => {
+    if (!list.length) return toast.error("Nothing to export");
     const chosen = COLS.filter((c) => colsOn[c.key] !== false);
     if (!chosen.length) return toast.error("Select at least one column");
     downloadCsv("withdrawals.csv", list.map((w) => Object.fromEntries(chosen.map((c) => [c.key, c.get(w)]))));
@@ -95,7 +96,7 @@ function Withdrawals() {
           </div>
           <div className="flex gap-2">
             <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input className="w-60 pl-9" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
-            <Button variant="outline" onClick={exportExcel}><Download className="mr-1 h-4 w-4" /> Excel</Button>
+            <Button variant="outline" onClick={() => { setCols({}); setDlOpen(true); }}><Download className="mr-1 h-4 w-4" /> Select & Download</Button>
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
