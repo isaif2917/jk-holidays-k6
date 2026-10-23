@@ -15,3 +15,6 @@
 - Member wallet reads stay scoped through the browser client and row policies; withdrawal ownership, initial status, amount rules, and available-balance checks are enforced again by a database trigger because browser checks alone are bypassable.
 - Keep the shared wallet-balance calculation in `src/lib/wallet-balance.ts` so member and admin views reserve the same withdrawal statuses.
 - Content pages define page-specific sharing metadata through the shared `src/lib/route-meta.ts` helper, while the home page keeps its own title and description.
+- Referral rewards are governed by admin_settings keys referral_active/referral_mode/referral_value plus per-plan membership_plans.referral_amount; the credit_referral_reward trigger reads them, so never compute rewards in app code.
+- Admin-uploaded member documents live in the private `documents` storage bucket listed via the site_documents table (admins manage, authenticated members read); hero carousel images are URLs stored in admin_settings key hero_images (publicly readable).
+- Staff roles use extended app_role values (manager, supervisor, operations_manager, other) with a user_roles.role_label for custom titles; they grant no admin powers.
