@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { IndianRupee, Percent, Save, Users } from "lucide-react";
-import { db, inr, useRefresh, useRows } from "@/lib/data";
+import { db, fmtDate, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { rejectReferral, settleReferral } from "@/lib/admin.functions";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/referral-settings")({ head: () => createRouteHead("Referral Settings — JK Holidays Admin", "Configure referral cashback rules and per-membership reward values."), component: ReferralSettings });

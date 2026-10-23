@@ -277,6 +277,7 @@ function AddMember({ open, onClose, plans, onDone }: { open: boolean; onClose: (
 
 function PasswordBox({ userId }: { userId: string }) {
   const changePassword = useServerFn(setMemberPassword);
+  const refresh = useRefresh();
   const known = useRows(["admin-known-password", userId], () => db.from("admin_known_passwords").select("password, updated_at").eq("user_id", userId).maybeSingle());
   const current = (known.data as any)?.password as string | null | undefined;
   const [pw, setPw] = useState("");
