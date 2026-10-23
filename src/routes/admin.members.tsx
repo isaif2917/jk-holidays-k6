@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
-import { Search, Download, Upload, Plus, Eye, Edit, MoreVertical, CalendarIcon } from "lucide-react";
+import { Search, Download, Upload, Plus, Eye, Edit, MoreVertical, CalendarIcon, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
