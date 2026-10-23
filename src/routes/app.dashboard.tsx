@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Briefcase, Wallet, Crown, MapPin, Users, Gift, Tag, Headphones } from "lucide-react";
-import { destinations } from "@/data/mock";
 import { db, fmtDate, inr, useMe, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import nextHoliday from "@/assets/next-holiday.webp";
@@ -11,6 +10,7 @@ import upgradeBanner from "@/assets/upgrade-banner.webp";
 import heroImg from "@/assets/hero-resort.webp";
 import { createRouteHead } from "@/lib/route-meta";
 import { calculateAvailableWalletBalance } from "@/lib/wallet-balance";
+import { useSiteDestinations } from "@/lib/catalog";
 
 export const Route = createFileRoute("/app/dashboard")({ head: () => createRouteHead("Member Dashboard — JK Holidays", "View your holiday membership, wallet, bookings and travel requests."), component: Dashboard });
 
