@@ -22,6 +22,7 @@ import { Route as OffersRouteImport } from './routes/offers'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminMembershipRequestsRouteImport } from './routes/admin.membership-requests'
@@ -120,6 +121,11 @@ const AdminBookingsRoute = AdminBookingsRouteImport.update({
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDocumentsRoute = AdminDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -406,6 +414,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -457,6 +466,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -506,6 +516,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -555,6 +566,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -698,6 +710,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/documents': {
+      id: '/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminDocumentsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/leads': {
@@ -944,6 +963,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminDocumentsRoute: typeof AdminDocumentsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminMembersRoute: typeof AdminMembersRoute
   AdminMembershipRequestsRoute: typeof AdminMembershipRequestsRoute
@@ -964,6 +984,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminDocumentsRoute: AdminDocumentsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminMembersRoute: AdminMembersRoute,
   AdminMembershipRequestsRoute: AdminMembershipRequestsRoute,

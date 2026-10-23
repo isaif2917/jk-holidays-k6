@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Bell } from "lucide-react";
 import { db, fmtDate, useMe, useRefresh, useRows } from "@/lib/data";
@@ -14,7 +15,7 @@ function Notifications() {
   const unread = rows.filter((n: any) => !n.read);
   const markRead = async () => {
     const { error } = await db.from("notifications").update({ read: true }).eq("user_id", me!.user.id).eq("read", false);
-    if (error) return toastError(error);
+    if (error) return toast.error(error.message);
     refresh("notifications");
   };
   return (
@@ -40,6 +41,3 @@ function Notifications() {
   );
 }
 
-function toastError(error: { message: string }) {
-  import("sonner").then(({ toast }) => toast.error(error.message));
-}
