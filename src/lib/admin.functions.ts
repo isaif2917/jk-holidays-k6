@@ -230,7 +230,7 @@ export const removeRole = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Admins only");
     if (data.userId === context.userId && data.role === "admin") throw new Error("You can't remove your own admin access");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role);
+    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role as any);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
