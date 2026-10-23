@@ -22,6 +22,15 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (error || !isAdmin) throw new Error("Admins only");
 }
 
+// Keeps the last password an admin set through the panel so admins can view it
+// in the member details. Passwords set by members themselves stay hidden.
+async function rememberPassword(supabaseAdmin: any, userId: string, password: string) {
+  const { error } = await supabaseAdmin
+    .from("admin_known_passwords")
+    .upsert({ user_id: userId, password, updated_at: new Date().toISOString() });
+  if (error) console.error("Could not record the password for the admin view:", error.message);
+}
+
 export const saveMemberDetails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: MemberDetails) => {
@@ -115,6 +124,7 @@ export const createMember = createServerFn({ method: "POST" })
       id, full_name: data.full_name, email: data.email, phone: data.phone || null, city: data.city || null,
       plan: data.plan || null, status: data.plan ? "Active" : "Pending",
     });
+    await rememberPassword(supabaseAdmin, id, data.password);
     return { id };
   });
 
@@ -131,6 +141,7 @@ export const setMemberPassword = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
     if (error) throw new Error(error.message);
+    await rememberPassword(supabaseAdmin, data.userId, data.password);
     return { ok: true };
   });
 
@@ -151,15 +162,11 @@ export const createAdmin = createServerFn({ method: "POST" })
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email, password: data.password, email_confirm: true, user_metadata: { full_name: data.full_name },
     });
-    if (error) {
-      // Existing account: promote it and set the new password.
-      const { data: prof } = await supabaseAdmin.from("profiles").select("id").eq("email", email).maybeSingle();
-      if (!prof) throw new Error(error.message);
-      id = prof.id;
-      await supabaseAdmin.auth.admin.updateUserById(id, { password: data.password, email_confirm: true });
-    } else id = created.user!.id;
+    if (error) throw new Error("An account with this email already exists. Open the member's details to change its password instead.");
+    id = created.user!.id;
     const { error: rErr } = await supabaseAdmin.from("user_roles").upsert({ user_id: id, role: "admin" }, { onConflict: "user_id,role" });
     if (rErr) throw new Error(rErr.message);
+    await rememberPassword(supabaseAdmin, id, data.password);
     return { id };
   });
 
@@ -203,18 +210,14 @@ export const createStaff = createServerFn({ method: "POST" })
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email, password: data.password, email_confirm: true, user_metadata: { full_name: data.full_name },
     });
-    if (error) {
-      // Existing account: reuse it and set the password.
-      const { data: prof } = await supabaseAdmin.from("profiles").select("id").eq("email", email).maybeSingle();
-      if (!prof) throw new Error(error.message);
-      id = prof.id;
-      await supabaseAdmin.auth.admin.updateUserById(id, { password: data.password, email_confirm: true });
-    } else id = created.user!.id;
+    if (error) throw new Error("An account with this email already exists. Open the member's details to change its password instead.");
+    id = created.user!.id;
     const { error: rErr } = await supabaseAdmin.from("user_roles").upsert(
       { user_id: id, role: data.role, role_label: data.role === "other" ? data.roleLabel!.trim() : null },
       { onConflict: "user_id,role" },
     );
     if (rErr) throw new Error(rErr.message);
+    await rememberPassword(supabaseAdmin, id, data.password);
     return { id };
   });
 
@@ -232,6 +235,49 @@ export const removeRole = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role as any);
     if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const settleReferral = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { referralId: string; amount: number }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.referralId ?? "")) throw new Error("Valid referral required");
+    if (!Number.isFinite(d.amount) || d.amount <= 0) throw new Error("Enter the reward amount to settle");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ref, error } = await supabaseAdmin.from("referrals").select("*").eq("id", data.referralId).maybeSingle();
+    if (error || !ref) throw new Error("Could not find this referral");
+    if (ref.status === "Rewarded") throw new Error("This referral is already settled");
+    if (ref.status === "Rejected") throw new Error("This referral was rejected");
+    const { error: wErr } = await supabaseAdmin.from("wallet_transactions").insert({
+      user_id: ref.user_id,
+      type: "credit",
+      amount: data.amount,
+      description: "Referral settlement: " + (ref.friend_name || "referred member"),
+    });
+    if (wErr) throw new Error(wErr.message);
+    const { error: uErr } = await supabaseAdmin.from("referrals").update({ status: "Rewarded", reward_amount: data.amount }).eq("id", data.referralId);
+    if (uErr) throw new Error(uErr.message);
+    return { ok: true };
+  });
+
+export const rejectReferral = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { referralId: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.referralId ?? "")) throw new Error("Valid referral required");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ref, error } = await supabaseAdmin.from("referrals").select("status").eq("id", data.referralId).maybeSingle();
+    if (error || !ref) throw new Error("Could not find this referral");
+    if (ref.status === "Rewarded") throw new Error("This referral is already settled and can't be rejected");
+    const { error: uErr } = await supabaseAdmin.from("referrals").update({ status: "Rejected" }).eq("id", data.referralId);
+    if (uErr) throw new Error(uErr.message);
     return { ok: true };
   });
 

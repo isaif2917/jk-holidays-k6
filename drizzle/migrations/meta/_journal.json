@@ -50,6 +50,13 @@
       "when": 1792741398397,
       "tag": "0006_staff_roles_referral_settings_site_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792745889127,
+      "tag": "0007_admin_known_passwords",
+      "breakpoints": true
     }
   ]
 }
