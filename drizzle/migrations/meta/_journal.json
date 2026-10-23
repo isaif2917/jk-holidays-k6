@@ -43,6 +43,13 @@
       "when": 1792671922908,
       "tag": "0005_referral_rewards_and_site_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792741398397,
+      "tag": "0006_staff_roles_referral_settings_site_documents",
+      "breakpoints": true
     }
   ]
 }
