@@ -83,38 +83,3 @@ function PasswordCard() {
   );
 }
 
-function DangerZone() {
-  const { data: me } = useMe();
-  const navigate = useNavigate();
-  const deleteAccount = useServerFn(deleteOwnAccount);
-  const [confirmText, setConfirmText] = useState("");
-  const [busy, setBusy] = useState(false);
-  const del = async () => {
-    if (confirmText !== "DELETE") return toast.error('Type DELETE in the box to confirm.');
-    setBusy(true);
-    try {
-      await deleteAccount({ data: { userId: me!.user.id } });
-      await db.auth.signOut();
-      toast.success("Your account and its saved records were deleted.");
-      navigate({ to: "/", replace: true });
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not delete the account");
-      setBusy(false);
-    }
-  };
-  return (
-    <Card className="border-rose-200 p-6">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-rose-100 text-rose-600"><ShieldCheck className="h-5 w-5" /></span>
-        <div>
-          <h2 className="font-serif text-lg font-bold text-navy">Delete my account</h2>
-          <p className="text-xs text-muted-foreground">Permanently removes your account, bookings, payments, wallet history and requests. This cannot be undone.</p>
-        </div>
-      </div>
-      <div className="mt-4 flex flex-wrap items-end gap-2">
-        <label className="text-xs font-semibold text-navy">Type DELETE to confirm<Input className="mt-1 w-40" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="DELETE" /></label>
-        <Button disabled={busy} variant="destructive" onClick={del}><Trash2 className="mr-1 h-4 w-4" />{busy ? "DELETING…" : "DELETE MY ACCOUNT"}</Button>
-      </div>
-    </Card>
-  );
-}
