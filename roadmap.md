@@ -24,3 +24,18 @@
 - [x] Admin reports: animated line/area charts for all six report topics + CSV export
 - [x] Admin settings: editable website email, phone, address and site name, live on footer/contact pages
 - [x] Admin dashboard: animated new-members growth chart directly below Total Members
+
+# Round: admin + member panel requests (Oct 23)
+
+- [x] Removed "Delete my account" from the member profile
+- [x] Member Popular Destinations shows only admin-published destinations (dashboard + Available Holidays)
+- [x] Admin Holiday Requests: alternate dates picked on a calendar, alt dates highlighted red, approved requests show only the approved (alternate) dates with a blinking red "please discuss with customer support to verify the dates" note; date sorting + CSV download
+- [x] Admin Settings: upload/paste/remove homepage hero images (Cloudinary), shown as an auto-rotating carousel on the homepage
+- [x] Admin Documents: upload PDFs (membership details, T&C); member Documents page lists them for download and no longer shows payment receipts
+- [x] Member notifications cleared for all users and now show only real notifications (mark-all-read)
+- [x] Admin Support Tickets: ticket ID, user + member ID, and status select (Open / In Progress / Resolved)
+- [x] Admin Members: spacious horizontally scrollable rows; referrals, wallet transactions and withdrawals editable/deletable in member details
+- [x] Admin Withdrawals: pick-your-columns CSV download dialog
+- [x] Admins & Roles: create staff (Manager, Supervisor, Operations Manager, Other with custom role text) and remove roles
+- [x] Admin Referral Settings: program on/off, fixed vs percentage cashback, per-membership reward values; the database trigger honours these settings when crediting referrers
+- [ ] Verify admin screens signed in as an admin in the preview (session mint was declined in chat)
