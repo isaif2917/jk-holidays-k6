@@ -51,12 +51,31 @@ const planArt = [
 function Home() {
   const liveDestinations = useSiteDestinations();
   const popularDestinations = liveDestinations.length ? liveDestinations : destinations;
+  const adminHeroImages = useHeroImages();
+  const heroSlides = adminHeroImages.length ? adminHeroImages : [heroImg];
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    if (heroSlides.length < 2) return;
+    const t = setInterval(() => setSlide((s) => (s + 1) % heroSlides.length), 5000);
+    return () => clearInterval(t);
+  }, [heroSlides.length]);
   return (
     <PublicLayout>
       {/* Hero */}
       <section className="relative bg-background text-white">
         <div className="relative h-[440px] overflow-hidden md:h-[520px]">
-          <img src={heroImg} alt="Infinity pool at a tropical beach resort at sunset" className="absolute inset-0 h-full w-full object-cover" width={1920} height={1080} />
+          {heroSlides.map((src, i) => (
+            <img key={`${src}-${i}`} src={src} alt={`Holiday resort slide ${i + 1}`} width={1920} height={1080}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${i === slide % heroSlides.length ? "opacity-100" : "opacity-0"}`} />
+          ))}
+          {heroSlides.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+              {heroSlides.map((_, i) => (
+                <button key={i} aria-label={`Go to slide ${i + 1}`} onClick={() => setSlide(i)}
+                  className={`h-2 w-2 rounded-full transition-all ${i === slide % heroSlides.length ? "w-6 bg-gold" : "bg-white/50"}`} />
+              ))}
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/90 via-navy-deep/50 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20">
