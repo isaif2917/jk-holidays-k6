@@ -135,18 +135,18 @@ function Members() {
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[1500px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr className="border-b">
-              <th className="py-2"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
-              <th>Member ID</th><th>Member Name</th><th>Mobile Number</th><th>Email</th><th>City</th><th>Plan</th><th>Referrals</th><th>Earned</th><th>Withdrawals</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead>
+              <th className="py-2 pr-3"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
+              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Status</th><th className="pr-4">Action</th></tr></thead>
             <tbody>
               {profiles.isLoading && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
               {!profiles.isLoading && !shown.length && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
               {shown.map((m: any) => {
                 const active = m.status === "Active";
                 return (
-                <tr key={m.id} className="border-b">
-                  <td className="py-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
+                <tr key={m.id} className="whitespace-nowrap border-b hover:bg-muted/30">
+                  <td className="py-4 pr-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
                   <td>{m.phone || "—"}</td><td>{m.email}</td><td>{m.city || "—"}</td>
