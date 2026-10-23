@@ -18,6 +18,7 @@ function Dashboard() {
   const { data: me } = useMe();
   const uid = me?.user.id;
   const p = me?.profile ?? {};
+  const liveDestinations = useSiteDestinations();
   const bookings = useRows(["bookings", uid], () => db.from("bookings").select("*").eq("user_id", uid).order("check_in", { ascending: false }).limit(4), !!uid);
   const requests = useRows(["holiday_requests", uid], () => db.from("holiday_requests").select("*").eq("user_id", uid).order("created_at", { ascending: false }), !!uid);
   const tx = useRows(["wallet_transactions", uid], () => db.from("wallet_transactions").select("*").eq("user_id", uid), !!uid);
@@ -129,7 +130,7 @@ function Dashboard() {
           <Link to="/app/holidays" className="text-xs font-semibold text-blue-600">View All</Link>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-6">
-          {destinations.map((d) => (
+          {liveDestinations.map((d) => (
             <Link to="/app/request" key={d.name} className="relative aspect-square overflow-hidden rounded-lg">
               <img src={d.image} alt={d.name} loading="lazy" className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 to-transparent" />
@@ -139,6 +140,9 @@ function Dashboard() {
               </div>
             </Link>
           ))}
+          {!liveDestinations.length && (
+            <div className="col-span-3 py-6 text-center text-sm text-muted-foreground md:col-span-6">No destinations published yet.</div>
+          )}
         </div>
       </div>
     </div>

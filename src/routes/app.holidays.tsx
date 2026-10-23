@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Crown, CalendarCheck, CreditCard, MapPin, ArrowRight } from "lucide-react";
-import { destinations } from "@/data/mock";
 import { useSiteDestinations } from "@/lib/catalog";
 import { db, fmtDate, inr, useMe, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
@@ -14,8 +13,7 @@ function Holidays() {
   const { data: me } = useMe();
   const p = me?.profile ?? {};
   const pays = useRows(["payments", me?.user.id], () => db.from("payments").select("*").eq("user_id", me!.user.id).order("created_at", { ascending: false }), !!me?.user.id);
-  const live = useSiteDestinations();
-  const list = live.length ? live : destinations.map((d) => ({ name: d.name, country: d.country, image: d.image }));
+  const list = useSiteDestinations();
   const nightsLeft = Math.max(0, (p.nights_total ?? 0) - (p.nights_used ?? 0));
   const latest = (pays.data ?? [])[0] as any;
 
