@@ -223,7 +223,7 @@ function ReferralSettlements() {
               <div className="text-xs text-muted-foreground">Referred by {label(r.user_id)} · {fmtDate(r.created_at)}</div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge status={r.status} />
+              <StatusBadge s={r.status} />
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
                 <Input className="w-28 pl-7" type="number" min="0" value={amounts[r.id] ?? ""} onChange={(e) => setAmounts({ ...amounts, [r.id]: e.target.value })} />
@@ -246,7 +246,7 @@ function ReferralSettlements() {
                   <div className="text-xs text-muted-foreground">Referred by {label(r.user_id)} · {fmtDate(r.created_at)}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <StatusBadge status={r.status} />
+                  <StatusBadge s={r.status} />
                   <span className="text-sm font-semibold text-navy">{r.reward_amount != null ? inr(r.reward_amount) : ""}</span>
                 </div>
               </div>

@@ -298,7 +298,7 @@ function PasswordBox({ userId }: { userId: string }) {
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <code className="rounded bg-muted px-2 py-1 text-xs font-semibold">{show ? current : "•".repeat(Math.max(current.length, 8))}</code>
           <Button type="button" variant="outline" size="sm" onClick={() => setShow(!show)}>{show ? "Hide" : "Show password"}</Button>
-          <span className="text-[11px] text-muted-foreground">Last password set from the admin panel{known.data?.updated_at ? ` on ${fmtDate(known.data.updated_at)}` : ""}.</span>
+          <span className="text-[11px] text-muted-foreground">Last password set from the admin panel{(known.data as any)?.updated_at ? ` on ${fmtDate((known.data as any).updated_at)}` : ""}.</span>
         </div>
       ) : (
         <p className="text-[11px] text-muted-foreground">No recorded password yet — passwords members choose themselves stay private. Set one below and it will show here.</p>
