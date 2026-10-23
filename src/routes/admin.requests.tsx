@@ -17,7 +17,7 @@ import { createRouteHead } from "@/lib/route-meta";
 export const Route = createFileRoute("/admin/requests")({ head: () => createRouteHead("Holiday Requests — JK Holidays Admin", "Review member holiday requests, travel details and status."), component: AdminRequests });
 
 /** alt_dates is stored as "YYYY-MM-DD|YYYY-MM-DD" when set from the calendar; free text is shown as-is. */
-export const altRange = (alt: string | null): DateRange | undefined => {
+const altRange = (alt: string | null): DateRange | undefined => {
   const m = /^(\d{4}-\d{2}-\d{2})\|(\d{4}-\d{2}-\d{2})$/.exec(alt ?? "");
   if (!m) return undefined;
   return { from: new Date(m[1]), to: new Date(m[2]) };
