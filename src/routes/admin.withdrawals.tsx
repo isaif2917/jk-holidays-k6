@@ -148,6 +148,24 @@ function Withdrawals() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={dlOpen} onOpenChange={setDlOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Choose columns to download</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground">The file includes the {list.length} withdrawal(s) currently filtered on this page ({tab === "All" ? "all statuses" : tab}).</p>
+          <div className="grid grid-cols-2 gap-1 text-sm sm:grid-cols-3">
+            {COLS.map((c) => (
+              <label key={c.key} className="flex items-center gap-2">
+                <input type="checkbox" checked={colsOn[c.key] !== false} onChange={(e) => setCols({ ...cols, [c.key]: e.target.checked })} /> {c.key}
+              </label>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDlOpen(false)}>Cancel</Button>
+            <Button className="bg-navy text-white" onClick={exportExcel}><Download className="mr-1 h-4 w-4" /> Download CSV</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
