@@ -27,6 +27,8 @@ function Withdrawals() {
   const [picked, setPicked] = useState<string[]>([]);
   const [review, setReview] = useState<any | null>(null);
   const [remarks, setRemarks] = useState("");
+  const [dlOpen, setDlOpen] = useState(false);
+  const [cols, setCols] = useState<Record<string, boolean>>({});
 
   const rows = q.data ?? [];
   const balance = (uid: string) => calculateAvailableWalletBalance(
@@ -45,13 +47,31 @@ function Withdrawals() {
     refresh("withdrawals", "wallet_transactions");
   };
 
+  const COLS: { key: string; get: (w: any) => unknown }[] = [
+    { key: "ID", get: (w) => shortId(w.id) },
+    { key: "Name", get: (w) => map[w.user_id]?.full_name ?? "" },
+    { key: "Member ID", get: (w) => map[w.user_id]?.member_code ?? "" },
+    { key: "Email", get: (w) => map[w.user_id]?.email ?? "" },
+    { key: "Mobile", get: (w) => map[w.user_id]?.phone ?? "" },
+    { key: "Amount", get: (w) => w.amount },
+    { key: "Status", get: (w) => w.status },
+    { key: "Balance", get: (w) => balance(w.user_id) },
+    { key: "DateTime", get: (w) => fmtDT(w.created_at) },
+    { key: "Method", get: (w) => w.method },
+    { key: "Account Number", get: (w) => w.details?.account_number ?? "" },
+    { key: "Holder Name", get: (w) => w.details?.holder_name ?? "" },
+    { key: "Bank", get: (w) => w.details?.bank ?? "" },
+    { key: "Branch", get: (w) => w.details?.branch ?? "" },
+    { key: "IFSC", get: (w) => w.details?.ifsc ?? "" },
+    { key: "UPI", get: (w) => w.details?.upi_id ?? "" },
+    { key: "Remarks", get: (w) => w.remarks ?? "" },
+  ];
+  const colsOn = COLS.every((c) => cols[c.key] !== false) ? {} : cols;
   const exportExcel = () => {
-    if (!list.length) return toast.error("Nothing to export");
-    downloadCsv("withdrawals.csv", list.map((w) => ({
-      ID: shortId(w.id), Name: map[w.user_id]?.full_name ?? "", MemberID: map[w.user_id]?.member_code ?? "", Amount: w.amount, Status: w.status,
-      Balance: balance(w.user_id), DateTime: fmtDT(w.created_at), Method: w.method, AccountNumber: w.details?.account_number ?? "", HolderName: w.details?.holder_name ?? "",
-      Bank: w.details?.bank ?? "", Branch: w.details?.branch ?? "", IFSC: w.details?.ifsc ?? "", UPI: w.details?.upi_id ?? "", Remarks: w.remarks ?? "",
-    })));
+    const chosen = COLS.filter((c) => colsOn[c.key] !== false);
+    if (!chosen.length) return toast.error("Select at least one column");
+    downloadCsv("withdrawals.csv", list.map((w) => Object.fromEntries(chosen.map((c) => [c.key, c.get(w)]))));
+    setDlOpen(false);
   };
 
   const allChecked = list.length > 0 && list.every((w) => picked.includes(w.id));
