@@ -38,4 +38,11 @@
 - [x] Admin Withdrawals: pick-your-columns CSV download dialog
 - [x] Admins & Roles: create staff (Manager, Supervisor, Operations Manager, Other with custom role text) and remove roles
 - [x] Admin Referral Settings: program on/off, fixed vs percentage cashback, per-membership reward values; the database trigger honours these settings when crediting referrers
-- [ ] Verify admin screens signed in as an admin in the preview (session mint was declined in chat)
+- [x] Verified admin screens signed in as the admin in the preview (admin creation, member password display, referral settlement)
+
+# Round: admin passwords + referrals + staff creation fix (Oct 23)
+
+- [x] Admin can now see the password in member details — every password set from the admin panel (add member/admin/staff or change password) is saved and shown with a Show/Hide toggle; passwords members choose themselves stay private
+- [x] Fixed the "Missing Supabase environment variables" error when creating admins/staff (stale backend key re-bound); duplicate emails now get a clear message instead of overwriting an existing account's password
+- [x] Referral Settings: new "Referral settlements" section — settle (credits the referrer's wallet) or reject each referral, with a settled/rejected history list
+- [ ] Saif (saif2917@gmail.com) admin account created in verification — sign in at Admin Login with the password from the "Add new admin" form
