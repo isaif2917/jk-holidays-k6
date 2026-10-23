@@ -44,6 +44,15 @@ export function useSiteDestinations(): SiteDestination[] {
   return q.data.map((r: any) => ({ name: r.name, country: r.location, image: r.image_url ?? "" }));
 }
 
+/** Homepage hero carousel images managed in Admin → Settings (public read of the hero_images key). */
+export function useHeroImages() {
+  const q = useRows("hero-images", () => db.from("admin_settings").select("key,value").eq("key", "hero_images"));
+  try {
+    const list = JSON.parse(q.data?.[0]?.value || "[]");
+    return Array.isArray(list) ? list.filter((u: unknown) => typeof u === "string" && /^https:\/\//.test(u)) : [];
+  } catch { return []; }
+}
+
 /** Site contact details managed in Admin → Settings, falling back to bundled defaults. */
 export function useSiteContact() {
   const q = useRows("site-settings", () => db.from("admin_settings").select("key,value").in("key", ["site_name", "site_email", "site_phone", "site_address"]));

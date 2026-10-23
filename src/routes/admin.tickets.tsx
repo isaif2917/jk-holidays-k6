@@ -5,10 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db, fmtDate, useProfilesMap, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/tickets")({ head: () => createRouteHead("Support Tickets — JK Holidays Admin", "Review support tickets and respond to member requests."), component: Tickets });
+
+const TICKET_STATUSES = ["Open", "In Progress", "Resolved"];
+const shortId = (id: string) => "TKT-" + id.slice(0, 5).toUpperCase();
 
 function Tickets() {
   const refresh = useRefresh();
@@ -25,6 +29,11 @@ function Tickets() {
     refresh("support_tickets");
   };
 
+  const setStatus = async (t: any, status: string) => {
+    if (!TICKET_STATUSES.includes(status)) return;
+    await update(t, { status }, `Your ticket status is now ${status}.`);
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="font-serif text-3xl font-bold text-navy">Support Tickets</h1>
@@ -37,10 +46,21 @@ function Tickets() {
             <Card key={t.id} className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <div className="font-semibold text-navy">{t.subject}</div>
-                  <div className="text-xs text-muted-foreground">{p?.full_name || p?.email || "Member"} · {p?.member_code} · {fmtDate(t.created_at)}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-muted-foreground">{shortId(t.id)}</span>
+                    <span className="font-semibold text-navy">{t.subject}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    User: {p?.full_name || p?.email || "Member"} · Member ID: {p?.member_code || "—"} · Raised {fmtDate(t.created_at)}
+                  </div>
                 </div>
-                <StatusBadge s={t.status} />
+                <div className="flex items-center gap-2">
+                  <StatusBadge s={t.status} />
+                  <Select value={TICKET_STATUSES.includes(t.status) ? t.status : undefined} onValueChange={(v) => setStatus(t, v)}>
+                    <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Update status" /></SelectTrigger>
+                    <SelectContent>{TICKET_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
               </div>
               <p className="mt-3 whitespace-pre-line text-sm">{t.message}</p>
               {t.admin_reply && <div className="mt-3 rounded-md bg-muted p-3 text-sm"><span className="text-xs font-semibold text-navy">Your reply: </span>{t.admin_reply}</div>}
@@ -48,11 +68,7 @@ function Tickets() {
                 onChange={(e) => setReplies((r) => ({ ...r, [t.id]: e.target.value }))} />
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button size="sm" className="bg-navy text-white" disabled={!reply.trim()}
-                  onClick={() => update(t, { admin_reply: reply.trim(), status: t.status === "Open" ? "Replied" : t.status }, reply.trim())}>Reply</Button>
-                <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700"
-                  onClick={() => update(t, { status: "Approved", ...(reply.trim() ? { admin_reply: reply.trim() } : {}) }, reply.trim() || "Your ticket has been approved.")}>Approve</Button>
-                <Button size="sm" variant="destructive"
-                  onClick={() => update(t, { status: "Rejected", ...(reply.trim() ? { admin_reply: reply.trim() } : {}) }, reply.trim() || "Your ticket has been rejected.")}>Reject</Button>
+                  onClick={() => update(t, { admin_reply: reply.trim() }, reply.trim())}>Reply</Button>
               </div>
             </Card>
           );

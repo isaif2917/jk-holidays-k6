@@ -27,6 +27,8 @@ function Withdrawals() {
   const [picked, setPicked] = useState<string[]>([]);
   const [review, setReview] = useState<any | null>(null);
   const [remarks, setRemarks] = useState("");
+  const [dlOpen, setDlOpen] = useState(false);
+  const [cols, setCols] = useState<Record<string, boolean>>({});
 
   const rows = q.data ?? [];
   const balance = (uid: string) => calculateAvailableWalletBalance(
@@ -45,13 +47,32 @@ function Withdrawals() {
     refresh("withdrawals", "wallet_transactions");
   };
 
+  const COLS: { key: string; get: (w: any) => unknown }[] = [
+    { key: "ID", get: (w) => shortId(w.id) },
+    { key: "Name", get: (w) => map[w.user_id]?.full_name ?? "" },
+    { key: "Member ID", get: (w) => map[w.user_id]?.member_code ?? "" },
+    { key: "Email", get: (w) => map[w.user_id]?.email ?? "" },
+    { key: "Mobile", get: (w) => map[w.user_id]?.phone ?? "" },
+    { key: "Amount", get: (w) => w.amount },
+    { key: "Status", get: (w) => w.status },
+    { key: "Balance", get: (w) => balance(w.user_id) },
+    { key: "DateTime", get: (w) => fmtDT(w.created_at) },
+    { key: "Method", get: (w) => w.method },
+    { key: "Account Number", get: (w) => w.details?.account_number ?? "" },
+    { key: "Holder Name", get: (w) => w.details?.holder_name ?? "" },
+    { key: "Bank", get: (w) => w.details?.bank ?? "" },
+    { key: "Branch", get: (w) => w.details?.branch ?? "" },
+    { key: "IFSC", get: (w) => w.details?.ifsc ?? "" },
+    { key: "UPI", get: (w) => w.details?.upi_id ?? "" },
+    { key: "Remarks", get: (w) => w.remarks ?? "" },
+  ];
+  const colsOn = COLS.every((c) => cols[c.key] !== false) ? {} : cols;
   const exportExcel = () => {
     if (!list.length) return toast.error("Nothing to export");
-    downloadCsv("withdrawals.csv", list.map((w) => ({
-      ID: shortId(w.id), Name: map[w.user_id]?.full_name ?? "", MemberID: map[w.user_id]?.member_code ?? "", Amount: w.amount, Status: w.status,
-      Balance: balance(w.user_id), DateTime: fmtDT(w.created_at), Method: w.method, AccountNumber: w.details?.account_number ?? "", HolderName: w.details?.holder_name ?? "",
-      Bank: w.details?.bank ?? "", Branch: w.details?.branch ?? "", IFSC: w.details?.ifsc ?? "", UPI: w.details?.upi_id ?? "", Remarks: w.remarks ?? "",
-    })));
+    const chosen = COLS.filter((c) => colsOn[c.key] !== false);
+    if (!chosen.length) return toast.error("Select at least one column");
+    downloadCsv("withdrawals.csv", list.map((w) => Object.fromEntries(chosen.map((c) => [c.key, c.get(w)]))));
+    setDlOpen(false);
   };
 
   const allChecked = list.length > 0 && list.every((w) => picked.includes(w.id));
@@ -75,7 +96,7 @@ function Withdrawals() {
           </div>
           <div className="flex gap-2">
             <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input className="w-60 pl-9" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
-            <Button variant="outline" onClick={exportExcel}><Download className="mr-1 h-4 w-4" /> Excel</Button>
+            <Button variant="outline" onClick={() => { setCols({}); setDlOpen(true); }}><Download className="mr-1 h-4 w-4" /> Select & Download</Button>
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
@@ -125,6 +146,24 @@ function Withdrawals() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dlOpen} onOpenChange={setDlOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Choose columns to download</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground">The file includes the {list.length} withdrawal(s) currently filtered on this page ({tab === "All" ? "all statuses" : tab}).</p>
+          <div className="grid grid-cols-2 gap-1 text-sm sm:grid-cols-3">
+            {COLS.map((c) => (
+              <label key={c.key} className="flex items-center gap-2">
+                <input type="checkbox" checked={colsOn[c.key] !== false} onChange={(e) => setCols({ ...cols, [c.key]: e.target.checked })} /> {c.key}
+              </label>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDlOpen(false)}>Cancel</Button>
+            <Button className="bg-navy text-white" onClick={exportExcel}><Download className="mr-1 h-4 w-4" /> Download CSV</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
-import { Search, Download, Upload, Plus, Eye, Edit, MoreVertical, CalendarIcon } from "lucide-react";
+import { Search, Download, Upload, Plus, Eye, Edit, MoreVertical, CalendarIcon, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -135,18 +135,18 @@ function Members() {
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[1500px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr className="border-b">
-              <th className="py-2"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
-              <th>Member ID</th><th>Member Name</th><th>Mobile Number</th><th>Email</th><th>City</th><th>Plan</th><th>Referrals</th><th>Earned</th><th>Withdrawals</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead>
+              <th className="py-2 pr-3"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
+              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Status</th><th className="pr-4">Action</th></tr></thead>
             <tbody>
               {profiles.isLoading && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
               {!profiles.isLoading && !shown.length && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
               {shown.map((m: any) => {
                 const active = m.status === "Active";
                 return (
-                <tr key={m.id} className="border-b">
-                  <td className="py-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
+                <tr key={m.id} className="whitespace-nowrap border-b hover:bg-muted/30">
+                  <td className="py-4 pr-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
                   <td>{m.phone || "—"}</td><td>{m.email}</td><td>{m.city || "—"}</td>
@@ -300,26 +300,108 @@ function PasswordBox({ userId }: { userId: string }) {
 }
 
 function MemberHistory({ userId, profilesById }: { userId: string; profilesById: Record<string, any> }) {
+  const refresh = useRefresh();
   const pay = useRows(["payments", userId], () => db.from("payments").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const tx = useRows(["wallet_transactions", userId], () => db.from("wallet_transactions").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const bk = useRows(["bookings", userId], () => db.from("bookings").select("*").eq("user_id", userId).order("check_in", { ascending: false }));
   const refs = useRows(["member-referrals", userId], () => db.from("referrals").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
   const withdrawals = useRows(["member-withdrawals", userId], () => db.from("withdrawals").select("*").eq("user_id", userId).order("created_at", { ascending: false }));
-  const Section = ({ title, rows, render }: { title: string; rows: any[]; render: (r: any) => React.ReactNode }) => (
+  const [edit, setEdit] = useState<{ table: "referrals" | "wallet_transactions" | "withdrawals"; row: any } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const saveEdit = async (patch: Record<string, unknown>) => {
+    if (!edit) return;
+    setBusy(true);
+    const { error } = await db.from(edit.table).update(patch).eq("id", edit.row.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Record updated");
+    setEdit(null);
+    refresh("referrals", "member-referrals", "member-referral-summary", "wallet_transactions", "member-wallet-summary", "withdrawals", "member-withdrawals", "member-withdrawal-summary");
+  };
+
+  const removeRow = async () => {
+    if (!edit) return;
+    setBusy(true);
+    const { error } = await db.from(edit.table).delete().eq("id", edit.row.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Record deleted");
+    setEdit(null);
+    refresh("referrals", "member-referrals", "member-referral-summary", "wallet_transactions", "member-wallet-summary", "withdrawals", "member-withdrawals", "member-withdrawal-summary");
+  };
+
+  const Section = ({ title, rows, table, render }: { title: string; rows: any[]; table?: "referrals" | "wallet_transactions" | "withdrawals"; render: (r: any) => React.ReactNode }) => (
     <div className="mt-4">
       <div className="text-xs font-semibold text-navy">{title} ({rows.length})</div>
       {rows.length === 0 ? <div className="mt-1 text-xs text-muted-foreground">None yet</div> :
-        <div className="mt-1 divide-y rounded-md border text-xs">{rows.map((r) => <div key={r.id} className="flex flex-wrap justify-between gap-2 p-2">{render(r)}</div>)}</div>}
+        <div className="mt-1 divide-y rounded-md border text-xs">
+          {rows.map((r) => (
+            <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 p-2">
+              {render(r)}
+              {table && <span className="ml-auto flex shrink-0 gap-1">
+                <button className="text-amber-600" aria-label={`Edit ${title}`} onClick={() => setEdit({ table, row: { ...r } })}><Edit className="h-3.5 w-3.5" /></button>
+              </span>}
+            </div>
+          ))}
+        </div>}
     </div>
   );
   return (
     <div>
-      <Section title="Referrals and member IDs" rows={refs.data ?? []} render={(r) => <><span>{r.friend_name} · {r.referred_user_id ? `Member ${profilesById[r.referred_user_id]?.member_code ?? r.referred_user_id.slice(0, 8)}` : r.friend_phone}</span><span className="font-semibold">{r.status}</span></>} />
-      <Section title="Wallet earned" rows={(tx.data ?? []).filter((r: any) => String(r.type).toLowerCase() === "credit")} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{inr(r.amount)}</span></>} />
-      <Section title="Withdrawals" rows={withdrawals.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.method} · {inr(r.amount)}</span><span className="font-semibold">{r.status}{r.remarks ? ` · ${r.remarks}` : ""}</span></>} />
+      <Section title="Referrals" table="referrals" rows={refs.data ?? []} render={(r) => <><span>{r.friend_name} · {r.referred_user_id ? `Member ${profilesById[r.referred_user_id]?.member_code ?? r.referred_user_id.slice(0, 8)}` : r.friend_phone}</span><span className="font-semibold">{r.status}{r.reward_amount != null ? ` · ${inr(r.reward_amount)}` : ""}</span></>} />
+      <Section title="Wallet transactions (editable)" table="wallet_transactions" rows={tx.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{r.type} {inr(r.amount)}</span></>} />
+      <Section title="Withdrawals (editable)" table="withdrawals" rows={withdrawals.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.method} · {inr(r.amount)}</span><span className="font-semibold">{r.status}{r.remarks ? ` · ${r.remarks}` : ""}</span></>} />
       <Section title="Payments & membership requests" rows={pay.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.plan_slug} · {r.method}{r.reference ? ` · Ref ${r.reference}` : ""}</span><span className="font-semibold">{inr(r.amount)} · {r.status}</span></>} />
-      <Section title="Wallet transactions" rows={tx.data ?? []} render={(r) => <><span>{fmtDate(r.created_at)} · {r.description}</span><span className="font-semibold">{r.type} {inr(r.amount)}</span></>} />
       <Section title="Bookings" rows={bk.data ?? []} render={(r) => <><span>{r.destination} · {fmtDate(r.check_in)} – {fmtDate(r.check_out)}</span><span className="font-semibold">{r.nights} nights · {r.status}</span></>} />
+
+      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit record</DialogTitle></DialogHeader>
+          {edit?.table === "referrals" && <ReferralForm row={edit.row} busy={busy} onSave={saveEdit} />}
+          {edit?.table === "wallet_transactions" && <WalletForm row={edit.row} busy={busy} onSave={saveEdit} />}
+          {edit?.table === "withdrawals" && <WithdrawalForm row={edit.row} busy={busy} onSave={saveEdit} />}
+          <DialogFooter className="flex-row justify-between">
+            <Button variant="outline" className="text-destructive" disabled={busy} onClick={removeRow}><Trash2 className="mr-1 h-4 w-4" /> Delete record</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+const REFERRAL_STATUSES = ["Pending", "Approved", "Rewarded", "Rejected"];
+function ReferralForm({ row, busy, onSave }: { row: any; busy: boolean; onSave: (patch: Record<string, unknown>) => void }) {
+  const [f, setF] = useState({ friend_name: row.friend_name ?? "", friend_phone: row.friend_phone ?? "", status: row.status ?? "Pending", reward: row.reward_amount != null ? String(row.reward_amount) : "" });
+  return <div className="grid gap-2">
+    <Input placeholder="Friend name" value={f.friend_name} onChange={(e) => setF({ ...f, friend_name: e.target.value })} />
+    <Input placeholder="Friend phone" value={f.friend_phone} onChange={(e) => setF({ ...f, friend_phone: e.target.value })} />
+    <Select value={f.status} onValueChange={(v) => setF({ ...f, status: v })}><SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent>{REFERRAL_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
+    <Input type="number" placeholder="Reward amount (blank = none)" value={f.reward} onChange={(e) => setF({ ...f, reward: e.target.value })} />
+    <Button disabled={busy} className="bg-navy text-white" onClick={() => onSave({ friend_name: f.friend_name.trim(), friend_phone: f.friend_phone.trim(), status: f.status, reward_amount: f.reward === "" ? null : Number(f.reward) })}>{busy ? "Saving…" : "Save referral"}</Button>
+  </div>;
+}
+
+function WalletForm({ row, busy, onSave }: { row: any; busy: boolean; onSave: (patch: Record<string, unknown>) => void }) {
+  const [f, setF] = useState({ type: /^debit$/i.test(row.type) ? "Debit" : "Credit", amount: String(row.amount ?? ""), description: row.description ?? "" });
+  return <div className="grid gap-2">
+    <Select value={f.type} onValueChange={(v) => setF({ ...f, type: v })}><SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent><SelectItem value="Credit">Credit (adds to wallet)</SelectItem><SelectItem value="Debit">Debit (deducts from wallet)</SelectItem></SelectContent></Select>
+    <Input type="number" min="0" placeholder="Amount" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} />
+    <Input placeholder="Description" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
+    <Button disabled={busy || !(Number(f.amount) > 0)} className="bg-navy text-white" onClick={() => onSave({ type: f.type, amount: Number(f.amount), description: f.description.trim() })}>{busy ? "Saving…" : "Save transaction"}</Button>
+  </div>;
+}
+
+const WITHDRAWAL_STATUSES = ["Pending", "Approved", "Rejected", "Paid"];
+function WithdrawalForm({ row, busy, onSave }: { row: any; busy: boolean; onSave: (patch: Record<string, unknown>) => void }) {
+  const [f, setF] = useState({ amount: String(row.amount ?? ""), status: WITHDRAWAL_STATUSES.includes(row.status) ? row.status : "Pending", remarks: row.remarks ?? "" });
+  return <div className="grid gap-2">
+    <Input type="number" min="0" placeholder="Amount" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} />
+    <Select value={f.status} onValueChange={(v) => setF({ ...f, status: v })}><SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent>{WITHDRAWAL_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
+    <Input placeholder="Remarks" value={f.remarks} onChange={(e) => setF({ ...f, remarks: e.target.value })} />
+    <Button disabled={busy || !(Number(f.amount) > 0)} className="bg-navy text-white" onClick={() => onSave({ amount: Number(f.amount), status: f.status, remarks: f.remarks.trim() || null })}>{busy ? "Saving…" : "Save withdrawal"}</Button>
+  </div>;
 }

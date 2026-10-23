@@ -22,6 +22,7 @@ import { Route as OffersRouteImport } from './routes/offers'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminMembershipRequestsRouteImport } from './routes/admin.membership-requests'
@@ -29,6 +30,7 @@ import { Route as AdminNotificationsRouteImport } from './routes/admin.notificat
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
+import { Route as AdminReferralSettingsRouteImport } from './routes/admin.referral-settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminRequestsRouteImport } from './routes/admin.requests'
 import { Route as AdminResortsRouteImport } from './routes/admin.resorts'
@@ -122,6 +124,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDocumentsRoute = AdminDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -155,6 +162,11 @@ const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
 const AdminPlansRoute = AdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralSettingsRoute = AdminReferralSettingsRouteImport.update({
+  id: '/referral-settings',
+  path: '/referral-settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
@@ -307,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -314,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/admin/offers': typeof AdminOffersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
+  '/admin/referral-settings': typeof AdminReferralSettingsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/resorts': typeof AdminResortsRoute
@@ -356,6 +370,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -363,6 +378,7 @@ export interface FileRoutesByTo {
   '/admin/offers': typeof AdminOffersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
+  '/admin/referral-settings': typeof AdminReferralSettingsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/resorts': typeof AdminResortsRoute
@@ -406,6 +422,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/membership-requests': typeof AdminMembershipRequestsRoute
@@ -413,6 +430,7 @@ export interface FileRoutesById {
   '/admin/offers': typeof AdminOffersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
+  '/admin/referral-settings': typeof AdminReferralSettingsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/resorts': typeof AdminResortsRoute
@@ -457,6 +475,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -464,6 +483,7 @@ export interface FileRouteTypes {
     | '/admin/offers'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/referral-settings'
     | '/admin/reports'
     | '/admin/requests'
     | '/admin/resorts'
@@ -506,6 +526,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -513,6 +534,7 @@ export interface FileRouteTypes {
     | '/admin/offers'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/referral-settings'
     | '/admin/reports'
     | '/admin/requests'
     | '/admin/resorts'
@@ -555,6 +577,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin/bookings'
     | '/admin/dashboard'
+    | '/admin/documents'
     | '/admin/leads'
     | '/admin/members'
     | '/admin/membership-requests'
@@ -562,6 +585,7 @@ export interface FileRouteTypes {
     | '/admin/offers'
     | '/admin/payments'
     | '/admin/plans'
+    | '/admin/referral-settings'
     | '/admin/reports'
     | '/admin/requests'
     | '/admin/resorts'
@@ -700,6 +724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/documents': {
+      id: '/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminDocumentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/leads': {
       id: '/admin/leads'
       path: '/leads'
@@ -747,6 +778,13 @@ declare module '@tanstack/react-router' {
       path: '/plans'
       fullPath: '/admin/plans'
       preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referral-settings': {
+      id: '/admin/referral-settings'
+      path: '/referral-settings'
+      fullPath: '/admin/referral-settings'
+      preLoaderRoute: typeof AdminReferralSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reports': {
@@ -944,6 +982,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminDocumentsRoute: typeof AdminDocumentsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminMembersRoute: typeof AdminMembersRoute
   AdminMembershipRequestsRoute: typeof AdminMembershipRequestsRoute
@@ -951,6 +990,7 @@ interface AdminRouteChildren {
   AdminOffersRoute: typeof AdminOffersRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPlansRoute: typeof AdminPlansRoute
+  AdminReferralSettingsRoute: typeof AdminReferralSettingsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminResortsRoute: typeof AdminResortsRoute
@@ -964,6 +1004,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminDocumentsRoute: AdminDocumentsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminMembersRoute: AdminMembersRoute,
   AdminMembershipRequestsRoute: AdminMembershipRequestsRoute,
@@ -971,6 +1012,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOffersRoute: AdminOffersRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPlansRoute: AdminPlansRoute,
+  AdminReferralSettingsRoute: AdminReferralSettingsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
   AdminResortsRoute: AdminResortsRoute,

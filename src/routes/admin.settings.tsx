@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Globe, Mail, Phone, MapPin, Save } from "lucide-react";
+import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2 } from "lucide-react";
 import { db, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
-export const Route = createFileRoute("/admin/settings")({ head: () => createRouteHead("Settings — JK Holidays Admin", "Edit the website name, contact email, phone number and address."), component: AdminSettings });
+export const Route = createFileRoute("/admin/settings")({ head: () => createRouteHead("Settings — JK Holidays Admin", "Edit the website name, contact details and homepage hero images."), component: AdminSettings });
 
 const KEYS = [
   { key: "site_name", label: "Site / Company Name", icon: Globe, placeholder: "JK Holidays Pvt. Ltd.", multiline: false },
@@ -23,14 +23,42 @@ function AdminSettings() {
   const settings = useRows("admin_settings", () => db.from("admin_settings").select("*"));
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [heroes, setHeroes] = useState<string[]>([]);
+  const [newUrl, setNewUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const heroFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!values.site_email && settings.data?.length) {
       const map: Record<string, string> = {};
       settings.data.forEach((r: any) => (map[r.key] = r.value ?? ""));
       setValues(map);
+      try { setHeroes(JSON.parse(map.hero_images || "[]")); } catch { setHeroes([]); }
     }
   }, [settings.data]);
+
+  const saveHeroList = async (list: string[]) => {
+    const { error } = await db.from("admin_settings").upsert({ key: "hero_images", value: JSON.stringify(list), updated_at: new Date().toISOString() });
+    if (error) return toast.error(error.message);
+    setHeroes(list);
+    refresh("admin_settings", "site-settings");
+  };
+
+  const uploadHero = async (file: File) => {
+    const s: Record<string, string> = {};
+    (settings.data ?? []).forEach((r: any) => (s[r.key] = r.value));
+    const cloud = s.cloudinary_cloud_name, preset = s.cloudinary_upload_preset;
+    if (!cloud || !preset) return toast.error("Set up Cloudinary in Membership Plans → Cloudinary first, then upload hero images here.");
+    setUploading(true);
+    try {
+      const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", preset); fd.append("folder", "jk-hero");
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, { method: "POST", body: fd });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error?.message ?? "Upload failed");
+      await saveHeroList([...heroes, j.secure_url]);
+      toast.success("Hero image added — the homepage carousel updates automatically.");
+    } catch (e: any) { toast.error(e.message); } finally { setUploading(false); }
+  };
 
   const save = async () => {
     setBusy(true);
@@ -63,7 +91,38 @@ function AdminSettings() {
         </div>
         <Button disabled={busy} onClick={save} className="mt-6 bg-gold-gradient font-bold text-navy-deep"><Save className="mr-2 h-4 w-4" />{busy ? "SAVING…" : "SAVE SETTINGS"}</Button>
       </Card>
-      <p className="text-xs text-muted-foreground">Changes appear on the public website footer, header phone number and Contact Us page shortly after saving.</p>
+
+      <Card className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-xl font-bold text-navy">Homepage Hero Images</h2>
+            <p className="text-xs text-muted-foreground">These images rotate in the website's top hero carousel. Add several to create a slideshow.</p>
+          </div>
+          <input ref={heroFileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadHero(e.target.files[0])} />
+          <Button disabled={uploading} className="bg-navy text-white" onClick={() => heroFileRef.current?.click()}><ImagePlus className="mr-1 h-4 w-4" />{uploading ? "Uploading…" : "Upload image"}</Button>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Input placeholder="…or paste an image URL (https://…)" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} />
+          <Button variant="outline" onClick={async () => {
+            const url = newUrl.trim();
+            if (!/^https:\/\//.test(url)) return toast.error("Enter a valid https image URL");
+            await saveHeroList([...heroes, url]); setNewUrl(""); toast.success("Hero image added");
+          }}><Link2 className="mr-1 h-4 w-4" /> Add URL</Button>
+        </div>
+        {heroes.length ? (
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {heroes.map((url, i) => (
+              <div key={`${url}-${i}`} className="group relative overflow-hidden rounded-lg border">
+                <img src={url} alt={`Hero ${i + 1}`} className="h-32 w-full object-cover" />
+                <button aria-label={`Remove hero ${i + 1}`} onClick={() => saveHeroList(heroes.filter((_, j) => j !== i))}
+                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-rose-600 shadow hover:bg-white"><Trash2 className="h-4 w-4" /></button>
+                <span className="absolute bottom-2 left-2 rounded bg-navy-deep/80 px-2 py-0.5 text-[10px] font-bold text-white">#{i + 1}</span>
+              </div>
+            ))}
+          </div>
+        ) : <p className="mt-4 text-sm text-muted-foreground">No custom hero images yet — the homepage uses its default image until you add one.</p>}
+      </Card>
+      <p className="text-xs text-muted-foreground">Changes appear on the public website footer, header phone number, Contact Us page and hero carousel shortly after saving.</p>
     </div>
   );
 }
