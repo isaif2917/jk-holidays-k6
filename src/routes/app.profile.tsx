@@ -1,13 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, ShieldCheck, Trash2, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Eye, EyeOff } from "lucide-react";
 import { db, useMe, useRefresh } from "@/lib/data";
-import { deleteOwnAccount } from "@/lib/admin.functions";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/app/profile")({ head: () => createRouteHead("My Profile — JK Holidays", "Review and update your JK Holidays contact details."), component: Profile });
@@ -41,7 +39,6 @@ function Profile() {
         <Button onClick={save} className="mt-6 bg-gold-gradient font-bold text-navy-deep">SAVE CHANGES</Button>
       </Card>
       <PasswordCard />
-      <DangerZone />
     </div>
   );
 }
