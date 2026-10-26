@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/brand/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { db, signOut, useMe, useRows } from "@/lib/data";
+import { db, signOut, useMe, useRows, useSessionGuard } from "@/lib/data";
 import { CONTACT } from "@/data/mock";
 
 const memberNav = [
