@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/brand/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { db, signOut, useMe, useRows } from "@/lib/data";
+import { db, signOut, useMe, useRows, useSessionGuard } from "@/lib/data";
 import { CONTACT } from "@/data/mock";
 
 const memberNav = [
@@ -31,6 +31,7 @@ const memberNav = [
 export function PortalLayout() {
   const { data: me, isLoading } = useMe();
   const navigate = useNavigate();
+  useSessionGuard(!isLoading && !!me, "/auth/login");
   const qc = useQueryClient();
   const unread = useRows(["notifications", me?.user.id], () => db.from("notifications").select("id").eq("user_id", me!.user.id).eq("read", false), !!me);
 

@@ -52,3 +52,4 @@
 - [x] Members: "Referred By" column in the member table and in View details (who referred this member)
 - [x] Referral Settings: "Send Custom Reward" — search members by ID/phone/name/email/city, credit any amount to their wallet, saved in a "Custom reward history" section on the same page
 - [x] Admins & Roles: Edit button beside Remove — change name, email, role, custom role label and password (own admin role is protected)
+- [x] Fixed "Unauthorized: No authorization header provided": expired/lost sign-in sessions now clear the screen and return the user to the login page automatically (checked every 30s and on tab focus) instead of leaving broken admin/member pages
