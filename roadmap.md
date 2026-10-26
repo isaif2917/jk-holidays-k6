@@ -46,3 +46,9 @@
 - [x] Fixed the "Missing Supabase environment variables" error when creating admins/staff (stale backend key re-bound); duplicate emails now get a clear message instead of overwriting an existing account's password
 - [x] Referral Settings: new "Referral settlements" section — settle (credits the referrer's wallet) or reject each referral, with a settled/rejected history list
 - [ ] Saif (saif2917@gmail.com) admin account created in verification — sign in at Admin Login with the password from the "Add new admin" form
+
+# Round: admin requests (Oct 26)
+
+- [x] Members: "Referred By" column in the member table and in View details (who referred this member)
+- [x] Referral Settings: "Send Custom Reward" — search members by ID/phone/name/email/city, credit any amount to their wallet, saved in a "Custom reward history" section on the same page
+- [x] Admins & Roles: Edit button beside Remove — change name, email, role, custom role label and password (own admin role is protected)
