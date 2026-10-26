@@ -36,6 +36,7 @@ export function AdminLayout() {
   const { data: me, isLoading } = useMe();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  useSessionGuard(!isLoading && !!me, "/admin-login");
   const ok = !!me?.isAdmin;
   const req = useRows("holiday_requests", () => db.from("holiday_requests").select("*").order("created_at", { ascending: false }), ok);
   const pay = useRows("payments", () => db.from("payments").select("*").order("created_at", { ascending: false }), ok);
