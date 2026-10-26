@@ -282,3 +282,93 @@ export const rejectReferral = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Manually credit a referral reward to a member chosen by the admin,
+// and record it in the custom-reward history shown on the referral settings page.
+export const createCustomReward = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { userId: string; amount: number; note?: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Choose a member first");
+    if (!Number.isFinite(d.amount) || d.amount <= 0) throw new Error("Enter a reward amount greater than zero");
+    if ((d.note ?? "").length > 200) throw new Error("Note is limited to 200 characters");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile, error: pErr } = await supabaseAdmin.from("profiles").select("full_name, member_code").eq("id", data.userId).maybeSingle();
+    if (pErr || !profile) throw new Error("Could not find this member");
+    const { error: wErr } = await supabaseAdmin.from("wallet_transactions").insert({
+      user_id: data.userId,
+      type: "credit",
+      amount: data.amount,
+      description: `Custom referral reward${data.note ? ": " + data.note.trim() : ""}`,
+    });
+    if (wErr) throw new Error(wErr.message);
+    const { error: hErr } = await supabaseAdmin.from("custom_referral_rewards").insert({
+      user_id: data.userId,
+      amount: data.amount,
+      note: data.note?.trim() ?? "",
+      created_by: context.userId,
+    });
+    if (hErr) throw new Error(hErr.message);
+    return { ok: true, name: profile.full_name };
+  });
+
+type RoleAccountInput = {
+  userId: string;
+  oldRole: string;
+  role: "admin" | "manager" | "supervisor" | "operations_manager" | "other";
+  roleLabel?: string;
+  full_name: string;
+  email: string;
+  password?: string;
+};
+
+// Edit an admin/staff account: name, email, role and password.
+export const updateRoleAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: RoleAccountInput) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Valid account required");
+    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.oldRole)) throw new Error("Invalid current role");
+    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.role)) throw new Error("Choose a valid role");
+    if (d.role === "other" && (!d.roleLabel || d.roleLabel.trim().length > 60)) throw new Error("Type the role (60 characters max)");
+    if (!d.full_name?.trim() || d.full_name.length > 100) throw new Error("Name is required (100 characters max)");
+    if (!/^\S+@\S+\.\S+$/.test(d.email ?? "") || d.email.length > 255) throw new Error("Valid email required");
+    if (d.password && d.password.length < 6) throw new Error("Password must be at least 6 characters");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (data.userId === context.userId && data.oldRole === "admin" && data.role !== "admin") {
+      throw new Error("You can't change your own admin role");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = data.email.trim().toLowerCase();
+    const { data: current, error: readError } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+    if (readError || !current.user) throw new Error("Could not find this account");
+    if (current.user.email?.toLowerCase() !== email) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { email, email_confirm: true });
+      if (error) throw new Error(error.message);
+    }
+    if (data.password) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
+      if (error) throw new Error(error.message);
+      await rememberPassword(supabaseAdmin, data.userId, data.password);
+    }
+    const { error: pErr } = await supabaseAdmin.from("profiles").update({
+      full_name: data.full_name.trim(), email,
+    }).eq("id", data.userId);
+    if (pErr) {
+      if (current.user.email && current.user.email.toLowerCase() !== email) {
+        await supabaseAdmin.auth.admin.updateUserById(data.userId, { email: current.user.email, email_confirm: true });
+      }
+      throw new Error(pErr.message);
+    }
+    const { error: rErr } = await supabaseAdmin.from("user_roles").update({
+      role: data.role,
+      role_label: data.role === "other" ? data.roleLabel!.trim() : null,
+    }).eq("user_id", data.userId).eq("role", data.oldRole as any);
+    if (rErr) throw new Error(rErr.message);
+    return { ok: true };
+  });
+
