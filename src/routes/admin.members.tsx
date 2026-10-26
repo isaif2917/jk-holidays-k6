@@ -146,10 +146,10 @@ function Members() {
           <table className="w-full min-w-[1500px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr className="border-b">
               <th className="py-2 pr-3"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
-              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email</th><th className="pr-4">Referred By</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Status</th><th className="pr-4">Action</th></tr></thead>
+              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email / Status</th><th className="pr-4">Referred By</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Action</th></tr></thead>
             <tbody>
-              {profiles.isLoading && <tr><td colSpan={14} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
-              {!profiles.isLoading && !shown.length && <tr><td colSpan={14} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
+              {profiles.isLoading && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
+              {!profiles.isLoading && !shown.length && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
               {shown.map((m: any) => {
                 const active = m.status === "Active";
                 return (
@@ -157,13 +157,18 @@ function Members() {
                   <td className="py-4 pr-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
-                  <td>{m.phone || "—"}</td><td>{m.email}</td><td>{referrerLabel(m.id) || <span className="text-muted-foreground">—</span>}</td><td>{m.city || "—"}</td>
+                  <td>{m.phone || "—"}</td>
+                  <td className="pr-4">
+                    <div className="flex items-center gap-2">
+                      <span>{m.email}</span>
+                      <button onClick={() => update([m.id], { status: active ? "Inactive" : "Active" }, active ? "Deactivated" : "Activated")} title="Click to toggle"
+                        className={active ? "text-emerald-600" : "text-rose-600"}>● {m.status}</button>
+                    </div>
+                  </td><td>{referrerLabel(m.id) || <span className="text-muted-foreground">—</span>}</td><td>{m.city || "—"}</td>
                   <td>{m.plan ? <Badge className={planColor[m.plan] ?? "bg-muted text-foreground"}>{m.plan}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                   <td>{summaries[m.id]?.referrals ?? 0}</td><td>{inr(summaries[m.id]?.earned ?? 0)}</td>
                   <td><div>{inr(summaries[m.id]?.withdrawn ?? 0)}</div>{(summaries[m.id]?.pending ?? 0) > 0 && <div className="text-xs text-muted-foreground">{inr(summaries[m.id]?.pending)} pending</div>}</td>
                   <td>{fmtDate(m.created_at)}</td>
-                  <td><button onClick={() => update([m.id], { status: active ? "Inactive" : "Active" }, active ? "Deactivated" : "Activated")} title="Click to toggle"
-                    className={active ? "text-emerald-600" : "text-rose-600"}>● {m.status}</button></td>
                   <td><div className="flex gap-2">
                     <button className="text-blue-600" onClick={() => setView(m)} aria-label="View"><Eye className="h-4 w-4" /></button>
                     <button className="text-amber-600" onClick={() => setEdit({ ...m })} aria-label="Edit"><Edit className="h-4 w-4" /></button>
