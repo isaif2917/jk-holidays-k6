@@ -108,6 +108,23 @@ function Roles() {
           <DialogFooter><Button disabled={busy} className="bg-navy text-white" onClick={submit}>{busy ? "Creating…" : "Create account"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent><DialogHeader><DialogTitle>Edit account</DialogTitle></DialogHeader>
+          {edit && <div className="space-y-3">
+            <Input placeholder="Full name" value={edit.full_name} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} />
+            <Input placeholder="Email" type="email" value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+            <Select value={edit.role} onValueChange={(v) => setEdit({ ...edit, role: v, roleLabel: v === "other" ? edit.roleLabel : "" })} disabled={edit.userId === me?.user.id && edit.oldRole === "admin"}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{ROLE_OPTIONS.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+            </Select>
+            {edit.role === "other" && <Input placeholder="Type the role (e.g. Field Executive)" maxLength={60} value={edit.roleLabel} onChange={(e) => setEdit({ ...edit, roleLabel: e.target.value })} />}
+            <Input placeholder="New password (leave blank to keep current)" value={edit.password} onChange={(e) => setEdit({ ...edit, password: e.target.value })} />
+            <p className="text-xs text-muted-foreground">Changes take effect on the next sign-in. Your own admin role can't be changed here.</p>
+          </div>}
+          <DialogFooter><Button disabled={editBusy} className="bg-navy text-white" onClick={submitEdit}>{editBusy ? "Saving…" : "Save changes"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

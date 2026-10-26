@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { IndianRupee, Percent, Save, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { HandCoins, IndianRupee, Percent, Save, Search, Users } from "lucide-react";
 import { db, fmtDate, inr, useProfilesMap, useRefresh, useRows } from "@/lib/data";
-import { rejectReferral, settleReferral } from "@/lib/admin.functions";
+import { createCustomReward, rejectReferral, settleReferral } from "@/lib/admin.functions";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/referral-settings")({ head: () => createRouteHead("Referral Settings — JK Holidays Admin", "Configure referral cashback rules and per-membership reward values."), component: ReferralSettings });
@@ -17,6 +18,7 @@ function ReferralSettings() {
   const refresh = useRefresh();
   const settings = useRows("admin_settings", () => db.from("admin_settings").select("*"));
   const plans = useRows("membership_plans", () => db.from("membership_plans").select("*").order("sort"));
+  const [customOpen, setCustomOpen] = useState(false);
   const [active, setActive] = useState(true);
   const [mode, setMode] = useState<"fixed" | "percent">("fixed");
   const [value, setValue] = useState("2000");
@@ -68,9 +70,12 @@ function ReferralSettings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold text-navy">Referral Settings</h1>
-        <div className="text-sm text-muted-foreground">Tune what referrers earn when a referred member's membership is approved.</div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-3xl font-bold text-navy">Referral Settings</h1>
+          <div className="text-sm text-muted-foreground">Tune what referrers earn when a referred member's membership is approved.</div>
+        </div>
+        <Button className="bg-navy text-white" onClick={() => setCustomOpen(true)}><HandCoins className="mr-1 h-4 w-4" /> Send Custom Reward</Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
@@ -151,7 +156,123 @@ function ReferralSettings() {
       </div>
 
       <ReferralSettlements />
+      <CustomRewardHistory />
+
+      <CustomRewardDialog open={customOpen} onClose={() => setCustomOpen(false)} />
     </div>
+  );
+}
+
+function CustomRewardDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const reward = useServerFn(createCustomReward);
+  const refresh = useRefresh();
+  const { list, isLoading } = useProfilesMap();
+  const [q, setQ] = useState("");
+  const [picked, setPicked] = useState<any>(null);
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const matches = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return [];
+    return list.filter((m: any) =>
+      [m.full_name, m.email, m.phone, m.member_code, m.city].some((v: any) => String(v ?? "").toLowerCase().includes(s)),
+    ).slice(0, 6);
+  }, [list, q]);
+
+  const close = () => { onClose(); setQ(""); setPicked(null); setAmount(""); setNote(""); };
+
+  const submit = async () => {
+    if (!picked) return toast.error("Choose a member first");
+    const amt = Number(amount);
+    if (!Number.isFinite(amt) || amt <= 0) return toast.error("Enter a reward amount greater than zero");
+    setBusy(true);
+    try {
+      const res = await reward({ data: { userId: picked.id, amount: amt, note: note.trim() || undefined } });
+      toast.success(`${inr(amt)} credited to ${res?.name || picked.full_name || "the member"}'s wallet`);
+      refresh("custom-referral-rewards", "wallet_transactions", "member-wallet-summary", "profiles");
+      close();
+    } catch (e: any) { toast.error(e.message); }
+    setBusy(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && close()}>
+      <DialogContent><DialogHeader><DialogTitle>Send a custom referral reward</DialogTitle></DialogHeader>
+        <div className="grid gap-3">
+          {picked ? (
+            <div className="flex items-center justify-between rounded-lg border border-gold/50 bg-gold-soft/20 p-3">
+              <div>
+                <div className="text-sm font-bold text-navy">{picked.full_name || picked.email}</div>
+                <div className="text-xs text-muted-foreground">{picked.member_code}{picked.phone ? ` · ${picked.phone}` : ""}{picked.city ? ` · ${picked.city}` : ""}</div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setPicked(null)}>Change</Button>
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs font-semibold">Search member</label>
+              <div className="relative mt-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input className="pl-9" placeholder="Member ID, phone, name, email or city…" value={q} onChange={(e) => setQ(e.target.value)} />
+              </div>
+              {q.trim() && (
+                <div className="mt-2 divide-y rounded-md border text-sm">
+                  {isLoading && <div className="p-3 text-muted-foreground">Loading members…</div>}
+                  {!isLoading && !matches.length && <div className="p-3 text-muted-foreground">No members match "{q.trim()}"</div>}
+                  {matches.map((m: any) => (
+                    <button key={m.id} type="button" className="flex w-full items-center justify-between p-2 text-left hover:bg-muted/40" onClick={() => { setPicked(m); setQ(""); }}>
+                      <span className="font-medium text-navy">{m.full_name || m.email}</span>
+                      <span className="text-xs text-muted-foreground">{m.member_code}{m.phone ? ` · ${m.phone}` : ""}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div>
+            <label className="text-xs font-semibold">Reward amount (₹)</label>
+            <Input className="mt-1" type="number" min="1" placeholder="e.g. 2000" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs font-semibold">Note (optional)</label>
+            <Input className="mt-1" placeholder="Reason for this manual reward" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
+          </div>
+          <p className="text-xs text-muted-foreground">The amount is credited to the member's wallet immediately and saved in the custom reward history below.</p>
+        </div>
+        <DialogFooter><Button disabled={busy || !picked} className="bg-navy text-white" onClick={submit}>{busy ? "Crediting…" : "Send reward"}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CustomRewardHistory() {
+  const { map } = useProfilesMap();
+  const rows = useRows("custom-referral-rewards", () => db.from("custom_referral_rewards").select("*").order("created_at", { ascending: false }));
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-2">
+        <HandCoins className="h-5 w-5 text-gold" />
+        <h2 className="font-serif text-xl font-bold text-navy">Custom reward history</h2>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Rewards you credited manually, separate from the automatic referral settlements.</p>
+      <div className="mt-4 space-y-2">
+        {rows.isLoading && <div className="py-4 text-center text-sm text-muted-foreground">Loading history…</div>}
+        {!rows.isLoading && !(rows.data ?? []).length && <div className="py-4 text-center text-sm text-muted-foreground">No custom rewards sent yet.</div>}
+        {(rows.data ?? []).map((r: any) => (
+          <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3">
+            <div>
+              <div className="text-sm text-navy">{map[r.user_id]?.full_name || "Member"} <span className="font-normal text-muted-foreground">· {map[r.user_id]?.member_code ?? ""}</span></div>
+              <div className="text-xs text-muted-foreground">{fmtDate(r.created_at)}{r.note ? ` · ${r.note}` : ""}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <StatusBadge s="Rewarded" />
+              <span className="text-sm font-semibold text-navy">{inr(r.amount)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
