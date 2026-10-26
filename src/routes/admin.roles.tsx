@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
+import { Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db, useMe, useProfilesMap, useRefresh, useRows } from "@/lib/data";
-import { createAdmin, createStaff, removeRole } from "@/lib/admin.functions";
+import { createAdmin, createStaff, removeRole, updateRoleAccount } from "@/lib/admin.functions";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/roles")({ head: () => createRouteHead("Admins & Roles — JK Holidays", "Manage administrators and staff roles for JK Holidays."), component: Roles });
@@ -32,9 +33,12 @@ function Roles() {
   const create = useServerFn(createAdmin);
   const staff = useServerFn(createStaff);
   const remove = useServerFn(removeRole);
+  const updateAcct = useServerFn(updateRoleAccount);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ full_name: "", email: "", password: "", role: "admin", roleLabel: "" });
   const [busy, setBusy] = useState(false);
+  const [edit, setEdit] = useState<any>(null);
+  const [editBusy, setEditBusy] = useState(false);
   const rows = (roles.data ?? []).filter((r: any) => r.role !== "member");
 
   const submit = async () => {
@@ -50,7 +54,22 @@ function Roles() {
       setOpen(false); setF({ full_name: "", email: "", password: "", role: "admin", roleLabel: "" });
       refresh("user_roles"); refresh("profiles");
     } catch (e: any) { toast.error(e?.message ?? "Could not create the account"); }
-    setBusy(false);
+      setBusy(false);
+  };
+
+  const submitEdit = async () => {
+    if (!edit) return;
+    setEditBusy(true);
+    try {
+      await updateAcct({ data: {
+        userId: edit.userId, oldRole: edit.oldRole, role: edit.role, roleLabel: edit.roleLabel || undefined,
+        full_name: edit.full_name, email: edit.email, password: edit.password || undefined,
+      } });
+      toast.success("Account updated");
+      setEdit(null);
+      refresh("user_roles", "profiles");
+    } catch (e: any) { toast.error(e?.message ?? "Could not update the account"); }
+    setEditBusy(false);
   };
 
   return (
@@ -61,9 +80,15 @@ function Roles() {
           const p = map[r.user_id];
           return (
             <tr key={`${r.user_id}-${r.role}`} className="whitespace-nowrap border-b"><td className="py-3 font-medium text-navy">{p?.full_name || "—"}</td><td>{p?.email}</td><td><Badge>{roleTitle(r.role, r.role_label)}</Badge></td>
-              <td className="text-right">{r.user_id !== me?.user.id && <Button size="sm" variant="outline" onClick={async () => {
-                try { await remove({ data: { userId: r.user_id, role: r.role } }); toast.success("Role removed"); refresh("user_roles"); } catch (e: any) { toast.error(e?.message); }
-              }}>Remove</Button>}</td></tr>
+              <td className="text-right"><div className="flex justify-end gap-2">
+                <Button size="sm" variant="outline" onClick={() => setEdit({
+                  userId: r.user_id, oldRole: r.role, role: r.role, roleLabel: r.role_label ?? "",
+                  full_name: p?.full_name ?? "", email: p?.email ?? "", password: "",
+                })}><Edit className="mr-1 h-4 w-4" />Edit</Button>
+                {r.user_id !== me?.user.id && <Button size="sm" variant="outline" onClick={async () => {
+                  try { await remove({ data: { userId: r.user_id, role: r.role } }); toast.success("Role removed"); refresh("user_roles"); } catch (e: any) { toast.error(e?.message); }
+                }}>Remove</Button>}
+              </div></td></tr>
           );
         })}
         {!rows.length && <tr><td colSpan={4} className="py-6 text-center text-muted-foreground">{roles.isLoading ? "Loading…" : "No accounts yet."}</td></tr>}
@@ -81,6 +106,23 @@ function Roles() {
             <p className="text-xs text-muted-foreground">Admins sign in at Admin Login. Staff roles are recorded here for your team directory.</p>
           </div>
           <DialogFooter><Button disabled={busy} className="bg-navy text-white" onClick={submit}>{busy ? "Creating…" : "Create account"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent><DialogHeader><DialogTitle>Edit account</DialogTitle></DialogHeader>
+          {edit && <div className="space-y-3">
+            <Input placeholder="Full name" value={edit.full_name} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} />
+            <Input placeholder="Email" type="email" value={edit.email} onChange={(e) => setEdit({ ...edit, email: e.target.value })} />
+            <Select value={edit.role} onValueChange={(v) => setEdit({ ...edit, role: v, roleLabel: v === "other" ? edit.roleLabel : "" })} disabled={edit.userId === me?.user.id && edit.oldRole === "admin"}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{ROLE_OPTIONS.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+            </Select>
+            {edit.role === "other" && <Input placeholder="Type the role (e.g. Field Executive)" maxLength={60} value={edit.roleLabel} onChange={(e) => setEdit({ ...edit, roleLabel: e.target.value })} />}
+            <Input placeholder="New password (leave blank to keep current)" value={edit.password} onChange={(e) => setEdit({ ...edit, password: e.target.value })} />
+            <p className="text-xs text-muted-foreground">Changes take effect on the next sign-in. Your own admin role can't be changed here.</p>
+          </div>}
+          <DialogFooter><Button disabled={editBusy} className="bg-navy text-white" onClick={submitEdit}>{editBusy ? "Saving…" : "Save changes"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

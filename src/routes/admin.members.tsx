@@ -35,6 +35,7 @@ function Members() {
   const profiles = useRows("profiles", () => db.from("profiles").select("*").order("created_at", { ascending: false }));
   const plans = useRows("membership_plans", () => db.from("membership_plans").select("name").order("sort"));
   const referralRows = useRows("member-referral-summary", () => db.from("referrals").select("user_id"));
+  const referrerRows = useRows("member-referrer-of", () => db.from("referrals").select("referred_user_id,user_id").not("referred_user_id", "is", null));
   const walletRows = useRows("member-wallet-summary", () => db.from("wallet_transactions").select("user_id,type,amount"));
   const withdrawalRows = useRows("member-withdrawal-summary", () => db.from("withdrawals").select("user_id,amount,status"));
   const [q, setQ] = useState(""); const [plan, setPlan] = useState("all"); const [status, setStatus] = useState("all");
@@ -68,6 +69,13 @@ function Members() {
     return result;
   }, [referralRows.data, walletRows.data, withdrawalRows.data]);
   const profilesById = useMemo(() => Object.fromEntries((profiles.data ?? []).map((p: any) => [p.id, p])), [profiles.data]);
+  const referrerOf = useMemo(() => Object.fromEntries((referrerRows.data ?? []).map((r: any) => [r.referred_user_id, r.user_id])), [referrerRows.data]);
+  const referrerLabel = (id: string) => {
+    const rid = referrerOf[id];
+    if (!rid) return null;
+    const p = profilesById[rid];
+    return p ? `${p.full_name || p.email || "Member"}${p.member_code ? ` (${p.member_code})` : ""}` : null;
+  };
 
   const update = async (ids: string[], patch: any, msg = "Updated") => {
     const { error } = await db.from("profiles").update(patch).in("id", ids);
@@ -138,10 +146,10 @@ function Members() {
           <table className="w-full min-w-[1500px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr className="border-b">
               <th className="py-2 pr-3"><input type="checkbox" checked={shown.length > 0 && shown.every((m: any) => sel.includes(m.id))} onChange={(e) => setSel(e.target.checked ? shown.map((m: any) => m.id) : [])} /></th>
-              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Status</th><th className="pr-4">Action</th></tr></thead>
+              <th className="py-2 pr-4">Member ID</th><th className="pr-4">Member Name</th><th className="pr-4">Mobile Number</th><th className="pr-4">Email</th><th className="pr-4">Referred By</th><th className="pr-4">City</th><th className="pr-4">Plan</th><th className="pr-4">Referrals</th><th className="pr-4">Earned</th><th className="pr-4">Withdrawals</th><th className="pr-4">Join Date</th><th className="pr-4">Status</th><th className="pr-4">Action</th></tr></thead>
             <tbody>
-              {profiles.isLoading && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
-              {!profiles.isLoading && !shown.length && <tr><td colSpan={13} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
+              {profiles.isLoading && <tr><td colSpan={14} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
+              {!profiles.isLoading && !shown.length && <tr><td colSpan={14} className="py-6 text-center text-muted-foreground">No members found</td></tr>}
               {shown.map((m: any) => {
                 const active = m.status === "Active";
                 return (
@@ -149,7 +157,7 @@ function Members() {
                   <td className="py-4 pr-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
-                  <td>{m.phone || "—"}</td><td>{m.email}</td><td>{m.city || "—"}</td>
+                  <td>{m.phone || "—"}</td><td>{m.email}</td><td>{referrerLabel(m.id) || <span className="text-muted-foreground">—</span>}</td><td>{m.city || "—"}</td>
                   <td>{m.plan ? <Badge className={planColor[m.plan] ?? "bg-muted text-foreground"}>{m.plan}</Badge> : <span className="text-muted-foreground">—</span>}</td>
                   <td>{summaries[m.id]?.referrals ?? 0}</td><td>{inr(summaries[m.id]?.earned ?? 0)}</td>
                   <td><div>{inr(summaries[m.id]?.withdrawn ?? 0)}</div>{(summaries[m.id]?.pending ?? 0) > 0 && <div className="text-xs text-muted-foreground">{inr(summaries[m.id]?.pending)} pending</div>}</td>
@@ -202,7 +210,7 @@ function Members() {
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{view?.full_name}</DialogTitle></DialogHeader>
           {view && <dl className="grid grid-cols-2 gap-2 text-sm">
             {[["Member ID", view.member_code], ["Email", view.email], ["Mobile", view.phone], ["City", view.city], ["Plan", view.plan], ["Status", view.status],
-              ["Joined", fmtDate(view.created_at)], ["Membership", `${fmtDate(view.membership_start)} – ${fmtDate(view.membership_end)}`], ["Nights", `${view.nights_used} used / ${view.nights_total}`]]
+              ["Referred By", referrerLabel(view.id)], ["Joined", fmtDate(view.created_at)], ["Membership", `${fmtDate(view.membership_start)} – ${fmtDate(view.membership_end)}`], ["Nights", `${view.nights_used} used / ${view.nights_total}`]]
               .map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium">{v || "—"}</dd></div>)}
           </dl>}
           {view && <MemberHistory userId={view.id} profilesById={profilesById} />}
