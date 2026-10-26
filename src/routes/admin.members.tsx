@@ -157,7 +157,8 @@ function Members() {
                   <td className="py-4 pr-3"><input type="checkbox" checked={sel.includes(m.id)} onChange={(e) => setSel(e.target.checked ? [...sel, m.id] : sel.filter((x) => x !== m.id))} /></td>
                   <td className="font-mono text-xs">{m.member_code}</td>
                   <td><div className="flex items-center gap-2"><div className="grid h-8 w-8 place-items-center rounded-full bg-navy text-xs font-bold text-white">{(m.full_name || m.email || "?")[0].toUpperCase()}</div><span className="font-medium text-navy">{m.full_name || "—"}</span></div></td>
-                  <td>
+                  <td>{m.phone || "—"}</td>
+                  <td className="pr-4">
                     <div className="flex items-center gap-2">
                       <span>{m.email}</span>
                       <button onClick={() => update([m.id], { status: active ? "Inactive" : "Active" }, active ? "Deactivated" : "Activated")} title="Click to toggle"
