@@ -1,4 +1,7 @@
+import { useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -48,6 +51,39 @@ export function useRows<T = any>(key: string | (string | undefined)[], run: () =
 export function useRefresh() {
   const qc = useQueryClient();
   return (...keys: string[]) => keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+}
+
+/**
+ * Watches the browser session while a portal is open. If it disappears
+ * (expiry, cleared storage, failed refresh) the cached screens would keep
+ * failing with "Unauthorized", so clear everything and return to sign-in.
+ */
+export function useSessionGuard(active: boolean, loginPath: "/admin-login" | "/auth/login") {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    const check = async () => {
+      const { data } = await db.auth.getSession();
+      if (!cancelled && !data.session) {
+        cancelled = true;
+        qc.clear();
+        toast.info("Your session expired — please sign in again.");
+        navigate({ to: loginPath, replace: true });
+      }
+    };
+    check();
+    const timer = setInterval(check, 30_000);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", check);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [active, loginPath, navigate, qc]);
 }
 
 /** Map of user_id -> profile, for admin screens. */
