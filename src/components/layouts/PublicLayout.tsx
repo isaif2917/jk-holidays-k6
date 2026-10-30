@@ -17,6 +17,8 @@ import { useMe } from "@/lib/data";
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About Us" },
+  { to: "/educational-tour", label: "Educational Tour" },
+  { to: "/corporate-tour", label: "Corporate Tour" },
   { to: "/destinations", label: "Destinations" },
   { to: "/offers", label: "Offers" },
   { to: "/contact", label: "Contact Us" },
@@ -68,7 +70,7 @@ function Navbar() {
     <header className="sticky top-0 z-40 bg-navy-gradient text-white shadow-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4">
         <Link to="/"><Logo /></Link>
-        <nav className="hidden items-center gap-7 text-sm font-semibold tracking-wide lg:flex">
+        <nav className="hidden items-center gap-4 text-sm font-semibold tracking-wide lg:flex xl:gap-6">
           {links.slice(0, 2).map((l) => (
             <Link key={l.to} to={l.to} className="hover:text-gold" activeProps={{ className: "text-gold" }} activeOptions={{ exact: true }}>
               {l.label.toUpperCase()}
@@ -155,6 +157,8 @@ function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/about" className="hover:text-gold">About Us</Link></li>
             <li><Link to="/packages" search={{}} className="hover:text-gold">Membership Plans</Link></li>
+            <li><Link to="/educational-tour" className="hover:text-gold">Educational Tour</Link></li>
+            <li><Link to="/corporate-tour" className="hover:text-gold">Corporate Tour</Link></li>
             <li><Link to="/destinations" className="hover:text-gold">Destinations</Link></li>
             <li><Link to="/offers" className="hover:text-gold">Offers</Link></li>
             <li><Link to="/contact" search={{}} className="hover:text-gold">Contact Us</Link></li>

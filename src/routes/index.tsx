@@ -21,7 +21,7 @@ import thailandImg from "@/assets/dest-thailand.webp";
 import dubaiImg from "@/assets/dest-dubai.webp";
 import { CountUp } from "@/components/CountUp";
 import { OfferCards } from "@/components/OfferCards";
-import { useSiteDestinations, useHeroImages } from "@/lib/catalog";
+import { useSiteDestinations, useHeroImages, useDestinationChips } from "@/lib/catalog";
 import {
   Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
@@ -291,7 +291,8 @@ function HeroSearch() {
   const [where, setWhere] = useState("");
   const [date, setDate] = useState("");
   const [guests, setGuests] = useState("2 Adults");
-  const cities = destinations.map((d) => d.name);
+  const managedChips = useDestinationChips();
+  const cities = managedChips.length ? managedChips : destinations.map((d) => d.name);
   return (
     <div className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 pb-6">
       <form

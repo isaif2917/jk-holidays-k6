@@ -44,6 +44,30 @@ export function useSiteDestinations(): SiteDestination[] {
   return q.data.map((r: any) => ({ name: r.name, country: r.location, image: r.image_url ?? "" }));
 }
 
+/** Homepage destination chips under the search bar, editable in Admin → Settings (falls back to bundled defaults). */
+export function useDestinationChips(): string[] {
+  const q = useRows("destination-chips", () => db.from("admin_settings").select("key,value").eq("key", "destination_chips"));
+  try {
+    const list = JSON.parse(q.data?.[0]?.value || "[]");
+    return Array.isArray(list) ? list.filter((c: unknown) => typeof c === "string" && c.trim()).map((c: string) => c.trim()) : [];
+  } catch { return []; }
+}
+
+export type TourDoc = { name: string; path: string };
+
+/** Tour brochure managed in Admin → Settings for the public Educational / Corporate tour pages. */
+export function useTourDoc(kind: "educational" | "corporate"): TourDoc | null {
+  const key = kind === "educational" ? "educational_tour_doc" : "corporate_tour_doc";
+  const q = useRows(`tour-doc-${kind}`, () => db.from("admin_settings").select("key,value").eq("key", key));
+  try {
+    const doc = JSON.parse(q.data?.[0]?.value || "null");
+    if (doc && typeof doc.path === "string" && doc.path.startsWith("tour-docs/")) {
+      return { name: typeof doc.name === "string" && doc.name ? doc.name : "Tour document", path: doc.path };
+    }
+  } catch { /* no document published yet */ }
+  return null;
+}
+
 /** Homepage hero carousel images managed in Admin → Settings (public read of the hero_images key). */
 export function useHeroImages() {
   const q = useRows("hero-images", () => db.from("admin_settings").select("key,value").eq("key", "hero_images"));
