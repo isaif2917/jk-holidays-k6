@@ -16,7 +16,9 @@ import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CorporateTourRouteImport } from './routes/corporate-tour'
 import { Route as DestinationsRouteImport } from './routes/destinations'
+import { Route as EducationalTourRouteImport } from './routes/educational-tour'
 import { Route as MembershipRouteImport } from './routes/membership'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -58,6 +60,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as PackagesIndexRouteImport } from './routes/packages.index'
 import { Route as PackagesSlugRouteImport } from './routes/packages.$slug'
+import { Route as ApiPublicTourDocRouteImport } from './routes/api/public/tour-doc'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,9 +97,19 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CorporateTourRoute = CorporateTourRouteImport.update({
+  id: '/corporate-tour',
+  path: '/corporate-tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DestinationsRoute = DestinationsRouteImport.update({
   id: '/destinations',
   path: '/destinations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EducationalTourRoute = EducationalTourRouteImport.update({
+  id: '/educational-tour',
+  path: '/educational-tour',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembershipRoute = MembershipRouteImport.update({
@@ -304,6 +317,11 @@ const PackagesSlugRoute = PackagesSlugRouteImport.update({
   path: '/packages/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTourDocRoute = ApiPublicTourDocRouteImport.update({
+  id: '/api/public/tour-doc',
+  path: '/api/public/tour-doc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -313,7 +331,9 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/contact': typeof ContactRoute
+  '/corporate-tour': typeof CorporateTourRoute
   '/destinations': typeof DestinationsRoute
+  '/educational-tour': typeof EducationalTourRoute
   '/membership': typeof MembershipRoute
   '/offers': typeof OffersRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -355,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/auth/register': typeof AuthRegisterRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
+  '/api/public/tour-doc': typeof ApiPublicTourDocRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -364,7 +385,9 @@ export interface FileRoutesByTo {
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/contact': typeof ContactRoute
+  '/corporate-tour': typeof CorporateTourRoute
   '/destinations': typeof DestinationsRoute
+  '/educational-tour': typeof EducationalTourRoute
   '/membership': typeof MembershipRoute
   '/offers': typeof OffersRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -406,6 +429,7 @@ export interface FileRoutesByTo {
   '/auth/register': typeof AuthRegisterRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages': typeof PackagesIndexRoute
+  '/api/public/tour-doc': typeof ApiPublicTourDocRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -416,7 +440,9 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/contact': typeof ContactRoute
+  '/corporate-tour': typeof CorporateTourRoute
   '/destinations': typeof DestinationsRoute
+  '/educational-tour': typeof EducationalTourRoute
   '/membership': typeof MembershipRoute
   '/offers': typeof OffersRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -458,6 +484,7 @@ export interface FileRoutesById {
   '/auth/register': typeof AuthRegisterRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
+  '/api/public/tour-doc': typeof ApiPublicTourDocRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -469,7 +496,9 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/contact'
+    | '/corporate-tour'
     | '/destinations'
+    | '/educational-tour'
     | '/membership'
     | '/offers'
     | '/reset-password'
@@ -511,6 +540,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/packages/$slug'
     | '/packages/'
+    | '/api/public/tour-doc'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -520,7 +550,9 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/contact'
+    | '/corporate-tour'
     | '/destinations'
+    | '/educational-tour'
     | '/membership'
     | '/offers'
     | '/reset-password'
@@ -562,6 +594,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/packages/$slug'
     | '/packages'
+    | '/api/public/tour-doc'
   id:
     | '__root__'
     | '/'
@@ -571,7 +604,9 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/contact'
+    | '/corporate-tour'
     | '/destinations'
+    | '/educational-tour'
     | '/membership'
     | '/offers'
     | '/reset-password'
@@ -613,6 +648,7 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/packages/$slug'
     | '/packages/'
+    | '/api/public/tour-doc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -623,12 +659,15 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ContactRoute: typeof ContactRoute
+  CorporateTourRoute: typeof CorporateTourRoute
   DestinationsRoute: typeof DestinationsRoute
+  EducationalTourRoute: typeof EducationalTourRoute
   MembershipRoute: typeof MembershipRoute
   OffersRoute: typeof OffersRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   PackagesSlugRoute: typeof PackagesSlugRoute
   PackagesIndexRoute: typeof PackagesIndexRoute
+  ApiPublicTourDocRoute: typeof ApiPublicTourDocRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -682,11 +721,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/corporate-tour': {
+      id: '/corporate-tour'
+      path: '/corporate-tour'
+      fullPath: '/corporate-tour'
+      preLoaderRoute: typeof CorporateTourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/destinations': {
       id: '/destinations'
       path: '/destinations'
       fullPath: '/destinations'
       preLoaderRoute: typeof DestinationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/educational-tour': {
+      id: '/educational-tour'
+      path: '/educational-tour'
+      fullPath: '/educational-tour'
+      preLoaderRoute: typeof EducationalTourRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/membership': {
@@ -976,6 +1029,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PackagesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/tour-doc': {
+      id: '/api/public/tour-doc'
+      path: '/api/public/tour-doc'
+      fullPath: '/api/public/tour-doc'
+      preLoaderRoute: typeof ApiPublicTourDocRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1083,12 +1143,15 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ContactRoute: ContactRoute,
+  CorporateTourRoute: CorporateTourRoute,
   DestinationsRoute: DestinationsRoute,
+  EducationalTourRoute: EducationalTourRoute,
   MembershipRoute: MembershipRoute,
   OffersRoute: OffersRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   PackagesSlugRoute: PackagesSlugRoute,
   PackagesIndexRoute: PackagesIndexRoute,
+  ApiPublicTourDocRoute: ApiPublicTourDocRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
