@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useHydrated } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/admin-login")({
 
 function AdminLogin() {
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const qc = useQueryClient();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("admin@jkholidays.com");
@@ -97,8 +98,8 @@ function AdminLogin() {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" disabled={busy} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep hover:opacity-90">
-                  {busy ? "PLEASE WAIT..." : "LOGIN TO CRM"} <ArrowRight className="ml-2 h-4 w-4" />
+                <Button type="submit" disabled={busy || !hydrated} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep hover:opacity-90">
+                  {!hydrated ? "LOADING…" : busy ? "PLEASE WAIT..." : "LOGIN TO CRM"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </form>

@@ -25,6 +25,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const { data: me } = useMe();
+  const hydrated = useHydrated();
   useEffect(() => { if (me) navigate({ to: "/app/dashboard", replace: true }); }, [me, navigate]);
 
   const submit = async (e: React.FormEvent) => {
@@ -118,8 +119,8 @@ function Login() {
                   <label className="flex items-center gap-2"><Checkbox defaultChecked /> Remember Me</label>
                   <button type="button" onClick={forgot} className="text-blue-600 hover:underline">Forgot Password?</button>
                 </div>
-                <Button type="submit" disabled={busy} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep hover:opacity-90">
-                  {busy ? "SIGNING IN..." : "LOGIN"} <ArrowRight className="ml-2 h-4 w-4" />
+                <Button type="submit" disabled={busy || !hydrated} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep hover:opacity-90">
+                  {!hydrated ? "LOADING…" : busy ? "SIGNING IN..." : "LOGIN"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Don't have an account? <Link to="/auth/register" className="font-semibold text-blue-600 hover:underline">Register Now</Link><br /><Link to="/admin-login" className="mt-2 inline-block text-xs font-semibold text-navy hover:underline">Staff? Admin Login →</Link>
