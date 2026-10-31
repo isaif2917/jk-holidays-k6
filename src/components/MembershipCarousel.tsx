@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, ChevronLeft, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { plans } from "@/data/mock";
 import resortImg from "@/assets/hero-resort.webp";
@@ -94,7 +94,7 @@ export function MembershipCarousel() {
                     <span className="text-xs text-muted-foreground">/{p.validity.split(" ")[0].toLowerCase()}</span>
                   </div>
                   <div className="mt-1 text-[11px] font-medium text-gold">
-                    <Sparkles className="mr-1 inline h-3 w-3" /> Limited-time member pricing
+                    Limited-time member pricing
                   </div>
 
                   <div className="mt-4 flex gap-2">
