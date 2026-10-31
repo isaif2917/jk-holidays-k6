@@ -72,6 +72,7 @@ function RequestFlow() {
 
   const submit = async () => {
     if (!me?.user.id) return toast.error("Sign in to submit a request.");
+    if (!activeMember) return toast.error("Membership required — please take a membership plan before requesting a holiday.");
     const problem = validate();
     if (problem) return toast.error(problem);
     setSubmitting(true);
