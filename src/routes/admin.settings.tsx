@@ -284,3 +284,126 @@ function TourDocCard({ kind }: { kind: "educational" | "corporate" }) {
     </Card>
   );
 }
+
+/** Featured holiday packages shown on the homepage — admin can add, edit and remove each one. */
+function FeaturedPackagesCard() {
+  const refresh = useRefresh();
+  const q = useRows("admin_settings", () => db.from("admin_settings").select("*"));
+  const [list, setList] = useState<FeaturedPackage[] | null>(null);
+  const [edit, setEdit] = useState<(Partial<FeaturedPackage> & { photosText?: string; highlightsText?: string }) | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (list !== null) return;
+    const row = (q.data ?? []).find((r: any) => r.key === "featured_packages");
+    try {
+      const parsed = JSON.parse(row?.value || "[]");
+      setList(Array.isArray(parsed) ? parsed : []);
+    } catch { setList([]); }
+  }, [q.data, list]);
+
+  const saveList = async (next: FeaturedPackage[]) => {
+    setBusy(true);
+    const { error } = await db.from("admin_settings").upsert({ key: "featured_packages", value: JSON.stringify(next), updated_at: new Date().toISOString() });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setList(next);
+    refresh("admin_settings", "featured-packages", "site-settings");
+    toast.success("Featured packages saved — the homepage updates automatically.");
+  };
+
+  const saveEdit = async () => {
+    const e = edit;
+    if (!e) return;
+    const name = (e.name ?? "").trim();
+    if (!name) return toast.error("Enter the package name.");
+    const photos = (e.photosText ?? "").split(/\r?\n/).map((s) => s.trim()).filter((s) => /^https?:\/\//.test(s));
+    if (!photos.length) return toast.error("Add at least one photo URL (https://…).");
+    const pkg: FeaturedPackage = {
+      slug: (e.slug ?? "").trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
+      name,
+      location: (e.location ?? "").trim(),
+      tag: (e.tag ?? "").trim().toUpperCase(),
+      duration: (e.duration ?? "").trim(),
+      rating: Math.min(5, Math.max(1, Number(e.rating) || 4.8)),
+      reviews: Math.max(0, parseInt(String(e.reviews), 10) || 0),
+      photos,
+      highlights: (e.highlightsText ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean),
+    };
+    const current = list ?? [];
+    const idx = current.findIndex((p) => p.slug === (e.slug || pkg.slug));
+    const next = idx >= 0 ? current.map((p, i) => (i === idx ? pkg : p)) : [...current, pkg];
+    setEdit(null);
+    await saveList(next);
+  };
+
+  const field = (label: string, key: "name" | "location" | "tag" | "duration", placeholder: string) => (
+    <div>
+      <label className="text-xs font-semibold">{label}</label>
+      <Input className="mt-1" placeholder={placeholder} value={(edit?.[key] as string) ?? ""} onChange={(ev) => setEdit({ ...edit, [key]: ev.target.value })} />
+    </div>
+  );
+
+  return (
+    <Card className="p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-gold-soft/60 text-navy"><Package className="h-5 w-5" /></span>
+          <div>
+            <h2 className="font-serif text-xl font-bold text-navy">Holiday Packages (Homepage Featured)</h2>
+            <p className="text-xs text-muted-foreground">These packages appear in the homepage "Featured Holiday Packages" section. Add or edit every detail here.</p>
+          </div>
+        </div>
+        <Button disabled={busy} className="bg-navy text-white" onClick={() => setEdit({ name: "", location: "", tag: "", duration: "", rating: 4.8, reviews: 0, photosText: "", highlightsText: "" })}>
+          <Plus className="mr-1 h-4 w-4" />Add package
+        </Button>
+      </div>
+      {(list?.length ?? 0) > 0 ? (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {(list ?? []).map((p, i) => (
+            <div key={`${p.slug}-${i}`} className="overflow-hidden rounded-lg border bg-card">
+              <img src={p.photos[0]} alt={p.name} className="h-28 w-full object-cover" />
+              <div className="p-3">
+                <div className="truncate text-sm font-semibold text-navy">{p.name}</div>
+                <div className="truncate text-xs text-muted-foreground">{p.duration || p.location || p.tag}</div>
+                <div className="mt-2 flex gap-2">
+                  <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => setEdit({ ...p, photosText: p.photos.join("\n"), highlightsText: p.highlights.join("\n") })}>
+                    <Pencil className="mr-1 h-3 w-3" />Edit
+                  </Button>
+                  <Button size="sm" variant="destructive" className="h-7 px-2" aria-label={`Remove ${p.name}`} onClick={() => { setList((list ?? []).filter((_, j) => j !== i)); saveList((list ?? []).filter((_, j) => j !== i)); }}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : <p className="mt-4 text-sm text-muted-foreground">No featured packages yet — the homepage shows its default packages until you add some.</p>}
+
+      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader><DialogTitle>{edit?.slug ? "Edit package" : "Add featured package"}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {field("Package name", "name", "Maldives Holiday Package")}
+              {field("Location", "location", "Maldives")}
+              {field("Tag / badge", "tag", "OVERWATER VILLAS")}
+              {field("Duration", "duration", "4 Nights / 5 Days")}
+              {field("Rating (1–5)", "rating" as never, "4.8")}
+              {field("Number of reviews", "reviews" as never, "312")}
+            </div>
+            <div>
+              <label className="text-xs font-semibold">Photo URLs — one per line</label>
+              <Textarea className="mt-1" rows={3} placeholder={"https://example.com/photo1.jpg\nhttps://example.com/photo2.jpg"} value={edit?.photosText ?? ""} onChange={(e) => setEdit({ ...edit, photosText: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold">Highlights — one per line</label>
+              <Textarea className="mt-1" rows={3} placeholder={"Overwater villa stay\nSeaplane transfers"} value={edit?.highlightsText ?? ""} onChange={(e) => setEdit({ ...edit, highlightsText: e.target.value })} />
+            </div>
+            <Button disabled={busy} className="w-full bg-navy text-white" onClick={saveEdit}>Save package</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
