@@ -294,8 +294,8 @@ function FeaturedPackagesCard() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (list !== null) return;
-    const row = (q.data ?? []).find((r: any) => r.key === "featured_packages");
+    if (list !== null || !q.data) return;
+    const row = q.data.find((r: any) => r.key === "featured_packages");
     try {
       const parsed = JSON.parse(row?.value || "[]");
       setList(Array.isArray(parsed) ? parsed : []);
