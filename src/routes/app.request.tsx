@@ -106,6 +106,20 @@ function RequestFlow() {
         <div className="text-sm text-muted-foreground">Book your next getaway in a few simple steps.</div>
       </div>
 
+      {!activeMember && (
+        <div className="flex flex-col gap-3 rounded-xl border-2 border-rose-300 bg-rose-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+            <div>
+              <div className="font-bold text-rose-700">Membership required before requesting a holiday</div>
+              <div className="text-sm text-rose-600">You must take a membership plan first — holiday requests are available to active members only.</div>
+            </div>
+          </div>
+          <Button asChild className="shrink-0 bg-rose-600 text-white hover:bg-rose-700"><Link to="/app/membership">Take a Membership Plan</Link></Button>
+        </div>
+      )}
+
+
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <Card className="p-4">
           <ol className="space-y-3">
