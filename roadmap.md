@@ -66,3 +66,9 @@
 - [x] Two-way messages on each holiday request: admin replies and member doubts/messages show in both panels below the request details, with date + time on every message; both sides get a reply box; each new message notifies the other side
 - [x] Member accepts or declines the proposed alternate dates from the request-status view; the decision (with time) is visible to the admin, who also gets notified
 - [x] Both panels show when the member requested and when the admin accepted/rejected, with date + time
+
+# Round: altered-date decision after approval (Oct 31)
+
+- [x] Member keeps the Accept new dates / Keep original dates buttons in Request Status → view even after the admin approves the request with changed dates; once decided, the decision (with date + time) replaces the buttons and the customer-support alert disappears
+- [x] Admin can change dates on an approved request (Change Dates button); sending new dates clears any earlier member decision so the member is asked again
+- [x] Admin panel shows the member's accepted/declined status with timestamp; verified end-to-end (admin proposes → approves → member accepts → admin sees decision); test request cleaned up
