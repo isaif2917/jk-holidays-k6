@@ -71,6 +71,13 @@
       "when": 1793407919905,
       "tag": "0009_public_read_site_settings_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793409355432,
+      "tag": "0010_holiday_request_messages_and_decisions",
+      "breakpoints": true
     }
   ]
 }
