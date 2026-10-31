@@ -184,8 +184,8 @@ function RequestFlow() {
                         ) : (
                           <div className="mt-1 text-muted-foreground">{fmtDate(detail.check_in)} – {fmtDate(detail.check_out)}</div>
                         )}
-                        {detail.alt_dates && (
-                          <div className="mt-1 font-semibold text-rose-600">{detail.status === "Approved" ? "Changed dates" : "Alternate dates proposed"}: {altLabel(detail.alt_dates)}</div>
+                        {detail.alt_dates && detail.status !== "Approved" && (
+                          <div className="mt-1 font-semibold text-rose-600">Alternate dates proposed: {altLabel(detail.alt_dates)}</div>
                         )}
                       </div>
                       <div className="rounded-md bg-muted p-3">
