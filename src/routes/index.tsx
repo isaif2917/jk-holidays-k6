@@ -104,7 +104,7 @@ function Home() {
             <PricingCarousel />
           </div>
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Sparkles className="mr-1 inline h-3 w-3 text-gold" /> All plans come with exciting referral benefits & reward points
+            All plans come with exciting referral benefits &amp; reward points
           </p>
         </div>
       </section>
