@@ -115,17 +115,19 @@ function Home() {
           <SectionHeading eyebrow="POPULAR DESTINATIONS" align="left" />
           <Link to="/destinations" className="text-xs font-bold tracking-widest text-gold hover:underline">VIEW ALL DESTINATIONS →</Link>
         </div>
-        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6">
-          {popularDestinations.map((d) => (
-            <div key={d.name} className="group relative aspect-square w-40 shrink-0 snap-start overflow-hidden rounded-xl sm:w-48 md:w-auto">
-              <img src={d.image} alt={d.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 to-transparent" />
-              <div className="absolute bottom-3 left-3 text-white">
-                <div className="font-serif text-lg font-bold">{d.name}</div>
-                <div className="text-xs text-white/80">{d.country}</div>
+        <div className="mt-8 overflow-hidden">
+          <div className="flex w-max gap-5 animate-marquee-right hover:[animation-play-state:paused]">
+            {[...popularDestinations, ...popularDestinations, ...popularDestinations, ...popularDestinations].map((d, i) => (
+              <div key={`${d.name}-${i}`} className="group relative aspect-[3/4] w-56 shrink-0 overflow-hidden rounded-2xl shadow-lg sm:w-72">
+                <img src={d.image} alt={d.name} loading="lazy" width={800} height={1000} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/85 via-navy-deep/10 to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <div className="font-serif text-xl font-bold">{d.name}</div>
+                  <div className="text-xs text-white/80">{d.country}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 

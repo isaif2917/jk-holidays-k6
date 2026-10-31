@@ -79,3 +79,10 @@
 - [x] Membership request dialog (My Membership → Request/Upgrade) now shows UPI QR + UPI ID (UPI) and account name/number/IFSC/bank with copy buttons (Bank Transfer); Card/Cash shows a "team will contact you" note
 - [x] Admin Settings RLS error could not be reproduced: verified as a signed-in admin (admin@jkholidays.com) that adding/removing destination chips works; the live-site error looks like a stale session/login on jkholidays.org — re-login advised
 - [x] Verified end-to-end: inactive member blocked with red alert, active member sees the wizard (temporarily activated/deactivated test member), test destination chip cleaned up
+
+# Round: admin-managed featured packages + destination marquee (Oct 31)
+
+- [x] Admin → Settings → "Holiday Packages (Homepage Featured)": add, edit (name, location, tag, duration, rating, reviews, photo URLs, highlights) and remove packages; homepage Featured Holiday Packages shows managed packages and falls back to bundled defaults
+- [x] Public read policy on admin_settings extended to the featured_packages key (migration 0011)
+- [x] Homepage Popular Destinations rebuilt as an oversized horizontal marquee moving left to right in super slow motion (90s loop, pauses on hover)
+- [x] Verified: package add/edit/remove round-trip from the admin UI, homepage shows managed package, marquee transform moves; test package removed

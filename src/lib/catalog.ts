@@ -77,6 +77,40 @@ export function useHeroImages() {
   } catch { return []; }
 }
 
+export type FeaturedPackage = {
+  slug: string;
+  name: string;
+  location: string;
+  tag: string;
+  duration: string;
+  rating: number;
+  reviews: number;
+  photos: string[];
+  highlights: string[];
+};
+
+/** Featured holiday packages managed in Admin → Settings (falls back to bundled defaults). */
+export function useFeaturedPackages(): FeaturedPackage[] {
+  const q = useRows("featured-packages", () => db.from("admin_settings").select("key,value").eq("key", "featured_packages"));
+  try {
+    const list = JSON.parse(q.data?.[0]?.value || "[]");
+    if (!Array.isArray(list) || !list.length) return [];
+    return list
+      .filter((p: any) => p && typeof p.name === "string")
+      .map((p: any, i: number) => ({
+        slug: typeof p.slug === "string" && p.slug ? p.slug : `pkg-${i + 1}`,
+        name: p.name,
+        location: typeof p.location === "string" ? p.location : "",
+        tag: typeof p.tag === "string" ? p.tag : "",
+        duration: typeof p.duration === "string" ? p.duration : "",
+        rating: Number(p.rating) || 4.8,
+        reviews: Math.max(0, Number(p.reviews) || 0),
+        photos: Array.isArray(p.photos) ? p.photos.filter((u: unknown) => typeof u === "string" && u.trim()) : [],
+        highlights: Array.isArray(p.highlights) ? p.highlights.filter((h: unknown) => typeof h === "string" && h.trim()) : [],
+      }));
+  } catch { return []; }
+}
+
 /** Site contact details managed in Admin → Settings, falling back to bundled defaults. */
 export function useSiteContact() {
   const q = useRows("site-settings", () => db.from("admin_settings").select("key,value").in("key", ["site_name", "site_email", "site_phone", "site_address"]));
