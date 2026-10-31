@@ -201,8 +201,8 @@ function RequestFlow() {
                             <div className="font-semibold text-navy">Our team proposed alternate dates</div>
                             <div className="mt-1 font-semibold text-rose-600">{altLabel(detail.alt_dates)}</div>
                             <div className="mt-2 flex gap-2">
-                              <Button size="sm" disabled={busy} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => decideAlt("Accepted")}><CalendarCheck className="mr-1 h-4 w-4" /> Accept new dates</Button>
-                              <Button size="sm" disabled={busy} variant="outline" onClick={() => decideAlt("Rejected")}><CalendarX className="mr-1 h-4 w-4" /> Keep original dates</Button>
+                              <Button size="sm" disabled={submitting} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => decideAlt("Accepted")}><CalendarCheck className="mr-1 h-4 w-4" /> Accept new dates</Button>
+                              <Button size="sm" disabled={submitting} variant="outline" onClick={() => decideAlt("Rejected")}><CalendarX className="mr-1 h-4 w-4" /> Keep original dates</Button>
                             </div>
                           </div>
                         ) : (
