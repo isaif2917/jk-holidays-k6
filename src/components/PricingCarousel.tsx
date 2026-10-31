@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { motion, type PanInfo } from "framer-motion";
+import { motion, type PanInfo, type Variants } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { CaretLeft, CaretRight, CheckCircle, Crown, Diamond, Medal } from "@phosphor-icons/react";
 import { useSitePlans, type SitePlan } from "@/lib/catalog";
@@ -13,16 +13,53 @@ const tierStyle = [
   { Icon: Diamond, header: "linear-gradient(135deg, var(--navy-deep), var(--navy))" },
 ];
 
+// Staggered reveal for the feature list — replays each time a card comes to front.
+const listVariants: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
+};
+const itemVariants: Variants = {
+  hidden: { opacity: 0, x: -16, filter: "blur(2px)" },
+  show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 340, damping: 26 } },
+};
+
 export function PricingCard({ plan, index, active }: { plan: Plan; index: number; active: boolean }) {
   const { Icon, header } = tierStyle[index % tierStyle.length]!;
   return (
     <article className={`flex h-full flex-col overflow-hidden rounded-[28px] bg-card text-navy-deep shadow-[0_30px_60px_-25px_color-mix(in_oklab,var(--navy-deep)_55%,transparent)] ring-1 ring-border/60 transition-shadow ${active ? "hover:shadow-[0_40px_70px_-25px_color-mix(in_oklab,var(--navy-deep)_65%,transparent)]" : ""}`}>
-      <div className="relative px-6 pb-12 pt-6 text-white" style={{ background: header }}>
-        <div className="flex items-center justify-between">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 backdrop-blur"><Icon size={22} weight="duotone" /></span>
-          {plan.badge && <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold tracking-widest backdrop-blur">{plan.badge}</span>}
+      <div className="relative overflow-hidden px-6 pb-12 pt-6 text-white" style={{ background: header }}>
+        {/* Diagonal light sweep across the coloured header of the front card */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-12 bg-white/15"
+          animate={active ? { x: ["0%", "420%"] } : { x: "0%" }}
+          transition={active ? { duration: 1.4, ease: "easeInOut", repeat: Infinity, repeatDelay: 3 } : { duration: 0.3 }}
+        />
+        <div className="relative flex items-center justify-between">
+          <motion.span
+            className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 backdrop-blur"
+            animate={active ? { y: [0, -5, 0] } : { y: 0 }}
+            transition={active ? { duration: 2.6, ease: "easeInOut", repeat: Infinity } : { duration: 0.3 }}
+          >
+            <Icon size={22} weight="duotone" />
+          </motion.span>
+          {plan.badge && (
+            <motion.span
+              className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold tracking-widest backdrop-blur"
+              animate={active ? { scale: 1 } : { scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 300, damping: 18 }}
+            >
+              {plan.badge}
+            </motion.span>
+          )}
         </div>
-        <h3 className="mt-4 font-display text-3xl font-bold">{plan.name}</h3>
+        <motion.h3
+          className="mt-4 font-display text-3xl font-bold"
+          animate={active ? { opacity: 1, y: 0 } : { opacity: 0.9, y: 4 }}
+          transition={{ type: "spring", stiffness: 260, damping: 24 }}
+        >
+          {plan.name}
+        </motion.h3>
         <p className="text-sm text-white/80">{plan.nights}</p>
         {/* Wavy transition into the white body */}
         <svg viewBox="0 0 400 40" preserveAspectRatio="none" className="absolute inset-x-0 -bottom-px h-8 w-full text-card" aria-hidden>
@@ -30,26 +67,43 @@ export function PricingCard({ plan, index, active }: { plan: Plan; index: number
         </svg>
       </div>
       <div className="flex flex-1 flex-col px-6 pb-6">
-        <div className="flex items-baseline gap-2">
+        <motion.div
+          className="flex items-baseline gap-2"
+          animate={active ? { scale: 1, opacity: 1 } : { scale: 0.95, opacity: 0.8 }}
+          style={{ transformOrigin: "left center" }}
+          transition={{ type: "spring", stiffness: 280, damping: 20 }}
+        >
           <span className="font-display text-4xl font-bold">₹{plan.price.toLocaleString("en-IN")}</span>
           <span className="text-sm text-muted-foreground line-through">₹{plan.original.toLocaleString("en-IN")}</span>
-        </div>
+        </motion.div>
         <p className="text-xs text-muted-foreground">{plan.validity}</p>
-        <ul className="mt-5 flex-1 space-y-2.5 text-sm">
+        <motion.ul
+          className="mt-5 flex-1 space-y-2.5 text-sm"
+          variants={listVariants}
+          initial="hidden"
+          animate={active ? "show" : "hidden"}
+        >
           {plan.features.map((f) => (
-            <li key={f} className="flex items-start gap-2.5">
+            <motion.li key={f} variants={itemVariants} className="flex items-start gap-2.5">
               <CheckCircle size={18} weight="fill" className="mt-0.5 shrink-0 text-gold-dark" />
               <span>{f}</span>
-            </li>
+            </motion.li>
           ))}
-        </ul>
-        <Link
-          to="/auth/register"
-          tabIndex={active ? 0 : -1}
-          className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-navy-deep text-sm font-semibold text-white transition hover:opacity-90"
+        </motion.ul>
+        <motion.div
+          className="mt-6"
+          whileHover={active ? { scale: 1.03, y: -2 } : undefined}
+          whileTap={active ? { scale: 0.97 } : undefined}
+          transition={{ type: "spring", stiffness: 400, damping: 18 }}
         >
-          {plan.highlight ? "Upgrade now" : "Join now"}
-        </Link>
+          <Link
+            to="/auth/register"
+            tabIndex={active ? 0 : -1}
+            className="flex h-12 items-center justify-center rounded-full bg-navy-deep text-sm font-semibold text-white transition-colors hover:opacity-90"
+          >
+            {plan.highlight ? "Upgrade now" : "Join now"}
+          </Link>
+        </motion.div>
       </div>
     </article>
   );
