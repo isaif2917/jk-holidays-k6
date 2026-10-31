@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Crown } from "lucide-react";
+import { Building2, Check, Copy, Crown, Smartphone } from "lucide-react";
 import { db, fmtDate, inr, useMe, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useState } from "react";
@@ -81,17 +81,56 @@ function Membership() {
         ))}
       </div>
       <Dialog open={!!req} onOpenChange={(o) => !o && setReq(null)}>
-        <DialogContent><DialogHeader><DialogTitle>Request {req?.name} membership</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Pay {inr(req?.price)} and enter the payment details below. Admin will approve your plan after verifying.</p>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+          <DialogHeader><DialogTitle>Request {req?.name} membership</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Pay {inr(req?.price)} using the payment details below, then enter your payment reference. Admin will approve your plan after verifying.</p>
           <label className="text-xs">Payment method
             <select className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm" value={method} onChange={(e) => setMethod(e.target.value)}>
               {["UPI", "Bank Transfer", "Card", "Cash"].map((m) => <option key={m}>{m}</option>)}
             </select>
           </label>
+          {method === "UPI" && req && (
+            <div className="space-y-3 rounded-md bg-muted/50 p-3 text-center">
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=JK%20Holidays&am=${req.price}&cu=INR`)}`} alt="UPI payment QR code" className="mx-auto rounded-lg border border-border" />
+              <button type="button" onClick={() => copyValue(UPI_ID, "UPI ID")} className="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:text-gold">
+                {UPI_ID} <Copy className="h-3.5 w-3.5" />
+              </button>
+              <div className="text-xs text-muted-foreground">Scan the QR in any UPI app, or pay to the UPI ID above.</div>
+            </div>
+          )}
+          {method === "Bank Transfer" && (
+            <div className="space-y-2 text-sm">
+              <PayRow label="Account Name" value="JK Holidays Pvt. Ltd." />
+              <PayRow label="Account Number" value="502000123456789" />
+              <PayRow label="IFSC" value="HDFC0001234" />
+              <PayRow label="Bank" value="HDFC Bank, Sector 63 Noida" />
+            </div>
+          )}
+          {(method === "Card" || method === "Cash") && (
+            <div className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground">Our team will contact you on your registered mobile number to complete the {method.toLowerCase()} payment.</div>
+          )}
           <label className="text-xs">Transaction ID / reference<Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="e.g. UPI ref number" /></label>
           <DialogFooter><Button className="bg-navy text-white" onClick={submit}>Send request</Button></DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+const UPI_ID = "jkholidays@ybl";
+
+const copyValue = (text: string, label: string) => {
+  void navigator.clipboard?.writeText(text);
+  toast.success(`${label} copied`);
+};
+
+function PayRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-md bg-muted/50 px-3 py-2">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <button type="button" onClick={() => copyValue(value, label)} className="inline-flex items-center gap-1.5 text-right text-sm font-semibold text-navy hover:text-gold">
+        {value} <Copy className="h-3 w-3 shrink-0" />
+      </button>
     </div>
   );
 }

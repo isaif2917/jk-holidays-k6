@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Check, Plus, Trash2, Eye, CalendarCheck, CalendarX } from "lucide-react";
+import { AlertTriangle, Check, Plus, Trash2, Eye, CalendarCheck, CalendarX } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RequestThread } from "@/components/RequestThread";
 import { useSiteDestinations } from "@/lib/catalog";
@@ -30,6 +30,9 @@ const altLabel = (alt: string | null) => {
 
 function RequestFlow() {
   const { data: me } = useMe();
+  const p = me?.profile ?? {};
+  /** Holiday requests require an active (paid) membership plan. */
+  const activeMember = !!(p.status === "Active" && p.plan);
   const refresh = useRefresh();
   const [step, setStep] = useState(0);
   const [tab, setTab] = useState<"All" | "Pending" | "Accepted" | "Rejected">("All");
@@ -69,6 +72,7 @@ function RequestFlow() {
 
   const submit = async () => {
     if (!me?.user.id) return toast.error("Sign in to submit a request.");
+    if (!activeMember) return toast.error("Membership required — please take a membership plan before requesting a holiday.");
     const problem = validate();
     if (problem) return toast.error(problem);
     setSubmitting(true);
@@ -102,6 +106,20 @@ function RequestFlow() {
         <div className="text-sm text-muted-foreground">Book your next getaway in a few simple steps.</div>
       </div>
 
+      {!activeMember && (
+        <div className="flex flex-col gap-3 rounded-xl border-2 border-rose-300 bg-rose-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+            <div>
+              <div className="font-bold text-rose-700">Membership required before requesting a holiday</div>
+              <div className="text-sm text-rose-600">You must take a membership plan first — holiday requests are available to active members only.</div>
+            </div>
+          </div>
+          <Button asChild className="shrink-0 bg-rose-600 text-white hover:bg-rose-700"><Link to="/app/membership">Take a Membership Plan</Link></Button>
+        </div>
+      )}
+
+
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <Card className="p-4">
           <ol className="space-y-3">
@@ -119,10 +137,18 @@ function RequestFlow() {
         </Card>
 
         <Card className="p-6">
-          {step === 0 && <TravelDetails travel={travel} setTravel={setTravel} nights={nights} onNext={() => { const p = !travel.destination.trim() ? "Please enter your preferred destination." : !travel.checkIn || !travel.checkOut || nights < 1 ? "Please choose valid check-in and check-out dates." : null; if (p) return toast.error(p); setStep(1); }} />}
-          {step === 1 && <TravellerDetails travellers={travellers} setTravellers={setTravellers} setT={setT} onBack={() => setStep(0)} onNext={() => { if (!travellers.some((t) => t.name.trim())) return toast.error("Add at least one traveller name."); setStep(2); }} />}
-          {step === 2 && <AdditionalInfo extras={extras} setExtras={setExtras} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
-          {step === 3 && <ReviewSubmit travel={travel} travellers={travellers} extras={extras} nights={nights} onBack={() => setStep(2)} submitting={submitting} onSubmit={submit} />}
+          {!activeMember && step !== 4 && (
+            <div className="py-10 text-center">
+              <AlertTriangle className="mx-auto h-10 w-10 text-rose-500" />
+              <div className="mt-3 font-serif text-xl font-bold text-rose-700">Membership required</div>
+              <p className="mx-auto mt-1 max-w-md text-sm text-rose-600">Holiday requests are available to active members only. Please take a membership plan first, then come back to request your holiday.</p>
+              <Button asChild className="mt-4 bg-rose-600 text-white hover:bg-rose-700"><Link to="/app/membership">Take a Membership Plan</Link></Button>
+            </div>
+          )}
+          {activeMember && step === 0 && <TravelDetails travel={travel} setTravel={setTravel} nights={nights} onNext={() => { const p = !travel.destination.trim() ? "Please enter your preferred destination." : !travel.checkIn || !travel.checkOut || nights < 1 ? "Please choose valid check-in and check-out dates." : null; if (p) return toast.error(p); setStep(1); }} />}
+          {activeMember && step === 1 && <TravellerDetails travellers={travellers} setTravellers={setTravellers} setT={setT} onBack={() => setStep(0)} onNext={() => { if (!travellers.some((t) => t.name.trim())) return toast.error("Add at least one traveller name."); setStep(2); }} />}
+          {activeMember && step === 2 && <AdditionalInfo extras={extras} setExtras={setExtras} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+          {activeMember && step === 3 && <ReviewSubmit travel={travel} travellers={travellers} extras={extras} nights={nights} onBack={() => setStep(2)} submitting={submitting} onSubmit={submit} />}
           {step === 4 && (
             <div>
               <div className="flex items-center justify-between">
