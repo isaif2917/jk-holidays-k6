@@ -389,8 +389,14 @@ function FeaturedPackagesCard() {
               {field("Location", "location", "Maldives")}
               {field("Tag / badge", "tag", "OVERWATER VILLAS")}
               {field("Duration", "duration", "4 Nights / 5 Days")}
-              {field("Rating (1–5)", "rating" as never, "4.8")}
-              {field("Number of reviews", "reviews" as never, "312")}
+              <div>
+                <label className="text-xs font-semibold">Rating (1–5)</label>
+                <Input className="mt-1" type="number" step="0.1" min={1} max={5} placeholder="4.8" value={String(edit?.rating ?? "")} onChange={(e) => setEdit({ ...edit, rating: Number(e.target.value) })} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold">Number of reviews</label>
+                <Input className="mt-1" type="number" min={0} placeholder="312" value={String(edit?.reviews ?? "")} onChange={(e) => setEdit({ ...edit, reviews: Number(e.target.value) })} />
+              </div>
             </div>
             <div>
               <label className="text-xs font-semibold">Photo URLs — one per line</label>
