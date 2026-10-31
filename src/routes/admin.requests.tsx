@@ -178,11 +178,6 @@ function AdminRequests() {
                   )}
                   {detail.admin_note && <div className="text-muted-foreground">Note: {detail.admin_note}</div>}
                 </div>
-                {approvedAlt && (
-                  <div className="blink-alert rounded-md bg-rose-50 p-3 text-sm font-bold text-rose-600">
-                    Please discuss with customer support to verify the dates
-                  </div>
-                )}
                 <div className="rounded-md bg-muted p-3">
                   <div className="font-semibold text-navy">Travellers ({travellers.length})</div>
                   {travellers.map((t, i) => <div key={i} className="text-muted-foreground">{t.name || "Guest"}{t.age ? `, ${t.age}` : ""}{t.gender ? ` · ${t.gender}` : ""}</div>)}

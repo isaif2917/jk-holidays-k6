@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Check, Plus, Trash2, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSiteDestinations } from "@/lib/catalog";
 import { db, fmtDate, useMe, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
@@ -19,15 +20,23 @@ const steps = ["Travel Details", "Traveller Details", "Additional Info", "Review
 type Traveller = { name: string; age: string; gender: string; mobile: string; idType: string; idNumber: string };
 const emptyTraveller = (): Traveller => ({ name: "", age: "", gender: "Male", mobile: "", idType: "Aadhar", idNumber: "" });
 
+/** alt_dates is stored as "YYYY-MM-DD|YYYY-MM-DD" when the admin proposes alternate dates. */
+const altLabel = (alt: string | null) => {
+  const m = /^(\d{4}-\d{2}-\d{2})\|(\d{4}-\d{2}-\d{2})$/.exec(alt ?? "");
+  if (!m) return alt ?? "";
+  return `${fmtDate(m[1])} – ${fmtDate(m[2])}`;
+};
+
 function RequestFlow() {
   const { data: me } = useMe();
   const refresh = useRefresh();
   const [step, setStep] = useState(0);
-  const [tab, setTab] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
+  const [tab, setTab] = useState<"All" | "Pending" | "Accepted" | "Rejected">("All");
   const [travel, setTravel] = useState({ destination: "", resort: "", checkIn: "", checkOut: "", rooms: "1", arrival: "", departure: "" });
   const [travellers, setTravellers] = useState<Traveller[]>([emptyTraveller()]);
   const [extras, setExtras] = useState({ airportPickup: "No", sightseeing: "No", mealPreference: "Vegetarian", special: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [detail, setDetail] = useState<any>(null);
   const requests = useRows("holiday_requests", () => db.from("holiday_requests").select("*").eq("user_id", me!.user.id).order("created_at", { ascending: false }), !!me?.user.id);
 
   const nights = useMemo(() => {
@@ -72,7 +81,7 @@ function RequestFlow() {
   };
 
   const rows = (requests.data ?? []);
-  const filtered = tab === "All" ? rows : rows.filter((r: any) => r.status === tab);
+  const filtered = tab === "All" ? rows : rows.filter((r: any) => r.status === (tab === "Accepted" ? "Approved" : tab));
 
   return (
     <div className="space-y-6">
@@ -109,7 +118,7 @@ function RequestFlow() {
                 <Button size="sm" className="bg-gold-gradient font-bold text-navy-deep" onClick={() => setStep(0)}>REQUEST HOLIDAY</Button>
               </div>
               <div className="mt-4 flex gap-2 border-b">
-                {(["All", "Pending", "Approved", "Rejected"] as const).map((t) => (
+                {(["All", "Pending", "Accepted", "Rejected"] as const).map((t) => (
                   <button key={t} onClick={() => setTab(t)} className={`px-3 py-2 text-sm ${tab === t ? "border-b-2 border-gold font-semibold text-navy" : "text-muted-foreground"}`}>{t}</button>
                 ))}
               </div>
@@ -127,7 +136,7 @@ function RequestFlow() {
                         <td>{r.nights}</td>
                         <td><StatusBadge s={r.status} /></td>
                         <td>{fmtDate(r.created_at)}</td>
-                        <td><Link to="/app/holidays" className="text-blue-600"><Eye className="h-4 w-4" /></Link></td>
+                        <td><button onClick={() => setDetail(r)} aria-label={`View request ${r.code}`} className="text-blue-600"><Eye className="h-4 w-4" /></button></td>
                       </tr>
                     ))}
                     {!filtered.length && <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">{requests.isLoading ? "Loading…" : "No requests yet. Submit your first holiday request."}</td></tr>}
@@ -135,6 +144,48 @@ function RequestFlow() {
                 </table>
               </div>
               <div className="mt-4 text-xs text-muted-foreground">Every request you submit appears instantly in the admin team's Holiday Requests queue.</div>
+              {detail && (
+                <Dialog open onOpenChange={(o) => { if (!o) setDetail(null); }}>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="font-serif text-navy">Request {detail.code}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between rounded-md bg-muted p-3">
+                        <span className="font-semibold text-navy">Status</span>
+                        <span className={detail.status === "Approved" ? "font-bold text-emerald-600" : detail.status === "Rejected" ? "font-bold text-rose-600" : "font-bold text-amber-600"}>
+                          {detail.status === "Approved" ? "Accepted" : detail.status === "Rejected" ? "Rejected" : "Pending review"}
+                        </span>
+                      </div>
+                      <div className="rounded-md bg-muted p-3">
+                        <div className="font-semibold text-navy">Dates</div>
+                        {detail.status === "Approved" && detail.alt_dates ? (
+                          <>
+                            <div className="mt-1 font-semibold text-rose-600">Approved dates: {altLabel(detail.alt_dates)}</div>
+                            <div className="text-xs text-muted-foreground line-through">{fmtDate(detail.check_in)} – {fmtDate(detail.check_out)} (originally requested)</div>
+                          </>
+                        ) : (
+                          <div className="mt-1 text-muted-foreground">{fmtDate(detail.check_in)} – {fmtDate(detail.check_out)}</div>
+                        )}
+                        {detail.alt_dates && detail.status !== "Approved" && (
+                          <div className="mt-1 font-semibold text-rose-600">Alternate dates proposed: {altLabel(detail.alt_dates)}</div>
+                        )}
+                      </div>
+                      <div className="rounded-md bg-muted p-3">
+                        <div className="font-semibold text-navy">Request</div>
+                        <div className="mt-1 text-muted-foreground">{detail.destination}{detail.resort ? ` · ${detail.resort}` : ""} · {detail.nights} night(s) · {detail.rooms} room(s)</div>
+                        {detail.special_requests && <div className="text-muted-foreground">Special: {detail.special_requests}</div>}
+                        {detail.admin_note && <div className="text-muted-foreground">Note from our team: {detail.admin_note}</div>}
+                      </div>
+                      {detail.status === "Approved" && !!detail.alt_dates && (
+                        <div className="blink-alert rounded-md bg-rose-50 p-3 text-sm font-bold text-rose-600">
+                          Please discuss with customer support to verify the altered date
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           )}
         </Card>

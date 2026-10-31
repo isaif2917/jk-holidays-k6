@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2 } from "lucide-react";
+import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2, FileText, Upload, Plus } from "lucide-react";
 import { db, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
@@ -122,7 +122,162 @@ function AdminSettings() {
           </div>
         ) : <p className="mt-4 text-sm text-muted-foreground">No custom hero images yet — the homepage uses its default image until you add one.</p>}
       </Card>
-      <p className="text-xs text-muted-foreground">Changes appear on the public website footer, header phone number, Contact Us page and hero carousel shortly after saving.</p>
+      <DestinationChipsCard />
+      <TourDocCard kind="educational" />
+      <TourDocCard kind="corporate" />
+      <p className="text-xs text-muted-foreground">Changes appear on the public website footer, header phone number, Contact Us page, hero carousel, search-bar destinations and the tour pages shortly after saving.</p>
     </div>
+  );
+}
+
+/** Homepage destination chips under the hero search bar, editable from Admin → Settings. */
+function DestinationChipsCard() {
+  const refresh = useRefresh();
+  const q = useRows("admin_settings", () => db.from("admin_settings").select("*"));
+  const [chips, setChips] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!loaded && q.data?.length) {
+      const row = q.data.find((r: any) => r.key === "destination_chips");
+      try {
+        const list = JSON.parse(row?.value || "[]");
+        setChips(Array.isArray(list) ? list : []);
+      } catch { setChips([]); }
+      setLoaded(true);
+    }
+  }, [q.data, loaded]);
+
+  const save = async (list: string[]) => {
+    setBusy(true);
+    const { error } = await db.from("admin_settings").upsert({ key: "destination_chips", value: JSON.stringify(list), updated_at: new Date().toISOString() });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setChips(list);
+    refresh("admin_settings", "site-settings", "destination-chips");
+  };
+
+  const add = () => {
+    const name = draft.trim();
+    if (!name) return;
+    if (chips.includes(name)) return toast.error("That place is already in the list.");
+    setDraft("");
+    save([...chips, name]);
+    toast.success("Destination added");
+  };
+
+  return (
+    <Card className="p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-xl font-bold text-navy">Homepage Destination Chips</h2>
+          <p className="text-xs text-muted-foreground">The place names shown under the homepage search bar. Add, remove or reorder them here.</p>
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2">
+        <Input
+          placeholder="e.g. Goa"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+        />
+        <Button disabled={busy} className="bg-navy text-primary-foreground" onClick={add}><Plus className="mr-1 h-4 w-4" />Add place</Button>
+      </div>
+      {chips.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {chips.map((chip, i) => (
+            <span key={`${chip}-${i}`} className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-sm font-semibold text-navy">
+              {chip}
+              <button
+                aria-label={`Remove ${chip}`}
+                disabled={busy}
+                onClick={() => save(chips.filter((_, j) => j !== i))}
+                className="text-rose-500 hover:text-rose-700"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      ) : <p className="mt-4 text-sm text-muted-foreground">No custom places yet — the homepage shows its default list until you add some.</p>}
+    </Card>
+  );
+}
+
+/** Tour brochure shown on the public Educational / Corporate tour pages. */
+function TourDocCard({ kind }: { kind: "educational" | "corporate" }) {
+  const refresh = useRefresh();
+  const q = useRows("admin_settings", () => db.from("admin_settings").select("*"));
+  const [doc, setDoc] = useState<{ name: string; path: string } | null | undefined>(undefined);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const settingsKey = kind === "educational" ? "educational_tour_doc" : "corporate_tour_doc";
+  const title = kind === "educational" ? "Educational Tour Document" : "Corporate Tour Document";
+
+  useEffect(() => {
+    if (doc === undefined && q.data?.length) {
+      const row = q.data.find((r: any) => r.key === settingsKey);
+      try {
+        const d = JSON.parse(row?.value || "null");
+        setDoc(d && typeof d.path === "string" && d.path ? { name: typeof d.name === "string" && d.name ? d.name : "Tour document", path: d.path } : null);
+      } catch { setDoc(null); }
+    }
+  }, [q.data, doc, settingsKey]);
+
+  const save = async (d: { name: string; path: string } | null) => {
+    const { error } = await db.from("admin_settings").upsert({ key: settingsKey, value: JSON.stringify(d), updated_at: new Date().toISOString() });
+    if (error) return toast.error(error.message);
+    setDoc(d);
+    refresh("admin_settings", `tour-doc-${kind}`);
+  };
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const path = `tour-docs/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "-")}`;
+      const { error: upErr } = await db.storage.from("documents").upload(path, file, { contentType: file.type || "application/octet-stream" });
+      if (upErr) throw new Error(upErr.message);
+      await save({ name: file.name, path });
+      toast.success(`${title} published — it now appears on the public tour page.`);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <Card className="p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-gold-soft/60 text-navy"><FileText className="h-5 w-5" /></span>
+          <div>
+            <h2 className="font-serif text-xl font-bold text-navy">{title}</h2>
+            <p className="text-xs text-muted-foreground">Shown as a downloadable document on the public {kind === "educational" ? "Educational" : "Corporate"} Tour page.</p>
+          </div>
+        </div>
+        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,image/*" hidden onChange={(e) => { if (e.target.files?.[0]) upload(e.target.files[0]); e.target.value = ""; }} />
+        <Button disabled={uploading} className="bg-navy text-primary-foreground" onClick={() => fileRef.current?.click()}>
+          <Upload className="mr-1 h-4 w-4" />{uploading ? "Uploading…" : "Upload document"}
+        </Button>
+      </div>
+      {doc ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted p-4">
+          <span className="truncate text-sm font-semibold text-navy">{doc.name}</span>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <a href={`/api/public/tour-doc?key=${kind}`} target="_blank" rel="noreferrer">Preview</a>
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => { save(null); toast.success(`${title} removed.`); }}>
+              <Trash2 className="mr-1 h-4 w-4" />Remove
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-muted-foreground">No document published yet — the tour page shows a "coming soon" note until you upload one.</p>
+      )}
+    </Card>
   );
 }

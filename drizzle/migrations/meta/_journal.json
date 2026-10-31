@@ -64,6 +64,13 @@
       "when": 1792990912095,
       "tag": "0008_create_custom_referral_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793407919905,
+      "tag": "0009_public_read_site_settings_keys",
+      "breakpoints": true
     }
   ]
 }

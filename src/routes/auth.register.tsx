@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useHydrated } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/auth/register")({
 });
 
 function Register() {
+  const hydrated = useHydrated();
   const [f, setF] = useState({ name: "", phone: "", email: "", password: "", city: "" });
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -60,7 +61,7 @@ function Register() {
               <div><label className="text-sm font-semibold">City</label><Input value={f.city} onChange={set("city")} className="mt-1 h-11" /></div>
               <div><label className="text-sm font-semibold">Email</label><Input required type="email" value={f.email} onChange={set("email")} className="mt-1 h-11" /></div>
               <div><label className="text-sm font-semibold">Password</label><Input required type="password" value={f.password} onChange={set("password")} className="mt-1 h-11" /></div>
-              <Button type="submit" disabled={busy} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep">{busy ? "CREATING..." : "CREATE ACCOUNT"}</Button>
+              <Button type="submit" disabled={busy || !hydrated} className="h-12 w-full bg-gold-gradient font-bold text-navy-deep">{!hydrated ? "LOADING…" : busy ? "CREATING..." : "CREATE ACCOUNT"}</Button>
               <p className="text-center text-sm text-muted-foreground">Already a member? <Link to="/auth/login" className="font-semibold text-blue-600">Login</Link></p>
             </div>
           </form>

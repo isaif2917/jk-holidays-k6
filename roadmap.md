@@ -53,3 +53,10 @@
 - [x] Referral Settings: "Send Custom Reward" — search members by ID/phone/name/email/city, credit any amount to their wallet, saved in a "Custom reward history" section on the same page
 - [x] Admins & Roles: Edit button beside Remove — change name, email, role, custom role label and password (own admin role is protected)
 - [x] Fixed "Unauthorized: No authorization header provided": expired/lost sign-in sessions now clear the screen and return the user to the login page automatically (checked every 30s and on tab focus) instead of leaving broken admin/member pages
+
+# Round: tour pages, chips, request details + login check (Oct 31)
+
+- [x] Educational Tour and Corporate Tour public pages with separate header/footer links; admin Settings cards to edit homepage destination chips and upload/preview/remove the tour brochures (served publicly through a verified read-only route)
+- [x] Member request view: Accepted/Rejected/Pending status, approved alternate dates with original dates struck through, proposed alternates, admin note, and the "please discuss with customer support" guidance moved out of the admin panel (verified end-to-end: member submits → admin proposes alternates → approves → member sees all of it)
+- [x] Login taking twice: reproduced cause was submitting the form during the first moment after the page opens, which silently wiped it; submit buttons on Login, Register and Admin Login now wait until the page is ready, so an early click can no longer clear the form. Member login verified one-attempt end-to-end; the admin login form has the same guard.
+- [ ] Swap remaining icons on inner pages (members area, admin) to the premium set — optional follow-up
