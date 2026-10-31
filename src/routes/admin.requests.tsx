@@ -75,7 +75,7 @@ function AdminRequests() {
     if (mode === "alt") {
       if (!altRangePick?.from || !altRangePick?.to) return toast.error("Pick the alternate check-in and check-out dates.");
       if (new Date(altRangePick.to) <= new Date(altRangePick.from)) return toast.error("Check-out must be after check-in.");
-      return update({ alt_dates: `${iso(altRangePick.from)}|${iso(altRangePick.to)}` }, "Alternate dates sent");
+      return update({ alt_dates: `${iso(altRangePick.from)}|${iso(altRangePick.to)}`, alt_decision: null, alt_decided_at: null }, "Alternate dates sent");
     }
     if (!text.trim()) return toast.error("Please enter some text");
     if (mode === "reject") update({ status: "Rejected", admin_note: text.trim(), admin_action_at: new Date().toISOString() }, "Request rejected");
@@ -197,6 +197,10 @@ function AdminRequests() {
                   <Button disabled={busy} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => update({ status: "Approved", admin_action_at: new Date().toISOString() }, "Request approved — booking created")}><Check className="mr-1 h-4 w-4" /> Approve</Button>
                   <Button disabled={busy} variant="destructive" onClick={() => { setMode("reject"); setText(""); }}><X className="mr-1 h-4 w-4" /> Reject</Button>
                   <Button variant="outline" onClick={() => { setAltRangePick(altRange(detail.alt_dates)); setMode("alt"); }}><CalendarClock className="mr-1 h-4 w-4" /> Alt Dates</Button>
+                </div>
+              ) : detail.status === "Approved" ? (
+                <div className="mt-4">
+                  <Button variant="outline" disabled={busy} onClick={() => { setAltRangePick(altRange(detail.alt_dates)); setMode("alt"); }}><CalendarClock className="mr-1 h-4 w-4" /> Change Dates</Button>
                 </div>
               ) : null}
               {mode === "alt" && (

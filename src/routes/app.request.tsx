@@ -184,8 +184,8 @@ function RequestFlow() {
                         ) : (
                           <div className="mt-1 text-muted-foreground">{fmtDate(detail.check_in)} – {fmtDate(detail.check_out)}</div>
                         )}
-                        {detail.alt_dates && detail.status !== "Approved" && (
-                          <div className="mt-1 font-semibold text-rose-600">Alternate dates proposed: {altLabel(detail.alt_dates)}</div>
+                        {detail.alt_dates && (
+                          <div className="mt-1 font-semibold text-rose-600">{detail.status === "Approved" ? "Changed dates" : "Alternate dates proposed"}: {altLabel(detail.alt_dates)}</div>
                         )}
                       </div>
                       <div className="rounded-md bg-muted p-3">
@@ -195,7 +195,7 @@ function RequestFlow() {
                         <div className="mt-1 text-muted-foreground">Requested on: {fmtDateTime(detail.created_at)}</div>
                         {detail.admin_note && <div className="text-muted-foreground">Note from our team: {detail.admin_note}</div>}
                       </div>
-                      {detail.alt_dates && detail.status !== "Approved" && (
+                      {detail.alt_dates && (
                         !detail.alt_decision ? (
                           <div className="rounded-md border border-gold bg-gold-soft/40 p-3 text-sm">
                             <div className="font-semibold text-navy">Our team proposed alternate dates</div>
@@ -211,7 +211,7 @@ function RequestFlow() {
                           </div>
                         )
                       )}
-                      {detail.status === "Approved" && !!detail.alt_dates && (
+                      {detail.status === "Approved" && !!detail.alt_dates && !detail.alt_decision && (
                         <div className="blink-alert rounded-md bg-rose-50 p-3 text-sm font-bold text-rose-600">
                           Please discuss with customer support to verify the altered date
                         </div>
