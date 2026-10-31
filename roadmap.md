@@ -72,3 +72,10 @@
 - [x] Member keeps the Accept new dates / Keep original dates buttons in Request Status → view even after the admin approves the request with changed dates; once decided, the decision (with date + time) replaces the buttons and the customer-support alert disappears
 - [x] Admin can change dates on an approved request (Change Dates button); sending new dates clears any earlier member decision so the member is asked again
 - [x] Admin panel shows the member's accepted/declined status with timestamp; verified end-to-end (admin proposes → approves → member accepts → admin sees decision); test request cleaned up
+
+# Round: membership gate + payment details + settings error (Oct 31)
+
+- [x] Members without an active membership (status Inactive / no plan) see a red "Membership required" alert on Request Holiday; the request wizard is blocked and submission shows a red alert toast, with a Take a Membership Plan button
+- [x] Membership request dialog (My Membership → Request/Upgrade) now shows UPI QR + UPI ID (UPI) and account name/number/IFSC/bank with copy buttons (Bank Transfer); Card/Cash shows a "team will contact you" note
+- [x] Admin Settings RLS error could not be reproduced: verified as a signed-in admin (admin@jkholidays.com) that adding/removing destination chips works; the live-site error looks like a stale session/login on jkholidays.org — re-login advised
+- [x] Verified end-to-end: inactive member blocked with red alert, active member sees the wizard (temporarily activated/deactivated test member), test destination chip cleaned up
