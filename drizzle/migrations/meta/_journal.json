@@ -78,6 +78,13 @@
       "when": 1793409355432,
       "tag": "0010_holiday_request_messages_and_decisions",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793470339642,
+      "tag": "0011_public_read_featured_packages",
+      "breakpoints": true
     }
   ]
 }
