@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { holidayPackages } from "@/data/mock";
 import { HolidayPackageCard } from "@/components/HolidayPackageCard";
+import { useFeaturedPackages } from "@/lib/catalog";
 
 export function FeaturedPackages({
   title = "Featured Holiday Packages",
@@ -13,7 +14,10 @@ export function FeaturedPackages({
   limit?: number;
   showViewAll?: boolean;
 }) {
-  const items = limit ? holidayPackages.slice(0, limit) : holidayPackages;
+  const managed = useFeaturedPackages();
+  /** Packages published from Admin → Settings take over; bundled defaults fill in until then. */
+  const source = managed.length ? managed : holidayPackages.map((p) => ({ ...p, photos: [...p.photos] }));
+  const items = limit ? source.slice(0, limit) : source;
   return (
     <section className="bg-background py-10 md:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

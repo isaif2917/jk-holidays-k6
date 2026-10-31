@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Share2, Star, Clock, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { holidayPackages } from "@/data/mock";
 import { useSiteContact } from "@/lib/catalog";
 
 type Pkg = {
@@ -16,7 +15,6 @@ type Pkg = {
   photos: string[];
   highlights: string[];
 };
-void holidayPackages;
 
 export function HolidayPackageCard({ pkg }: { pkg: Pkg }) {
   const c = useSiteContact();
