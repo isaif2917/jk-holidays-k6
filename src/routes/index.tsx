@@ -23,7 +23,7 @@ import { CountUp } from "@/components/CountUp";
 import { OfferCards } from "@/components/OfferCards";
 import { useSiteDestinations, useHeroImages, useDestinationChips } from "@/lib/catalog";
 import {
-  Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
+  Check, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
 } from "lucide-react";
 
