@@ -259,7 +259,9 @@ function Home() {
                 </div>
               ))}
             </div>
-            <Button className="bg-gold-gradient font-bold text-navy-deep">KNOW MORE</Button>
+            <Button asChild className="bg-gold-gradient font-bold text-navy-deep">
+              <Link to="/app/refer" preload="intent">KNOW MORE</Link>
+            </Button>
           </div>
         </div>
       </section>
