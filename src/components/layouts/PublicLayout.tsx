@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Phone, Menu, MessageCircle } from "lucide-react";
+import { ChevronDown, Phone, Menu } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import {
   DropdownMenu,
