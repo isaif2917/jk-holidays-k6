@@ -10,8 +10,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, MessageSquare, Check, X, CalendarClock, Download } from "lucide-react";
-import { db, downloadCsv, fmtDate, useProfilesMap, useRefresh, useRows } from "@/lib/data";
+import { RequestThread } from "@/components/RequestThread";
+import { Eye, Check, X, CalendarClock, Download } from "lucide-react";
+import { db, downloadCsv, fmtDate, fmtDateTime, useProfilesMap, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/admin/requests")({ head: () => createRouteHead("Holiday Requests — JK Holidays Admin", "Review member holiday requests, travel details and status."), component: AdminRequests });
@@ -37,7 +38,7 @@ function AdminRequests() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
   const [sel, setSel] = useState<string | null>(null);
-  const [mode, setMode] = useState<null | "alt" | "msg" | "reject">(null);
+  const [mode, setMode] = useState<null | "alt" | "reject">(null);
   const [altRangePick, setAltRangePick] = useState<DateRange | undefined>();
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -77,8 +78,7 @@ function AdminRequests() {
       return update({ alt_dates: `${iso(altRangePick.from)}|${iso(altRangePick.to)}` }, "Alternate dates sent");
     }
     if (!text.trim()) return toast.error("Please enter some text");
-    if (mode === "msg") update({ admin_note: text.trim() }, "Message sent to member");
-    if (mode === "reject") update({ status: "Rejected", admin_note: text.trim() }, "Request rejected");
+    if (mode === "reject") update({ status: "Rejected", admin_note: text.trim(), admin_action_at: new Date().toISOString() }, "Request rejected");
   };
 
   const exportCsv = () => {
@@ -173,8 +173,17 @@ function AdminRequests() {
                   <div className="text-muted-foreground">Nights: {detail.nights} · Rooms: {detail.rooms}</div>
                   <div className="text-muted-foreground">Destination: {detail.destination}{detail.resort ? ` · ${detail.resort}` : ""}</div>
                   {detail.special_requests && <div className="text-muted-foreground">Special: {detail.special_requests}</div>}
+                  <div className="text-muted-foreground">Requested on: {fmtDateTime(detail.created_at)}</div>
                   {detail.alt_dates && !approvedAlt && (
                     <div className="mt-1 font-semibold text-rose-600">Alternate dates proposed: {altLabel(detail.alt_dates)}</div>
+                  )}
+                  {detail.alt_decision && (
+                    <div className={`mt-1 font-semibold ${detail.alt_decision === "Accepted" ? "text-emerald-600" : "text-rose-600"}`}>
+                      Member {detail.alt_decision === "Accepted" ? "accepted" : "declined"} the alternate dates{detail.alt_decided_at ? ` on ${fmtDateTime(detail.alt_decided_at)}` : ""}
+                    </div>
+                  )}
+                  {detail.admin_action_at && (
+                    <div className="text-muted-foreground">{detail.status === "Approved" ? "Accepted" : "Rejected"} on: {fmtDateTime(detail.admin_action_at)}</div>
                   )}
                   {detail.admin_note && <div className="text-muted-foreground">Note: {detail.admin_note}</div>}
                 </div>
@@ -184,15 +193,12 @@ function AdminRequests() {
                 </div>
               </div>
               {detail.status === "Pending" ? (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <Button disabled={busy} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => update({ status: "Approved" }, "Request approved — booking created")}><Check className="mr-1 h-4 w-4" /> Approve</Button>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <Button disabled={busy} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => update({ status: "Approved", admin_action_at: new Date().toISOString() }, "Request approved — booking created")}><Check className="mr-1 h-4 w-4" /> Approve</Button>
                   <Button disabled={busy} variant="destructive" onClick={() => { setMode("reject"); setText(""); }}><X className="mr-1 h-4 w-4" /> Reject</Button>
                   <Button variant="outline" onClick={() => { setAltRangePick(altRange(detail.alt_dates)); setMode("alt"); }}><CalendarClock className="mr-1 h-4 w-4" /> Alt Dates</Button>
-                  <Button variant="outline" onClick={() => { setMode("msg"); setText(""); }}><MessageSquare className="mr-1 h-4 w-4" /> Send Msg</Button>
                 </div>
-              ) : (
-                <Button variant="outline" className="mt-4 w-full" onClick={() => { setMode("msg"); setText(""); }}><MessageSquare className="mr-1 h-4 w-4" /> Send Message</Button>
-              )}
+              ) : null}
               {mode === "alt" && (
                 <Dialog open onOpenChange={(o) => !o && setMode(null)}>
                   <DialogContent className="w-auto max-w-none">
@@ -205,12 +211,13 @@ function AdminRequests() {
                   </DialogContent>
                 </Dialog>
               )}
-              {mode && mode !== "alt" && (
+              {mode === "reject" && (
                 <div className="mt-3 space-y-2">
-                  <Textarea placeholder={mode === "reject" ? "Reason for rejection" : "Message to member"} value={text} onChange={(e) => setText(e.target.value)} />
+                  <Textarea placeholder="Reason for rejection" value={text} onChange={(e) => setText(e.target.value)} />
                   <div className="flex gap-2"><Button variant="outline" className="flex-1" onClick={() => setMode(null)}>Cancel</Button><Button className="flex-1 bg-navy text-primary-foreground" disabled={busy} onClick={submitMode}>Send</Button></div>
                 </div>
               )}
+              <RequestThread requestId={detail.id} sender="admin" className="mt-4 border-t pt-3" />
             </>
           ) : (
             <div className="grid h-full place-items-center py-10 text-center text-sm text-muted-foreground">Select a request to view details</div>
