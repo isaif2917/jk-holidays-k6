@@ -5,7 +5,18 @@ import { Button } from "@/components/ui/button";
 import { holidayPackages } from "@/data/mock";
 import { useSiteContact } from "@/lib/catalog";
 
-type Pkg = (typeof holidayPackages)[number];
+type Pkg = {
+  slug: string;
+  name: string;
+  location: string;
+  tag: string;
+  duration: string;
+  rating: number;
+  reviews: number;
+  photos: string[];
+  highlights: string[];
+};
+void holidayPackages;
 
 export function HolidayPackageCard({ pkg }: { pkg: Pkg }) {
   const c = useSiteContact();
