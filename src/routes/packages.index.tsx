@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowRight, Sparkles } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { membershipPackages } from "@/data/mock";
@@ -94,7 +94,6 @@ function PackagesIndex() {
           </div>
 
           <p className="mt-6 text-center text-xs text-white/70">
-            <Sparkles className="mr-1 inline h-3 w-3 text-gold" />
             Not sure which plan suits you?{" "}
             <Link to="/contact" search={{}} className="font-bold text-gold hover:underline">
               Book a free presentation <ArrowRight className="inline h-3 w-3" />

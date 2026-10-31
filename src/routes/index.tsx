@@ -23,7 +23,7 @@ import { CountUp } from "@/components/CountUp";
 import { OfferCards } from "@/components/OfferCards";
 import { useSiteDestinations, useHeroImages, useDestinationChips } from "@/lib/catalog";
 import {
-  Check, Sparkles, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
+  Check, Wallet, Shield, Headphones, Globe, Heart, ArrowRight,
   Play, Star, UserPlus, Users, Building2, Award, CalendarCheck, MapPin, Search, BadgeCheck,
 } from "lucide-react";
 
@@ -104,7 +104,7 @@ function Home() {
             <PricingCarousel />
           </div>
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Sparkles className="mr-1 inline h-3 w-3 text-gold" /> All plans come with exciting referral benefits & reward points
+            All plans come with exciting referral benefits &amp; reward points
           </p>
         </div>
       </section>
