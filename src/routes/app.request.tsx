@@ -137,10 +137,18 @@ function RequestFlow() {
         </Card>
 
         <Card className="p-6">
-          {step === 0 && <TravelDetails travel={travel} setTravel={setTravel} nights={nights} onNext={() => { const p = !travel.destination.trim() ? "Please enter your preferred destination." : !travel.checkIn || !travel.checkOut || nights < 1 ? "Please choose valid check-in and check-out dates." : null; if (p) return toast.error(p); setStep(1); }} />}
-          {step === 1 && <TravellerDetails travellers={travellers} setTravellers={setTravellers} setT={setT} onBack={() => setStep(0)} onNext={() => { if (!travellers.some((t) => t.name.trim())) return toast.error("Add at least one traveller name."); setStep(2); }} />}
-          {step === 2 && <AdditionalInfo extras={extras} setExtras={setExtras} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
-          {step === 3 && <ReviewSubmit travel={travel} travellers={travellers} extras={extras} nights={nights} onBack={() => setStep(2)} submitting={submitting} onSubmit={submit} />}
+          {!activeMember && step !== 4 && (
+            <div className="py-10 text-center">
+              <AlertTriangle className="mx-auto h-10 w-10 text-rose-500" />
+              <div className="mt-3 font-serif text-xl font-bold text-rose-700">Membership required</div>
+              <p className="mx-auto mt-1 max-w-md text-sm text-rose-600">Holiday requests are available to active members only. Please take a membership plan first, then come back to request your holiday.</p>
+              <Button asChild className="mt-4 bg-rose-600 text-white hover:bg-rose-700"><Link to="/app/membership">Take a Membership Plan</Link></Button>
+            </div>
+          )}
+          {activeMember && step === 0 && <TravelDetails travel={travel} setTravel={setTravel} nights={nights} onNext={() => { const p = !travel.destination.trim() ? "Please enter your preferred destination." : !travel.checkIn || !travel.checkOut || nights < 1 ? "Please choose valid check-in and check-out dates." : null; if (p) return toast.error(p); setStep(1); }} />}
+          {activeMember && step === 1 && <TravellerDetails travellers={travellers} setTravellers={setTravellers} setT={setT} onBack={() => setStep(0)} onNext={() => { if (!travellers.some((t) => t.name.trim())) return toast.error("Add at least one traveller name."); setStep(2); }} />}
+          {activeMember && step === 2 && <AdditionalInfo extras={extras} setExtras={setExtras} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+          {activeMember && step === 3 && <ReviewSubmit travel={travel} travellers={travellers} extras={extras} nights={nights} onBack={() => setStep(2)} submitting={submitting} onSubmit={submit} />}
           {step === 4 && (
             <div>
               <div className="flex items-center justify-between">
