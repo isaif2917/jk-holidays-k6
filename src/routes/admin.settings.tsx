@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2, FileText, Upload } from "lucide-react";
+import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2, FileText, Upload, Plus } from "lucide-react";
 import { db, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
