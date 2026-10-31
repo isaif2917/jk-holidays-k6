@@ -5,7 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2, FileText, Upload, Plus } from "lucide-react";
+import { Globe, Mail, Phone, MapPin, Save, ImagePlus, Trash2, Link2, FileText, Upload, Plus, Pencil, Package } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { FeaturedPackage } from "@/lib/catalog";
 import { db, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
@@ -123,6 +125,7 @@ function AdminSettings() {
         ) : <p className="mt-4 text-sm text-muted-foreground">No custom hero images yet — the homepage uses its default image until you add one.</p>}
       </Card>
       <DestinationChipsCard />
+      <FeaturedPackagesCard />
       <TourDocCard kind="educational" />
       <TourDocCard kind="corporate" />
       <p className="text-xs text-muted-foreground">Changes appear on the public website footer, header phone number, Contact Us page, hero carousel, search-bar destinations and the tour pages shortly after saving.</p>
