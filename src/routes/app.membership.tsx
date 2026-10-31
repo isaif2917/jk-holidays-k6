@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Crown } from "lucide-react";
+import { Building2, Check, Copy, Crown, Smartphone } from "lucide-react";
 import { db, fmtDate, inr, useMe, useRows } from "@/lib/data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useState } from "react";
