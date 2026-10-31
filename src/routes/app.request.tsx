@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Check, Plus, Trash2, Eye } from "lucide-react";
+import { Check, Plus, Trash2, Eye, CalendarCheck, CalendarX } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RequestThread } from "@/components/RequestThread";
 import { useSiteDestinations } from "@/lib/catalog";
-import { db, fmtDate, useMe, useRefresh, useRows } from "@/lib/data";
+import { db, fmtDate, fmtDateTime, useMe, useRefresh, useRows } from "@/lib/data";
 import { createRouteHead } from "@/lib/route-meta";
 
 export const Route = createFileRoute("/app/request")({ head: () => createRouteHead("Request a Holiday — JK Holidays", "Submit and track a holiday request with JK Holidays."), component: RequestFlow });
@@ -46,6 +47,17 @@ function RequestFlow() {
   }, [travel.checkIn, travel.checkOut]);
 
   const setT = (i: number, patch: Partial<Traveller>) => setTravellers((rows) => rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+
+  /** Member decides on the alternate dates proposed by the admin team. */
+  const decideAlt = async (decision: "Accepted" | "Rejected") => {
+    if (!detail) return;
+    const at = new Date().toISOString();
+    const { error } = await db.from("holiday_requests").update({ alt_decision: decision, alt_decided_at: at }).eq("id", detail.id);
+    if (error) return toast.error(error.message);
+    setDetail({ ...detail, alt_decision: decision, alt_decided_at: at });
+    refresh("holiday_requests");
+    toast.success(decision === "Accepted" ? "Thank you — our team will confirm the new dates." : "Noted — we will keep your original dates.");
+  };
 
   const validate = () => {
     if (!travel.destination.trim()) return "Please enter your preferred destination.";
@@ -157,6 +169,11 @@ function RequestFlow() {
                           {detail.status === "Approved" ? "Accepted" : detail.status === "Rejected" ? "Rejected" : "Pending review"}
                         </span>
                       </div>
+                      {detail.admin_action_at && (
+                        <div className="text-xs text-muted-foreground">
+                          Our team {detail.status === "Approved" ? "accepted" : "rejected"} this request on {fmtDateTime(detail.admin_action_at)}
+                        </div>
+                      )}
                       <div className="rounded-md bg-muted p-3">
                         <div className="font-semibold text-navy">Dates</div>
                         {detail.status === "Approved" && detail.alt_dates ? (
@@ -175,13 +192,31 @@ function RequestFlow() {
                         <div className="font-semibold text-navy">Request</div>
                         <div className="mt-1 text-muted-foreground">{detail.destination}{detail.resort ? ` · ${detail.resort}` : ""} · {detail.nights} night(s) · {detail.rooms} room(s)</div>
                         {detail.special_requests && <div className="text-muted-foreground">Special: {detail.special_requests}</div>}
+                        <div className="mt-1 text-muted-foreground">Requested on: {fmtDateTime(detail.created_at)}</div>
                         {detail.admin_note && <div className="text-muted-foreground">Note from our team: {detail.admin_note}</div>}
                       </div>
+                      {detail.alt_dates && detail.status !== "Approved" && (
+                        !detail.alt_decision ? (
+                          <div className="rounded-md border border-gold bg-gold-soft/40 p-3 text-sm">
+                            <div className="font-semibold text-navy">Our team proposed alternate dates</div>
+                            <div className="mt-1 font-semibold text-rose-600">{altLabel(detail.alt_dates)}</div>
+                            <div className="mt-2 flex gap-2">
+                              <Button size="sm" disabled={submitting} className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => decideAlt("Accepted")}><CalendarCheck className="mr-1 h-4 w-4" /> Accept new dates</Button>
+                              <Button size="sm" disabled={submitting} variant="outline" onClick={() => decideAlt("Rejected")}><CalendarX className="mr-1 h-4 w-4" /> Keep original dates</Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={`rounded-md p-3 text-sm font-semibold ${detail.alt_decision === "Accepted" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
+                            You {detail.alt_decision === "Accepted" ? "accepted" : "declined"} the proposed dates{detail.alt_decided_at ? ` on ${fmtDateTime(detail.alt_decided_at)}` : ""}
+                          </div>
+                        )
+                      )}
                       {detail.status === "Approved" && !!detail.alt_dates && (
                         <div className="blink-alert rounded-md bg-rose-50 p-3 text-sm font-bold text-rose-600">
                           Please discuss with customer support to verify the altered date
                         </div>
                       )}
+                      <RequestThread requestId={detail.id} sender="member" className="rounded-md bg-muted p-3" />
                     </div>
                   </DialogContent>
                 </Dialog>

@@ -97,6 +97,8 @@ export function useProfilesMap() {
 export const inr = (n: number | null | undefined) => "₹ " + Number(n ?? 0).toLocaleString("en-IN");
 export const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+export const fmtDateTime = (d?: string | null) =>
+  d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : "—";
 
 export async function signOut() {
   await supabase.auth.signOut();

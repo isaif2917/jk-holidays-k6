@@ -60,3 +60,9 @@
 - [x] Member request view: Accepted/Rejected/Pending status, approved alternate dates with original dates struck through, proposed alternates, admin note, and the "please discuss with customer support" guidance moved out of the admin panel (verified end-to-end: member submits → admin proposes alternates → approves → member sees all of it)
 - [x] Login taking twice: reproduced cause was submitting the form during the first moment after the page opens, which silently wiped it; submit buttons on Login, Register and Admin Login now wait until the page is ready, so an early click can no longer clear the form. Member login verified one-attempt end-to-end; the admin login form has the same guard.
 - [ ] Swap remaining icons on inner pages (members area, admin) to the premium set — optional follow-up
+
+# Round: request conversations + decision on altered dates (Oct 31)
+
+- [x] Two-way messages on each holiday request: admin replies and member doubts/messages show in both panels below the request details, with date + time on every message; both sides get a reply box; each new message notifies the other side
+- [x] Member accepts or declines the proposed alternate dates from the request-status view; the decision (with time) is visible to the admin, who also gets notified
+- [x] Both panels show when the member requested and when the admin accepted/rejected, with date + time

@@ -181,8 +181,11 @@ export type Database = {
       }
       holiday_requests: {
         Row: {
+          admin_action_at: string | null
           admin_note: string | null
           alt_dates: string | null
+          alt_decided_at: string | null
+          alt_decision: string | null
           check_in: string
           check_out: string
           code: string
@@ -199,8 +202,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_action_at?: string | null
           admin_note?: string | null
           alt_dates?: string | null
+          alt_decided_at?: string | null
+          alt_decision?: string | null
           check_in: string
           check_out: string
           code?: string
@@ -217,8 +223,11 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          admin_action_at?: string | null
           admin_note?: string | null
           alt_dates?: string | null
+          alt_decided_at?: string | null
+          alt_decision?: string | null
           check_in?: string
           check_out?: string
           code?: string
@@ -490,6 +499,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      request_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          request_id: string
+          sender: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          request_id: string
+          sender: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          sender?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "holiday_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resorts: {
         Row: {
