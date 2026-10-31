@@ -30,6 +30,9 @@ const altLabel = (alt: string | null) => {
 
 function RequestFlow() {
   const { data: me } = useMe();
+  const p = me?.profile ?? {};
+  /** Holiday requests require an active (paid) membership plan. */
+  const activeMember = !!(p.status === "Active" && p.plan);
   const refresh = useRefresh();
   const [step, setStep] = useState(0);
   const [tab, setTab] = useState<"All" | "Pending" | "Accepted" | "Rejected">("All");
