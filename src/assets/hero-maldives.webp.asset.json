@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "b00de503-851b-4a72-aa19-340686828508",
-  "project_id": "dc7277da-5ad6-43d4-b081-140e4850f3a4",
-  "url": "/__l5e/assets-v1/b00de503-851b-4a72-aa19-340686828508/hero-maldives.webp",
-  "r2_key": "a/v1/dc7277da-5ad6-43d4-b081-140e4850f3a4/b00de503-851b-4a72-aa19-340686828508/hero-maldives.webp",
-  "original_filename": "hero-maldives.webp",
-  "size": 326410,
   "content_type": "image/webp",
-  "created_at": "2026-10-14T06:24:06Z"
+  "created_at": "2026-10-14T06:24:06Z",
+  "original_filename": "hero-maldives.webp",
+  "project_id": "f6215290-60c3-43ac-bdea-3e4457b54bad",
+  "r2_key": "a/v1/f6215290-60c3-43ac-bdea-3e4457b54bad/b00de503-851b-4a72-aa19-340686828508/hero-maldives.webp",
+  "size": 326410,
+  "url": "/__l5e/assets-v1/b00de503-851b-4a72-aa19-340686828508/hero-maldives.webp",
+  "version": 1
 }
