@@ -86,3 +86,7 @@
 - [x] Public read policy on admin_settings extended to the featured_packages key (migration 0011)
 - [x] Homepage Popular Destinations rebuilt as an oversized horizontal marquee moving left to right in super slow motion (90s loop, pauses on hover)
 - [x] Verified: package add/edit/remove round-trip from the admin UI, homepage shows managed package, marquee transform moves; test package removed
+
+# Round: redeploy admin-ops edge function (Nov 10)
+
+- [ ] Redeploy the existing `admin-ops` edge function unchanged and report deployment result plus the deployed-function list
