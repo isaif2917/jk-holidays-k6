@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
 import { Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,10 +29,10 @@ function Roles() {
   const { data: me } = useMe();
   const { map } = useProfilesMap();
   const roles = useRows("user_roles", () => db.from("user_roles").select("user_id, role, role_label"));
-  const create = useServerFn(createAdmin);
-  const staff = useServerFn(createStaff);
-  const remove = useServerFn(removeRole);
-  const updateAcct = useServerFn(updateRoleAccount);
+  const create = createAdmin;
+  const staff = createStaff;
+  const remove = removeRole;
+  const updateAcct = updateRoleAccount;
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ full_name: "", email: "", password: "", role: "admin", roleLabel: "" });
   const [busy, setBusy] = useState(false);

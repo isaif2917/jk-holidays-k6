@@ -1,5 +1,78 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabase } from "@/integrations/supabase/client";
+
+/*
+ * Admins & Roles actions (createAdmin, createStaff, removeRole, updateRoleAccount) run in the
+ * `admin-ops` Supabase Edge Function (supabase/functions/admin-ops), NOT as TanStack server
+ * functions. Reason: they need the service role key, which Lovable Cloud only injects into its
+ * own runtimes, so server functions on Vercel/localhost fail with "Missing Supabase environment
+ * variable(s): SUPABASE_SERVICE_ROLE_KEY". Inside the edge function the key is always present.
+ *
+ * These exports keep the old names and the `fn({ data })` call shape, so routes need no changes
+ * beyond dropping useServerFn. The remaining handlers below are still server functions.
+ * Do not convert the four back into createServerFn.
+ */
+
+const ADMIN_OPS = "admin-ops";
+
+// functions.invoke wraps a non-2xx in a FunctionsHttpError whose `message` is generic; the
+// server's message sits in the unread Response on `error.context`.
+async function adminOpsErrorMessage(error: unknown): Promise<string> {
+  const res = (error as { context?: unknown })?.context;
+  if (typeof Response !== "undefined" && res instanceof Response) {
+    const body = await res.text().catch(() => "");
+    try {
+      const parsed = JSON.parse(body);
+      if (typeof parsed?.error === "string") return parsed.error;
+    } catch {
+      /* not JSON */
+    }
+    if (res.status === 404) return "This admin action isn't available yet — it hasn't been deployed.";
+    if (res.status === 401) return "Your session expired — please sign in again.";
+    return body.slice(0, 300) || `Request failed (${res.status})`;
+  }
+  return (error as Error)?.message || "Could not reach the server";
+}
+
+async function callAdminOps<T>(action: string, payload: unknown): Promise<T> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error("Your session expired — please sign in again.");
+  const { data, error } = await supabase.functions.invoke(ADMIN_OPS, {
+    body: { action, payload },
+    // Set explicitly: the generated client's fetch drops an Authorization equal to the
+    // publishable key, which is what supabase-js falls back to without a session.
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  if (error) throw new Error(await adminOpsErrorMessage(error));
+  return data as T;
+}
+
+type CreateAdminData = { full_name: string; email: string; password: string };
+type CreateStaffData = CreateAdminData & {
+  role: "manager" | "supervisor" | "operations_manager" | "other";
+  roleLabel?: string;
+};
+type RemoveRoleData = { userId: string; role: string };
+type UpdateRoleAccountData = {
+  userId: string;
+  oldRole: string;
+  role: "admin" | "manager" | "supervisor" | "operations_manager" | "other";
+  roleLabel?: string;
+  full_name: string;
+  email: string;
+  password?: string;
+};
+
+export const createAdmin = ({ data }: { data: CreateAdminData }) =>
+  callAdminOps<{ id: string }>("createAdmin", data);
+export const createStaff = ({ data }: { data: CreateStaffData }) =>
+  callAdminOps<{ id: string }>("createStaff", data);
+export const removeRole = ({ data }: { data: RemoveRoleData }) => callAdminOps<{ ok: true }>("removeRole", data);
+export const updateRoleAccount = ({ data }: { data: UpdateRoleAccountData }) =>
+  callAdminOps<{ ok: true }>("updateRoleAccount", data);
 
 type NewMember = { full_name: string; email: string; phone?: string; city?: string; password: string; plan?: string };
 
@@ -146,99 +219,6 @@ export const setMemberPassword = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const createAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { full_name: string; email: string; password: string }) => {
-    if (!d?.email || !/^\S+@\S+\.\S+$/.test(d.email)) throw new Error("Valid email required");
-    if (!d.full_name || d.full_name.length > 100) throw new Error("Name required");
-    if (!d.password || d.password.length < 6) throw new Error("Password must be at least 6 characters");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Admins only");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.trim().toLowerCase();
-    let id: string | undefined;
-    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email, password: data.password, email_confirm: true, user_metadata: { full_name: data.full_name },
-    });
-    if (error) throw new Error("An account with this email already exists. Open the member's details to change its password instead.");
-    id = created.user!.id;
-    const { error: rErr } = await supabaseAdmin.from("user_roles").upsert({ user_id: id, role: "admin" }, { onConflict: "user_id,role" });
-    if (rErr) throw new Error(rErr.message);
-    await rememberPassword(supabaseAdmin, id, data.password);
-    return { id };
-  });
-
-export const removeAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string }) => { if (!d?.userId) throw new Error("Admin required"); return d; })
-  .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Admins only");
-    if (data.userId === context.userId) throw new Error("You can't remove your own admin access");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-type StaffInput = {
-  full_name: string;
-  email: string;
-  password: string;
-  role: "manager" | "supervisor" | "operations_manager" | "other";
-  roleLabel?: string;
-};
-
-export const createStaff = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: StaffInput) => {
-    if (!d?.email || !/^\S+@\S+\.\S+$/.test(d.email)) throw new Error("Valid email required");
-    if (!d.full_name || d.full_name.length > 100) throw new Error("Name required");
-    if (!d.password || d.password.length < 6) throw new Error("Password must be at least 6 characters");
-    if (!["manager", "supervisor", "operations_manager", "other"].includes(d.role)) throw new Error("Choose a role");
-    if (d.role === "other" && (!d.roleLabel || d.roleLabel.trim().length > 60)) throw new Error("Type the staff role (60 characters max)");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Admins only");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.trim().toLowerCase();
-    let id: string | undefined;
-    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email, password: data.password, email_confirm: true, user_metadata: { full_name: data.full_name },
-    });
-    if (error) throw new Error("An account with this email already exists. Open the member's details to change its password instead.");
-    id = created.user!.id;
-    const { error: rErr } = await supabaseAdmin.from("user_roles").upsert(
-      { user_id: id, role: data.role, role_label: data.role === "other" ? data.roleLabel!.trim() : null },
-      { onConflict: "user_id,role" },
-    );
-    if (rErr) throw new Error(rErr.message);
-    await rememberPassword(supabaseAdmin, id, data.password);
-    return { id };
-  });
-
-export const removeRole = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; role: string }) => {
-    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Valid account required");
-    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.role)) throw new Error("Invalid role");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Admins only");
-    if (data.userId === context.userId && data.role === "admin") throw new Error("You can't remove your own admin access");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role as any);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
 export const settleReferral = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { referralId: string; amount: number }) => {
@@ -313,62 +293,3 @@ export const createCustomReward = createServerFn({ method: "POST" })
     if (hErr) throw new Error(hErr.message);
     return { ok: true, name: profile.full_name };
   });
-
-type RoleAccountInput = {
-  userId: string;
-  oldRole: string;
-  role: "admin" | "manager" | "supervisor" | "operations_manager" | "other";
-  roleLabel?: string;
-  full_name: string;
-  email: string;
-  password?: string;
-};
-
-// Edit an admin/staff account: name, email, role and password.
-export const updateRoleAccount = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: RoleAccountInput) => {
-    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Valid account required");
-    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.oldRole)) throw new Error("Invalid current role");
-    if (!["admin", "manager", "supervisor", "operations_manager", "other"].includes(d.role)) throw new Error("Choose a valid role");
-    if (d.role === "other" && (!d.roleLabel || d.roleLabel.trim().length > 60)) throw new Error("Type the role (60 characters max)");
-    if (!d.full_name?.trim() || d.full_name.length > 100) throw new Error("Name is required (100 characters max)");
-    if (!/^\S+@\S+\.\S+$/.test(d.email ?? "") || d.email.length > 255) throw new Error("Valid email required");
-    if (d.password && d.password.length < 6) throw new Error("Password must be at least 6 characters");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    if (data.userId === context.userId && data.oldRole === "admin" && data.role !== "admin") {
-      throw new Error("You can't change your own admin role");
-    }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.trim().toLowerCase();
-    const { data: current, error: readError } = await supabaseAdmin.auth.admin.getUserById(data.userId);
-    if (readError || !current.user) throw new Error("Could not find this account");
-    if (current.user.email?.toLowerCase() !== email) {
-      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { email, email_confirm: true });
-      if (error) throw new Error(error.message);
-    }
-    if (data.password) {
-      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
-      if (error) throw new Error(error.message);
-      await rememberPassword(supabaseAdmin, data.userId, data.password);
-    }
-    const { error: pErr } = await supabaseAdmin.from("profiles").update({
-      full_name: data.full_name.trim(), email,
-    }).eq("id", data.userId);
-    if (pErr) {
-      if (current.user.email && current.user.email.toLowerCase() !== email) {
-        await supabaseAdmin.auth.admin.updateUserById(data.userId, { email: current.user.email, email_confirm: true });
-      }
-      throw new Error(pErr.message);
-    }
-    const { error: rErr } = await supabaseAdmin.from("user_roles").update({
-      role: data.role,
-      role_label: data.role === "other" ? data.roleLabel!.trim() : null,
-    }).eq("user_id", data.userId).eq("role", data.oldRole as any);
-    if (rErr) throw new Error(rErr.message);
-    return { ok: true };
-  });
-

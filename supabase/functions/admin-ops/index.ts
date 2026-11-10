@@ -9,8 +9,10 @@
 // DEPLOYING: a git push does NOT deploy this. Ask Lovable in the project chat to deploy
 // the edge function, then confirm the version under More -> Database -> Manage -> Edge functions.
 //
-// STAGE 0 (current): only the `ping` diagnostic, to prove deployment, proxy routing,
-// env vars, _shared/ bundling, JWT delivery and has_role before any behaviour moves here.
+// STAGE 0: the `ping` diagnostic, proving deployment, proxy routing, env vars, _shared/
+// bundling, JWT delivery and has_role.
+// STAGE 1 (current): Admins & Roles actions — createAdmin, createStaff, removeRole,
+// updateRoleAccount. Members and referrals still run as server functions (src/lib/admin.functions.ts).
 import { preflight } from "../_shared/cors.ts";
 import { HttpError, fail, json } from "../_shared/http.ts";
 import {
@@ -20,6 +22,15 @@ import {
   serviceRoleKey,
   supabaseUrl,
 } from "../_shared/clients.ts";
+import { requireAdmin, type Ctx } from "../_shared/auth.ts";
+import {
+  ValidationError,
+  validateCreateAdmin,
+  validateCreateStaff,
+  validateRemoveRole,
+  validateUpdateRoleAccount,
+} from "../_shared/validate.ts";
+import { createAdmin, createStaff, removeRole, updateRoleAccount } from "./roles.ts";
 
 function bearer(req: Request): string {
   return (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
@@ -82,8 +93,25 @@ async function ping(req: Request): Promise<Record<string, unknown>> {
   return result;
 }
 
-const HANDLERS: Record<string, (req: Request, payload: unknown) => Promise<unknown>> = {
+type Handler = (req: Request, payload: unknown) => Promise<unknown>;
+
+/**
+ * Wraps a privileged action: admin check FIRST (so an unauthenticated or non-admin
+ * caller learns nothing about the payload rules), then validation, then the work.
+ */
+function adminAction<T>(validate: (payload: unknown) => T, run: (input: T, ctx: Ctx) => Promise<unknown>): Handler {
+  return async (req, payload) => {
+    const ctx = await requireAdmin(req);
+    return await run(validate(payload), ctx);
+  };
+}
+
+const HANDLERS: Record<string, Handler> = {
   ping: (req) => ping(req),
+  createAdmin: adminAction(validateCreateAdmin, createAdmin),
+  createStaff: adminAction(validateCreateStaff, createStaff),
+  removeRole: adminAction(validateRemoveRole, removeRole),
+  updateRoleAccount: adminAction(validateUpdateRoleAccount, updateRoleAccount),
 };
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -114,8 +142,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     console.log(JSON.stringify({ fn: "admin-ops", action, ok: true, ms: Date.now() - started }));
     return json(req, 200, result);
   } catch (e) {
-    const status = e instanceof HttpError ? e.status : 500;
-    const message = e instanceof HttpError ? e.message : "Something went wrong on the server";
+    // ValidationError messages are written for the admin who typed the input, so they pass through.
+    const known = e instanceof HttpError || e instanceof ValidationError;
+    const status = e instanceof HttpError ? e.status : e instanceof ValidationError ? 400 : 500;
+    const message = known ? (e as Error).message : "Something went wrong on the server";
     console.error(
       JSON.stringify({
         fn: "admin-ops",
