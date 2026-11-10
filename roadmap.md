@@ -89,4 +89,5 @@
 
 # Round: redeploy admin-ops edge function (Nov 10)
 
-- [ ] Redeploy the existing `admin-ops` edge function unchanged and report deployment result plus the deployed-function list
+- [x] Redeploy the existing `admin-ops` edge function unchanged; confirmed with the `ping` action
+- [ ] Enumerate every deployed edge function; the connected CLI is not authenticated for listing functions
