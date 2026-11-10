@@ -6,7 +6,9 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
+  // supabase/functions runs on Deno (URL imports, Deno.* globals), not in this Vite/browser
+  // project — linting it here only produces false errors. Deploys go through Lovable.
+  { ignores: ["dist", ".output", ".vinxi", "supabase/functions/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
