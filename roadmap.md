@@ -90,4 +90,4 @@
 # Round: redeploy admin-ops edge function (Nov 10)
 
 - [x] Redeploy the existing `admin-ops` edge function unchanged; confirmed with the `ping` action
-- [ ] Enumerate every deployed edge function; the connected CLI is not authenticated for listing functions
+- [ ] Enumerate every deployed edge function; blocked because the Supabase CLI has no access token in this workspace
