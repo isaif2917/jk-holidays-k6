@@ -12,8 +12,10 @@
 // STAGE 0: the `ping` diagnostic, proving deployment, proxy routing, env vars, _shared/
 // bundling, JWT delivery and has_role.
 // STAGE 1: Admins & Roles actions — createAdmin, createStaff, removeRole, updateRoleAccount.
-// STAGE 2 (current): referral actions — settleReferral, rejectReferral, createCustomReward.
-// Member actions still run as server functions (src/lib/admin.functions.ts).
+// STAGE 2: referral actions — settleReferral, rejectReferral, createCustomReward.
+// STAGE 3 (current): member actions — createMember, saveMemberDetails, setMemberPassword, deleteMember.
+// After this stage src/lib/admin.functions.ts holds only thin wrappers; no admin action there
+// uses the service role key any more (only src/routes/api/public/tour-doc.ts still does).
 import { preflight } from "../_shared/cors.ts";
 import { HttpError, fail, json } from "../_shared/http.ts";
 import {
@@ -28,7 +30,11 @@ import {
   ValidationError,
   validateCreateAdmin,
   validateCreateCustomReward,
+  validateCreateMember,
   validateCreateStaff,
+  validateDeleteMember,
+  validateSaveMemberDetails,
+  validateSetMemberPassword,
   validateRejectReferral,
   validateSettleReferral,
   validateRemoveRole,
@@ -36,6 +42,7 @@ import {
 } from "../_shared/validate.ts";
 import { createAdmin, createStaff, removeRole, updateRoleAccount } from "./roles.ts";
 import { createCustomReward, rejectReferral, settleReferral } from "./referrals.ts";
+import { createMember, deleteMember, saveMemberDetails, setMemberPassword } from "./members.ts";
 
 function bearer(req: Request): string {
   return (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
@@ -120,6 +127,10 @@ const HANDLERS: Record<string, Handler> = {
   settleReferral: adminAction(validateSettleReferral, settleReferral),
   rejectReferral: adminAction(validateRejectReferral, rejectReferral),
   createCustomReward: adminAction(validateCreateCustomReward, createCustomReward),
+  createMember: adminAction(validateCreateMember, createMember),
+  saveMemberDetails: adminAction(validateSaveMemberDetails, saveMemberDetails),
+  setMemberPassword: adminAction(validateSetMemberPassword, setMemberPassword),
+  deleteMember: adminAction(validateDeleteMember, deleteMember),
 };
 
 Deno.serve(async (req: Request): Promise<Response> => {

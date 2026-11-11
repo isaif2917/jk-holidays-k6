@@ -68,6 +68,90 @@ export function validateCreateCustomReward(d: Raw): CreateCustomRewardInput {
   return { userId: d.userId, amount: d.amount, note: d.note ?? undefined };
 }
 
+export const MEMBER_STATUSES = ["Active", "Inactive", "Pending", "Suspended"] as const;
+
+export type CreateMemberInput = CreateAdminInput & { phone?: string; city?: string; plan?: string };
+export type SetMemberPasswordInput = { userId: string; password: string };
+export type DeleteMemberInput = { userId: string };
+export type SaveMemberDetailsInput = {
+  userId: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  city: string | null;
+  plan: string | null;
+  status: (typeof MEMBER_STATUSES)[number];
+  membership_start: string | null;
+  membership_end: string | null;
+  nights_total: number;
+  nights_used: number;
+};
+
+const optionalText = (v: unknown, what: string): string | undefined => {
+  if (v === undefined || v === null) return undefined;
+  if (!isString(v)) throw new ValidationError(`${what} must be text`);
+  return v;
+};
+
+export function validateCreateMember(d: Raw): CreateMemberInput {
+  const base = validateCreateAdmin(d);
+  return {
+    ...base,
+    phone: optionalText(d.phone, "Mobile number"),
+    city: optionalText(d.city, "City"),
+    plan: optionalText(d.plan, "Plan"),
+  };
+}
+
+export function validateSetMemberPassword(d: Raw): SetMemberPasswordInput {
+  if (!isString(d?.userId) || !UUID.test(d.userId)) throw new ValidationError("Member required");
+  if (!isString(d.password) || d.password.length < 6) {
+    throw new ValidationError("Password must be at least 6 characters");
+  }
+  return { userId: d.userId, password: d.password };
+}
+
+export function validateDeleteMember(d: Raw): DeleteMemberInput {
+  if (!isString(d?.userId) || !UUID.test(d.userId)) throw new ValidationError("Valid member required");
+  return { userId: d.userId };
+}
+
+export function validateSaveMemberDetails(d: Raw): SaveMemberDetailsInput {
+  if (!isString(d?.userId) || !UUID.test(d.userId)) throw new ValidationError("Valid member required");
+  if (!isString(d.full_name) || !d.full_name.trim() || d.full_name.length > 100) {
+    throw new ValidationError("Name is required (100 characters max)");
+  }
+  if (!isString(d.email) || !EMAIL.test(d.email) || d.email.length > 255) {
+    throw new ValidationError("Valid email required");
+  }
+  if (d.phone && (!isString(d.phone) || d.phone.length > 40)) throw new ValidationError("Mobile number is too long");
+  if (d.city && (!isString(d.city) || d.city.length > 100)) throw new ValidationError("City is too long");
+  if (!(MEMBER_STATUSES as readonly unknown[]).includes(d.status)) throw new ValidationError("Invalid member status");
+  if (
+    !Number.isInteger(d.nights_total) ||
+    d.nights_total < 0 ||
+    !Number.isInteger(d.nights_used) ||
+    d.nights_used < 0
+  ) {
+    throw new ValidationError("Nights must be zero or greater");
+  }
+  // plan and the membership dates were never validated by the old server function; kept
+  // as pass-through (null when absent) so existing data keeps saving.
+  return {
+    userId: d.userId,
+    full_name: d.full_name,
+    email: d.email,
+    phone: d.phone ?? null,
+    city: d.city ?? null,
+    plan: d.plan ?? null,
+    status: d.status,
+    membership_start: d.membership_start ?? null,
+    membership_end: d.membership_end ?? null,
+    nights_total: d.nights_total,
+    nights_used: d.nights_used,
+  };
+}
+
 export function validateCreateAdmin(d: Raw): CreateAdminInput {
   if (!isString(d?.email) || !EMAIL.test(d.email)) throw new ValidationError("Valid email required");
   if (!isString(d.full_name) || !d.full_name || d.full_name.length > 100) throw new ValidationError("Name required");

@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
@@ -30,8 +29,8 @@ const PAGE = 10;
 
 function Members() {
   const refresh = useRefresh();
-  const saveMember = useServerFn(saveMemberDetails);
-  const deleteMemberAccount = useServerFn(deleteMember);
+  const saveMember = saveMemberDetails;
+  const deleteMemberAccount = deleteMember;
   const profiles = useRows("profiles", () => db.from("profiles").select("*").order("created_at", { ascending: false }));
   const plans = useRows("membership_plans", () => db.from("membership_plans").select("name").order("sort"));
   const referralRows = useRows("member-referral-summary", () => db.from("referrals").select("user_id"));
@@ -289,7 +288,7 @@ function AddMember({ open, onClose, plans, onDone }: { open: boolean; onClose: (
 }
 
 function PasswordBox({ userId }: { userId: string }) {
-  const changePassword = useServerFn(setMemberPassword);
+  const changePassword = setMemberPassword;
   const refresh = useRefresh();
   const known = useRows(["admin-known-password", userId], () => db.from("admin_known_passwords").select("password, updated_at").eq("user_id", userId).maybeSingle());
   const current = (known.data as any)?.password as string | null | undefined;

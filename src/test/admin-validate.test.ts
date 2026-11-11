@@ -8,6 +8,10 @@ import {
   validateSettleReferral,
   validateRejectReferral,
   validateCreateCustomReward,
+  validateCreateMember,
+  validateSetMemberPassword,
+  validateDeleteMember,
+  validateSaveMemberDetails,
 } from "../../supabase/functions/_shared/validate";
 
 const UUID = "123e4567-e89b-12d3-a456-426614174000";
@@ -141,5 +145,71 @@ describe("referral action validation", () => {
       "Note is limited to 200 characters",
     );
     expect(validateCreateCustomReward({ userId: UUID, amount: 5, note: "x".repeat(200) }).note).toHaveLength(200);
+  });
+});
+
+describe("member action validation", () => {
+  const member = {
+    userId: UUID,
+    full_name: "Asha",
+    email: "a@example.com",
+    phone: "999",
+    city: "Goa",
+    plan: "Gold",
+    status: "Active",
+    membership_start: "2026-01-01",
+    membership_end: "2027-01-01",
+    nights_total: 10,
+    nights_used: 2,
+  };
+
+  it("createMember reuses the account rules and keeps optional text fields", () => {
+    const ok = validateCreateMember({ full_name: "Asha", email: "a@example.com", password: "123456", city: "Goa" });
+    expect(ok.city).toBe("Goa");
+    expect(ok.phone).toBeUndefined();
+    expect(msg(() => validateCreateMember({ full_name: "Asha", email: "a@example.com", password: "1" }))).toBe(
+      "Password must be at least 6 characters",
+    );
+    expect(msg(() => validateCreateMember({ full_name: "A", email: "a@example.com", password: "123456", city: 5 }))).toBe(
+      "City must be text",
+    );
+  });
+
+  it("setMemberPassword needs a uuid and a 6+ character password", () => {
+    expect(validateSetMemberPassword({ userId: UUID, password: "123456" })).toEqual({ userId: UUID, password: "123456" });
+    expect(msg(() => validateSetMemberPassword({ userId: "", password: "123456" }))).toBe("Member required");
+    expect(msg(() => validateSetMemberPassword({ userId: UUID, password: "12" }))).toBe(
+      "Password must be at least 6 characters",
+    );
+  });
+
+  it("deleteMember needs a uuid", () => {
+    expect(validateDeleteMember({ userId: UUID })).toEqual({ userId: UUID });
+    expect(msg(() => validateDeleteMember({ userId: "nope" }))).toBe("Valid member required");
+  });
+
+  it("saveMemberDetails accepts a full member and rejects bad fields", () => {
+    expect(validateSaveMemberDetails(member).status).toBe("Active");
+    expect(msg(() => validateSaveMemberDetails({ ...member, userId: "x" }))).toBe("Valid member required");
+    expect(msg(() => validateSaveMemberDetails({ ...member, full_name: " " }))).toBe(
+      "Name is required (100 characters max)",
+    );
+    expect(msg(() => validateSaveMemberDetails({ ...member, email: "bad" }))).toBe("Valid email required");
+    expect(msg(() => validateSaveMemberDetails({ ...member, phone: "9".repeat(41) }))).toBe("Mobile number is too long");
+    expect(msg(() => validateSaveMemberDetails({ ...member, city: "c".repeat(101) }))).toBe("City is too long");
+    expect(msg(() => validateSaveMemberDetails({ ...member, status: "Banned" }))).toBe("Invalid member status");
+    expect(msg(() => validateSaveMemberDetails({ ...member, nights_total: -1 }))).toBe(
+      "Nights must be zero or greater",
+    );
+    expect(msg(() => validateSaveMemberDetails({ ...member, nights_used: 1.5 }))).toBe(
+      "Nights must be zero or greater",
+    );
+  });
+
+  it("saveMemberDetails turns missing optional fields into null", () => {
+    const out = validateSaveMemberDetails({ ...member, phone: undefined, plan: undefined, membership_end: undefined });
+    expect(out.phone).toBeNull();
+    expect(out.plan).toBeNull();
+    expect(out.membership_end).toBeNull();
   });
 });
