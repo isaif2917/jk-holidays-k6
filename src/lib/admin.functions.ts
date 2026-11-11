@@ -74,6 +74,14 @@ export const removeRole = ({ data }: { data: RemoveRoleData }) => callAdminOps<{
 export const updateRoleAccount = ({ data }: { data: UpdateRoleAccountData }) =>
   callAdminOps<{ ok: true }>("updateRoleAccount", data);
 
+// Referral actions also run in the admin-ops edge function.
+export const settleReferral = ({ data }: { data: { referralId: string; amount: number } }) =>
+  callAdminOps<{ ok: true }>("settleReferral", data);
+export const rejectReferral = ({ data }: { data: { referralId: string } }) =>
+  callAdminOps<{ ok: true }>("rejectReferral", data);
+export const createCustomReward = ({ data }: { data: { userId: string; amount: number; note?: string } }) =>
+  callAdminOps<{ ok: true; name: string }>("createCustomReward", data);
+
 type NewMember = { full_name: string; email: string; phone?: string; city?: string; password: string; plan?: string };
 
 type MemberDetails = {
@@ -217,79 +225,4 @@ export const setMemberPassword = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     await rememberPassword(supabaseAdmin, data.userId, data.password);
     return { ok: true };
-  });
-
-export const settleReferral = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { referralId: string; amount: number }) => {
-    if (!/^[0-9a-f-]{36}$/i.test(d?.referralId ?? "")) throw new Error("Valid referral required");
-    if (!Number.isFinite(d.amount) || d.amount <= 0) throw new Error("Enter the reward amount to settle");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: ref, error } = await supabaseAdmin.from("referrals").select("*").eq("id", data.referralId).maybeSingle();
-    if (error || !ref) throw new Error("Could not find this referral");
-    if (ref.status === "Rewarded") throw new Error("This referral is already settled");
-    if (ref.status === "Rejected") throw new Error("This referral was rejected");
-    const { error: wErr } = await supabaseAdmin.from("wallet_transactions").insert({
-      user_id: ref.user_id,
-      type: "credit",
-      amount: data.amount,
-      description: "Referral settlement: " + (ref.friend_name || "referred member"),
-    });
-    if (wErr) throw new Error(wErr.message);
-    const { error: uErr } = await supabaseAdmin.from("referrals").update({ status: "Rewarded", reward_amount: data.amount }).eq("id", data.referralId);
-    if (uErr) throw new Error(uErr.message);
-    return { ok: true };
-  });
-
-export const rejectReferral = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { referralId: string }) => {
-    if (!/^[0-9a-f-]{36}$/i.test(d?.referralId ?? "")) throw new Error("Valid referral required");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: ref, error } = await supabaseAdmin.from("referrals").select("status").eq("id", data.referralId).maybeSingle();
-    if (error || !ref) throw new Error("Could not find this referral");
-    if (ref.status === "Rewarded") throw new Error("This referral is already settled and can't be rejected");
-    const { error: uErr } = await supabaseAdmin.from("referrals").update({ status: "Rejected" }).eq("id", data.referralId);
-    if (uErr) throw new Error(uErr.message);
-    return { ok: true };
-  });
-
-// Manually credit a referral reward to a member chosen by the admin,
-// and record it in the custom-reward history shown on the referral settings page.
-export const createCustomReward = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; amount: number; note?: string }) => {
-    if (!/^[0-9a-f-]{36}$/i.test(d?.userId ?? "")) throw new Error("Choose a member first");
-    if (!Number.isFinite(d.amount) || d.amount <= 0) throw new Error("Enter a reward amount greater than zero");
-    if ((d.note ?? "").length > 200) throw new Error("Note is limited to 200 characters");
-    return d;
-  })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profile, error: pErr } = await supabaseAdmin.from("profiles").select("full_name, member_code").eq("id", data.userId).maybeSingle();
-    if (pErr || !profile) throw new Error("Could not find this member");
-    const { error: wErr } = await supabaseAdmin.from("wallet_transactions").insert({
-      user_id: data.userId,
-      type: "credit",
-      amount: data.amount,
-      description: `Custom referral reward${data.note ? ": " + data.note.trim() : ""}`,
-    });
-    if (wErr) throw new Error(wErr.message);
-    const { error: hErr } = await supabaseAdmin.from("custom_referral_rewards").insert({
-      user_id: data.userId,
-      amount: data.amount,
-      note: data.note?.trim() ?? "",
-      created_by: context.userId,
-    });
-    if (hErr) throw new Error(hErr.message);
-    return { ok: true, name: profile.full_name };
   });

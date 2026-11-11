@@ -5,6 +5,9 @@ import {
   validateCreateStaff,
   validateRemoveRole,
   validateUpdateRoleAccount,
+  validateSettleReferral,
+  validateRejectReferral,
+  validateCreateCustomReward,
 } from "../../supabase/functions/_shared/validate";
 
 const UUID = "123e4567-e89b-12d3-a456-426614174000";
@@ -105,5 +108,38 @@ describe("updateRoleAccount validation", () => {
   it("requires a label when the new role is 'other'", () => {
     expect(msg(() => validateUpdateRoleAccount({ ...ok, role: "other" }))).toBe("Type the role (60 characters max)");
     expect(validateUpdateRoleAccount({ ...ok, role: "other", roleLabel: "Driver" }).roleLabel).toBe("Driver");
+  });
+});
+
+describe("referral action validation", () => {
+  it("settleReferral needs a uuid and a positive number", () => {
+    expect(validateSettleReferral({ referralId: UUID, amount: 100 })).toEqual({ referralId: UUID, amount: 100 });
+    expect(msg(() => validateSettleReferral({ referralId: "x", amount: 100 }))).toBe("Valid referral required");
+    expect(msg(() => validateSettleReferral({ referralId: UUID, amount: 0 }))).toBe("Enter the reward amount to settle");
+    expect(msg(() => validateSettleReferral({ referralId: UUID, amount: "100" }))).toBe(
+      "Enter the reward amount to settle",
+    );
+    expect(msg(() => validateSettleReferral({ referralId: UUID, amount: Infinity }))).toBe(
+      "Enter the reward amount to settle",
+    );
+  });
+  it("rejectReferral needs a uuid", () => {
+    expect(validateRejectReferral({ referralId: UUID })).toEqual({ referralId: UUID });
+    expect(msg(() => validateRejectReferral({}))).toBe("Valid referral required");
+  });
+  it("createCustomReward checks member, amount and note length", () => {
+    expect(validateCreateCustomReward({ userId: UUID, amount: 50 })).toEqual({
+      userId: UUID,
+      amount: 50,
+      note: undefined,
+    });
+    expect(msg(() => validateCreateCustomReward({ userId: "x", amount: 50 }))).toBe("Choose a member first");
+    expect(msg(() => validateCreateCustomReward({ userId: UUID, amount: -1 }))).toBe(
+      "Enter a reward amount greater than zero",
+    );
+    expect(msg(() => validateCreateCustomReward({ userId: UUID, amount: 5, note: "x".repeat(201) }))).toBe(
+      "Note is limited to 200 characters",
+    );
+    expect(validateCreateCustomReward({ userId: UUID, amount: 5, note: "x".repeat(200) }).note).toHaveLength(200);
   });
 });

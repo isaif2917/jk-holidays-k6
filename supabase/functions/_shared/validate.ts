@@ -43,6 +43,31 @@ export type UpdateRoleAccountInput = {
 // deno-lint-ignore no-explicit-any
 type Raw = any;
 
+export type SettleReferralInput = { referralId: string; amount: number };
+export type RejectReferralInput = { referralId: string };
+export type CreateCustomRewardInput = { userId: string; amount: number; note?: string };
+
+const isPositiveNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v > 0;
+
+export function validateSettleReferral(d: Raw): SettleReferralInput {
+  if (!isString(d?.referralId) || !UUID.test(d.referralId)) throw new ValidationError("Valid referral required");
+  if (!isPositiveNumber(d.amount)) throw new ValidationError("Enter the reward amount to settle");
+  return { referralId: d.referralId, amount: d.amount };
+}
+
+export function validateRejectReferral(d: Raw): RejectReferralInput {
+  if (!isString(d?.referralId) || !UUID.test(d.referralId)) throw new ValidationError("Valid referral required");
+  return { referralId: d.referralId };
+}
+
+export function validateCreateCustomReward(d: Raw): CreateCustomRewardInput {
+  if (!isString(d?.userId) || !UUID.test(d.userId)) throw new ValidationError("Choose a member first");
+  if (!isPositiveNumber(d.amount)) throw new ValidationError("Enter a reward amount greater than zero");
+  if (d.note !== undefined && d.note !== null && !isString(d.note)) throw new ValidationError("Note must be text");
+  if ((d.note ?? "").length > 200) throw new ValidationError("Note is limited to 200 characters");
+  return { userId: d.userId, amount: d.amount, note: d.note ?? undefined };
+}
+
 export function validateCreateAdmin(d: Raw): CreateAdminInput {
   if (!isString(d?.email) || !EMAIL.test(d.email)) throw new ValidationError("Valid email required");
   if (!isString(d.full_name) || !d.full_name || d.full_name.length > 100) throw new ValidationError("Name required");

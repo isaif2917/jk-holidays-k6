@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -164,7 +163,7 @@ function ReferralSettings() {
 }
 
 function CustomRewardDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const reward = useServerFn(createCustomReward);
+  const reward = createCustomReward;
   const refresh = useRefresh();
   const { list, isLoading } = useProfilesMap();
   const [q, setQ] = useState("");
@@ -277,8 +276,8 @@ function CustomRewardHistory() {
 }
 
 function ReferralSettlements() {
-  const settle = useServerFn(settleReferral);
-  const reject = useServerFn(rejectReferral);
+  const settle = settleReferral;
+  const reject = rejectReferral;
   const refresh = useRefresh();
   const { map: profilesById } = useProfilesMap();
   const settings = useRows("admin_settings", () => db.from("admin_settings").select("*"));

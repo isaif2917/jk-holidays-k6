@@ -11,8 +11,9 @@
 //
 // STAGE 0: the `ping` diagnostic, proving deployment, proxy routing, env vars, _shared/
 // bundling, JWT delivery and has_role.
-// STAGE 1 (current): Admins & Roles actions — createAdmin, createStaff, removeRole,
-// updateRoleAccount. Members and referrals still run as server functions (src/lib/admin.functions.ts).
+// STAGE 1: Admins & Roles actions — createAdmin, createStaff, removeRole, updateRoleAccount.
+// STAGE 2 (current): referral actions — settleReferral, rejectReferral, createCustomReward.
+// Member actions still run as server functions (src/lib/admin.functions.ts).
 import { preflight } from "../_shared/cors.ts";
 import { HttpError, fail, json } from "../_shared/http.ts";
 import {
@@ -26,11 +27,15 @@ import { requireAdmin, type Ctx } from "../_shared/auth.ts";
 import {
   ValidationError,
   validateCreateAdmin,
+  validateCreateCustomReward,
   validateCreateStaff,
+  validateRejectReferral,
+  validateSettleReferral,
   validateRemoveRole,
   validateUpdateRoleAccount,
 } from "../_shared/validate.ts";
 import { createAdmin, createStaff, removeRole, updateRoleAccount } from "./roles.ts";
+import { createCustomReward, rejectReferral, settleReferral } from "./referrals.ts";
 
 function bearer(req: Request): string {
   return (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
@@ -112,6 +117,9 @@ const HANDLERS: Record<string, Handler> = {
   createStaff: adminAction(validateCreateStaff, createStaff),
   removeRole: adminAction(validateRemoveRole, removeRole),
   updateRoleAccount: adminAction(validateUpdateRoleAccount, updateRoleAccount),
+  settleReferral: adminAction(validateSettleReferral, settleReferral),
+  rejectReferral: adminAction(validateRejectReferral, rejectReferral),
+  createCustomReward: adminAction(validateCreateCustomReward, createCustomReward),
 };
 
 Deno.serve(async (req: Request): Promise<Response> => {
