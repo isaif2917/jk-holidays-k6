@@ -94,5 +94,5 @@
 
 # Round: redeploy admin-ops without ping (Nov 14)
 
-- [ ] Redeploy the checked-in `admin-ops` with shared helpers and roles/referrals/members actions, without restoring `ping`
-- [ ] List all currently deployed edge functions if the available management tools expose that inventory
+- [x] Redeploy the checked-in `admin-ops` with shared helpers and roles/referrals/members actions, without restoring `ping`; deployment succeeded and an invalid-action check confirmed the live function rejects unknown actions
+- [ ] List all currently deployed edge functions; available management tools do not expose the full deployed-function inventory
