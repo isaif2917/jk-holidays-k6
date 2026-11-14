@@ -91,3 +91,8 @@
 
 - [x] Redeploy the existing `admin-ops` edge function unchanged; confirmed with the `ping` action
 - [ ] Enumerate every deployed edge function; blocked because the Supabase CLI has no access token in this workspace
+
+# Round: redeploy admin-ops without ping (Nov 14)
+
+- [x] Redeploy the checked-in `admin-ops` with shared helpers and roles/referrals/members actions, without restoring `ping`; deployment succeeded and an invalid-action check confirmed the live function rejects unknown actions
+- [ ] List all currently deployed edge functions; available management tools do not expose the full deployed-function inventory
